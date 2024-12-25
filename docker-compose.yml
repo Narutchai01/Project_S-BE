@@ -1,0 +1,36 @@
+version: '3.1'
+
+services:
+  server:
+    restart: on-failure
+    container_name: project-s-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=${PORT}
+      - DB_HOST=project-s-db
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - SUPA_API_KEY=${SUPA_API_KEY}
+      - SUPA_API_URL=${SUPA_API_URL}
+      - SUPA_BUCKET_NAME=${SUPA_BUCKET_NAME}
+    ports:
+      - "${PORT}:${PORT}"
+
+
+
+
+  postgres:
+    image: postgres:alpine
+    container_name: project-s-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin123
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: ucare
+    volumes:
+      - ./databasepg:/var/lib/postgresql/data
