@@ -18,7 +18,7 @@ type AdminUsecases interface {
 	GetAdmin(id int) (entities.Admin, error)
 	UpdateAdmin(id int, admin entities.Admin) (entities.Admin, error)
 	DeleteAdmin(id int) (entities.Admin, error)
-	LogIn(email string, password string) (entities.Admin, error)
+	LogIn(email string, password string) (string, error)
 }
 
 type adminService struct {
@@ -82,7 +82,7 @@ func (service *adminService) UpdateAdmin(id int, admin entities.Admin) (entities
 	admin.ID = oldamin.ID
 
 	if err != nil {
-		return admin, err
+		return entities.Admin{}, err
 	}
 
 	admin.Image = checkVauleUpdateAdmin(admin.Image, oldamin.Image)
@@ -96,20 +96,27 @@ func (service *adminService) DeleteAdmin(id int) (entities.Admin, error) {
 	return service.repo.DeleteAdmin(id)
 }
 
-func (service *adminService) LogIn(email string, password string) (entities.Admin, error) {
+func (service *adminService) LogIn(email string, password string) (string, error) {
 	admin, err := service.repo.GetAdminByEmail(email)
 
 	if err != nil {
-		return admin, err
+		return "something wrong!", err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(password))
 
 	if err != nil {
-		return admin, err
+		return "something wrong!", err
 	}
 
-	return admin, nil
+	// create jwt token
+	token, err := utils.GenerateToken(int(admin.ID))
+
+	if err != nil {
+		return "something wrong!", err
+	}
+
+	return token, nil
 }
 
 func checkVauleUpdateAdmin(newValue string, oldValue string) string {

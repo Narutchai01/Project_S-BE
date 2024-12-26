@@ -121,5 +121,5 @@ func (handler *HttpAdminHandler) LogIn(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminResponse(result))
+	return c.Status(fiber.StatusOK).JSON(presentation.AdminLoginResponse(result, err))
 }

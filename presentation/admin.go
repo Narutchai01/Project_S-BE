@@ -60,3 +60,18 @@ func DeleteAdminResponse(id int) *fiber.Map {
 		"error":     nil,
 	}
 }
+
+func AdminLoginResponse(token string, err error) *fiber.Map {
+	if err != nil {
+		return &fiber.Map{
+			"status": false,
+			"token":  nil,
+			"error":  err.Error(),
+		}
+	}
+	return &fiber.Map{
+		"status": true,
+		"token":  token,
+		"error":  nil,
+	}
+}
