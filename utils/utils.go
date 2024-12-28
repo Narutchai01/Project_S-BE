@@ -35,7 +35,7 @@ func UploadImage(fileName string, dir string) (string, error) {
 		return "", fmt.Errorf("failed to upload file: %w", err)
 	}
 
-	url := fmt.Sprintf("%s/object/public/pathfinder/%s", supa_api_url, fileName)
+	url := fmt.Sprintf("%s/object/public/%s/%s", supa_api_url, bucketName, fileName)
 
 	return url, nil
 }
