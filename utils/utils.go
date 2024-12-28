@@ -28,6 +28,7 @@ func UploadImage(fileName string, dir string) (string, error) {
 	options := storage_go.FileOptions{
 		ContentType: func() *string { s := "image/jpeg"; return &s }(),
 	}
+	// bucketName := "public"
 	bucketName := config.GetEnv("SUPA_BUCKET_NAME")
 	fileName = dir + "/" + fileName
 	_, err = storageClient.UploadFile(bucketName, fileName, file, options)
