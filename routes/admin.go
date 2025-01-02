@@ -2,6 +2,7 @@ package routes
 
 import (
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/admin"
+	adapters_skincare "github.com/Narutchai01/Project_S-BE/adapters/skincare"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -19,5 +20,16 @@ func AdminRoutes(app fiber.Router, db *gorm.DB) {
 	app.Put("/manage/:id", adminHandler.UpdateAdmin)
 	app.Delete("/manage/:id", adminHandler.DeleteAdmin)
 	app.Post("/login/", adminHandler.LogIn)
+
+	skincareRepo := adapters_skincare.NewGormSkincareRepository(db)
+	skincareService := usecases.NewSkincareUseCase(skincareRepo)
+	skincareHandler := adapters_skincare.NewHttpSkincareHandler(skincareService)
+
+	skincare := app.Group("/manage/skincare")
+	skincare.Post("/", skincareHandler.CreateSkincare)
+	skincare.Get("/", skincareHandler.GetSkincares)
+	skincare.Get("/:id", skincareHandler.GetSkincare)
+	skincare.Put("/:id", skincareHandler.UpdateSkincare)
+	skincare.Delete("/:id", skincareHandler.DeleteSkincare)
 
 }
