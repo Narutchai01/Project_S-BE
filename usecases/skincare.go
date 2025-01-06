@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"fmt"
-	"log"
 	"mime/multipart"
 	"os"
 
@@ -69,7 +68,6 @@ func (service *skincareService) CreateSkincare(skincare entities.Skincare, file 
 		return skincare, fmt.Errorf("failed to extract token: %w", err)
 	}
 
-	log.Println("Extracted user_id from token: ", create_by_id)
 	skincare.CreateBY = create_by_id
 
 	return service.repo.CreateSkincare(skincare)
