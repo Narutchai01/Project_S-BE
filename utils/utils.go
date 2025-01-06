@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/Narutchai01/Project_S-BE/config"
@@ -57,4 +60,19 @@ func GenerateToken(userID int) (string, error) {
 		"exp":     time.Now().Add(time.Hour * 72).Unix(),
 	}
 	return CreateJWTToken(secretKey, claims)
+}
+
+func GenerateOTP() (string, error) {
+      range_number := big.NewInt(900000)
+	random_big, err := rand.Int(rand.Reader, range_number)
+	if err != nil {
+		return "", err
+	}
+
+	random_number := int(random_big.Int64()) + 100000
+	return strconv.Itoa(random_number), nil
+}
+
+func SendEmailVerification(email string) (uint, error) {
+      return 0, nil
 }
