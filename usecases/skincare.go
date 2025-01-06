@@ -15,9 +15,9 @@ import (
 type SkincareUsecases interface {
 	CreateSkincare(skincare entities.Skincare, file multipart.FileHeader, token string, c *fiber.Ctx) (entities.Skincare, error)
 	GetSkincares() ([]entities.Skincare, error)
-	GetSkincare(id int) (entities.Skincare, error)
-	UpdateSkincare(id int, skincare entities.Skincare) (entities.Skincare, error)
-	DeleteSkincare(id int) (entities.Skincare, error)
+	GetSkincareById(id int) (entities.Skincare, error)
+	UpdateSkincareById(id int, skincare entities.Skincare) (entities.Skincare, error)
+	DeleteSkincareById(id int) (entities.Skincare, error)
 }
 
 type skincareService struct {
@@ -77,13 +77,13 @@ func (service *skincareService) GetSkincares() ([]entities.Skincare, error) {
 	return service.repo.GetSkincares()
 }
 
-func (service *skincareService) GetSkincare(id int) (entities.Skincare, error) {
-	return service.repo.GetSkincare(id)
+func (service *skincareService) GetSkincareById(id int) (entities.Skincare, error) {
+	return service.repo.GetSkincareById(id)
 }
 
-func (service *skincareService) UpdateSkincare(id int, skincare entities.Skincare) (entities.Skincare, error) {
+func (service *skincareService) UpdateSkincareById(id int, skincare entities.Skincare) (entities.Skincare, error) {
 
-	old_skincare, err := service.repo.GetSkincare(id)
+	old_skincare, err := service.repo.GetSkincareById(id)
 
 	skincare.ID = old_skincare.ID
 
@@ -95,9 +95,9 @@ func (service *skincareService) UpdateSkincare(id int, skincare entities.Skincar
 	skincare.Image = utils.CheckEmptyValueBeforeUpdate(skincare.Image, old_skincare.Image)
 	skincare.Description = utils.CheckEmptyValueBeforeUpdate(skincare.Description, old_skincare.Description)
 
-	return service.repo.UpdateSkincare(id, skincare)
+	return service.repo.UpdateSkincareById(id, skincare)
 }
 
-func (service *skincareService) DeleteSkincare(id int) (entities.Skincare, error) {
-	return service.repo.DeleteSkincare(id)
+func (service *skincareService) DeleteSkincareById(id int) (entities.Skincare, error) {
+	return service.repo.DeleteSkincareById(id)
 }

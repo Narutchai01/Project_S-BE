@@ -28,8 +28,8 @@ func AdminRoutes(app fiber.Router, db *gorm.DB) {
 	skincare := app.Group("/manage/skincare")
 	skincare.Post("/", skincareHandler.CreateSkincare)
 	skincare.Get("/", skincareHandler.GetSkincares)
-	skincare.Get("/:id", skincareHandler.GetSkincare)
-	skincare.Put("/:id", skincareHandler.UpdateSkincare)
-	skincare.Delete("/:id", skincareHandler.DeleteSkincare)
+	skincare.Get("/:id", skincareHandler.GetSkincareById)
+	skincare.Put("/:id", skincareHandler.UpdateSkincareById)
+	skincare.Delete("/:id", skincareHandler.DeleteSkincareById)
 
 }

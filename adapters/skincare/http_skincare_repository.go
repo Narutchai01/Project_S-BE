@@ -51,14 +51,14 @@ func (handler *HttpSkincareHandler) GetSkincares(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincaresResponse(skincares))
 }
 
-func (handler *HttpSkincareHandler) GetSkincare(c *fiber.Ctx) error {
+func (handler *HttpSkincareHandler) GetSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.SkincareErrorResponse(err))
 	}
 
-	skincare, err := handler.skincarenUcase.GetSkincare(id)
+	skincare, err := handler.skincarenUcase.GetSkincareById(id)
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(presentation.SkincareErrorResponse(err))
@@ -67,7 +67,7 @@ func (handler *HttpSkincareHandler) GetSkincare(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincareResponse(skincare))
 }
 
-func (handler *HttpSkincareHandler) UpdateSkincare(c *fiber.Ctx) error {
+func (handler *HttpSkincareHandler) UpdateSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
@@ -80,7 +80,7 @@ func (handler *HttpSkincareHandler) UpdateSkincare(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.SkincareErrorResponse(err))
 	}
 
-	result, err := handler.skincarenUcase.UpdateSkincare(id, skincare)
+	result, err := handler.skincarenUcase.UpdateSkincareById(id, skincare)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.SkincareErrorResponse(err))
@@ -89,7 +89,7 @@ func (handler *HttpSkincareHandler) UpdateSkincare(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincareResponse(result))
 }
 
-func (handler *HttpSkincareHandler) DeleteSkincare(c *fiber.Ctx) error {
+func (handler *HttpSkincareHandler) DeleteSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
@@ -98,7 +98,7 @@ func (handler *HttpSkincareHandler) DeleteSkincare(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err = handler.skincarenUcase.DeleteSkincare(id)
+	_, err = handler.skincarenUcase.DeleteSkincareById(id)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.SkincareErrorResponse(err))

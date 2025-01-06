@@ -28,18 +28,18 @@ func (repo *GormSkincareRepository) GetSkincares() ([]entities.Skincare, error) 
 	return skincares, nil
 }
 
-func (repo *GormSkincareRepository) GetSkincare(id int) (entities.Skincare, error) {
+func (repo *GormSkincareRepository) GetSkincareById(id int) (entities.Skincare, error) {
 	var skincare entities.Skincare
 	err := repo.db.First(&skincare, id).Error
 	return skincare, err
 }
 
-func (repo *GormSkincareRepository) UpdateSkincare(id int, skincare entities.Skincare) (entities.Skincare, error) {
+func (repo *GormSkincareRepository) UpdateSkincareById(id int, skincare entities.Skincare) (entities.Skincare, error) {
 	err := repo.db.Model(&entities.Skincare{}).Where("id = ?", id).Updates(&skincare).Error
 	return skincare, err
 }
 
-func (repo *GormSkincareRepository) DeleteSkincare(id int) (entities.Skincare, error) {
+func (repo *GormSkincareRepository) DeleteSkincareById(id int) (entities.Skincare, error) {
 	err := repo.db.Where("id = ?", id).Delete(&entities.Skincare{}).Error
 	return entities.Skincare{}, err
 }
