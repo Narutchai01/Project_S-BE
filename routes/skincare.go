@@ -7,12 +7,17 @@ import (
 	"gorm.io/gorm"
 )
 
-func SkincareRoutes(app fiber.Router, db *gorm.DB) {
+func SkincareRoutes(app fiber.Router, admin fiber.Router, db *gorm.DB) {
 
 	skincareRepo := adapters.NewGormSkincareRepository(db)
 	skincareService := usecases.NewSkincareUseCase(skincareRepo)
 	skincareHandler := adapters.NewHttpSkincareHandler(skincareService)
 
-	app.Get("/manage/", skincareHandler.GetSkincares)
-	app.Get("/manage/:id", skincareHandler.GetSkincareById)
+	app.Get("/skincare", skincareHandler.GetSkincares)
+	app.Get("/skincare/:id", skincareHandler.GetSkincareById)
+
+	//admin
+	admin.Post("/skincare", skincareHandler.CreateSkincare)
+	admin.Put("/skincare/:id", skincareHandler.UpdateSkincareById)
+	admin.Delete("/skincare/:id", skincareHandler.DeleteSkincareById)
 }
