@@ -14,5 +14,6 @@ func RecoveryRoutes(app fiber.Router, db *gorm.DB) {
 	recoveryHandler := adapters.NewHttpRecoveryHandler(recoveryService)
 
 	app.Post("/", recoveryHandler.CreateRecovery)
-
-}
+	app.Delete("/:id", recoveryHandler.DeleteRecoveryById)
+	app.Get("/", recoveryHandler.GetRecoveries)
+	

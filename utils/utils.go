@@ -101,4 +101,4 @@ func SendEmailVerification(email string, otp string) error {
 	}
 
 	return nil
-  }
+}
