@@ -18,4 +18,7 @@ func Router(app *fiber.App, db *gorm.DB) {
 	user := api.Group("/")
 	UserRoutes(user, db)
 
+	recovery := api.Group("/recovery")
+	RecoveryRoutes(recovery, db)
+
 }
