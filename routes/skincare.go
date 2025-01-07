@@ -13,11 +13,14 @@ func SkincareRoutes(app fiber.Router, admin fiber.Router, db *gorm.DB) {
 	skincareService := usecases.NewSkincareUseCase(skincareRepo)
 	skincareHandler := adapters.NewHttpSkincareHandler(skincareService)
 
-	app.Get("/skincare", skincareHandler.GetSkincares)
-	app.Get("/skincare/:id", skincareHandler.GetSkincareById)
+	//user
+	userSkincare := app.Group("/skincare")
+	userSkincare.Get("/", skincareHandler.GetSkincares)
+	userSkincare.Get("/:id", skincareHandler.GetSkincareById)
 
 	//admin
-	admin.Post("/skincare", skincareHandler.CreateSkincare)
-	admin.Put("/skincare/:id", skincareHandler.UpdateSkincareById)
-	admin.Delete("/skincare/:id", skincareHandler.DeleteSkincareById)
+	adminSkincare := admin.Group("/skincare")
+	adminSkincare.Post("/", skincareHandler.CreateSkincare)
+	adminSkincare.Put("/:id", skincareHandler.UpdateSkincareById)
+	adminSkincare.Delete("/:id", skincareHandler.DeleteSkincareById)
 }
