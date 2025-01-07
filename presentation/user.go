@@ -45,24 +45,6 @@ func MiniProfileUserResponse(data entities.User) *fiber.Map {
 	}
 }
 
-// func ToAdminsResponse(data []entities.Admin) *fiber.Map {
-// 	admins := []Admin{}
-
-// 	for _, admin := range data {
-// 		admins = append(admins, Admin{
-// 			ID:       admin.ID,
-// 			FullName: admin.FullName,
-// 			Email:    admin.Email,
-// 			Image:    admin.Image,
-// 		})
-// 	}
-// 	return &fiber.Map{
-// 		"status": true,
-// 		"data":   admins,
-// 		"error":  nil,
-// 	}
-// }
-
 func UserErrorResponse(err error) *fiber.Map {
 	return &fiber.Map{
 		"status": false,
@@ -70,26 +52,3 @@ func UserErrorResponse(err error) *fiber.Map {
 		"error":  err.Error(),
 	}
 }
-
-// func DeleteAdminResponse(id int) *fiber.Map {
-// 	return &fiber.Map{
-// 		"status":    true,
-// 		"delete_id": id,
-// 		"error":     nil,
-// 	}
-// }
-
-// func AdminLoginResponse(token string, err error) *fiber.Map {
-// 	if err != nil {
-// 		return &fiber.Map{
-// 			"status": false,
-// 			"token":  nil,
-// 			"error":  err.Error(),
-// 		}
-// 	}
-// 	return &fiber.Map{
-// 		"status": true,
-// 		"token":  token,
-// 		"error":  nil,
-// 	}
-// }

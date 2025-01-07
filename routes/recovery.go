@@ -16,4 +16,5 @@ func RecoveryRoutes(app fiber.Router, db *gorm.DB) {
 	app.Post("/", recoveryHandler.CreateRecovery)
 	app.Delete("/:id", recoveryHandler.DeleteRecoveryById)
 	app.Get("/", recoveryHandler.GetRecoveries)
-	
+	app.Post("/validation", recoveryHandler.OtpValidation)
+}
