@@ -15,4 +15,6 @@ func Router(app *fiber.App, db *gorm.DB) {
 	admin := api.Group("/admin")
 	AdminRoutes(admin, db)
 
+	SkincareRoutes(api, admin, db)
+
 }

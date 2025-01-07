@@ -85,9 +85,9 @@ func (service *adminService) UpdateAdmin(id int, admin entities.Admin) (entities
 		return entities.Admin{}, err
 	}
 
-	admin.Image = checkVauleUpdateAdmin(admin.Image, oldamin.Image)
-	admin.Password = checkVauleUpdateAdmin(admin.Password, oldamin.Password)
-	admin.FullName = checkVauleUpdateAdmin(admin.FullName, oldamin.FullName)
+	admin.Image = utils.CheckEmptyValueBeforeUpdate(admin.Image, oldamin.Image)
+	admin.Password = utils.CheckEmptyValueBeforeUpdate(admin.Password, oldamin.Password)
+	admin.FullName = utils.CheckEmptyValueBeforeUpdate(admin.FullName, oldamin.FullName)
 
 	return service.repo.UpdateAdmin(id, admin)
 }
@@ -117,11 +117,4 @@ func (service *adminService) LogIn(email string, password string) (string, error
 	}
 
 	return token, nil
-}
-
-func checkVauleUpdateAdmin(newValue string, oldValue string) string {
-	if newValue == "" {
-		return oldValue
-	}
-	return newValue
 }
