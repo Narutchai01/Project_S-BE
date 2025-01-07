@@ -11,11 +11,15 @@ type GormRecoveryRepository struct {
 }
 
 func NewGormRecoveryRepository(db *gorm.DB) repositories.RecoveryRepository {
-	return GormRecoveryRepository{db: db}
+	return &GormRecoveryRepository{db: db}
 }
 
-func (repo GormRecoveryRepository) CreateRecovery(recovery entities.Recovery) (entities.Recovery, error) {
+func (repo *GormRecoveryRepository) CreateRecovery(recovery entities.Recovery) (entities.Recovery, error) {
 	err := repo.db.Create(&recovery).Error
 	return recovery, err
 }
 
+func (repo *GormRecoveryRepository) DeleteRecovery(id int) (entities.Recovery, error) {
+	err := repo.db.Where("id = ?", id).Delete(&entities.Recovery{}).Error
+	return entities.Recovery{}, err
+}
