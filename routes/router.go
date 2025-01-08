@@ -21,4 +21,6 @@ func Router(app *fiber.App, db *gorm.DB) {
 	recovery := api.Group("/recovery")
 	RecoveryRoutes(recovery, db)
 
+	SkincareRoutes(api, admin, db)
+
 }
