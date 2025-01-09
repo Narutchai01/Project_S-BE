@@ -15,6 +15,16 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+func CheckDirectoryExist() error  {
+	dir := "./uploads"
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		    return err
+		}
+	}
+	return nil
+}
+
 func UploadImage(fileName string, dir string) (string, error) {
 
 	supa_api_url := config.GetEnv("SUPA_API_URL")
@@ -45,6 +55,31 @@ func UploadImage(fileName string, dir string) (string, error) {
 	url := fmt.Sprintf("%s/object/public/%s/%s", supa_api_url, bucketName, fileName)
 
 	return url, nil
+}
+
+func UpdateImage(oldFilePath, newFilePath string) error {
+	supa_api_url := config.GetEnv("SUPA_API_URL")
+	supa_api_key := config.GetEnv("SUPA_API_KEY")
+	bucket_name := config.GetEnv("SUPA_BUCKET_NAME")
+
+	file, err := os.Open("./uploads/" + newFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to open new file: %w", err)
+	}
+	defer file.Close()
+
+	storageClient := storage_go.NewClient(supa_api_url, supa_api_key, nil)
+
+	options := storage_go.FileOptions{
+		ContentType: func() *string { s := "image/jpeg"; return &s }(),
+	}
+
+	_, err = storageClient.UpdateFile(bucket_name, oldFilePath, file, options)
+	if err != nil {
+		return fmt.Errorf("failed to update file %w", err)
+	}
+
+	return nil
 }
 
 func CreateJWTToken(secretKey string, claims jwt.MapClaims) (string, error) {

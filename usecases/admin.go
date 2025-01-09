@@ -1,8 +1,10 @@
 package usecases
 
 import (
+	"fmt"
 	"mime/multipart"
 	"os"
+	"path"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
@@ -16,7 +18,7 @@ type AdminUsecases interface {
 	CreateAdmin(admin entities.Admin, file multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error)
 	GetAdmins() ([]entities.Admin, error)
 	GetAdmin(id int) (entities.Admin, error)
-	UpdateAdmin(id int, admin entities.Admin) (entities.Admin, error)
+	UpdateAdmin(id int, admin entities.Admin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error)
 	DeleteAdmin(id int) (entities.Admin, error)
 	LogIn(email string, password string) (string, error)
 }
@@ -32,6 +34,10 @@ func NewAdminUseCase(repo repositories.AdminRepository) AdminUsecases {
 func (service *adminService) CreateAdmin(admin entities.Admin, file multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error) {
 
 	fileName := uuid.New().String() + ".jpg"
+
+	if err := utils.CheckDirectoryExist(); err != nil {
+		return entities.Admin{}, err
+	}
 
 	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
 		return entities.Admin{}, err
@@ -75,9 +81,45 @@ func (service *adminService) GetAdmin(id int) (entities.Admin, error) {
 	return service.repo.GetAdmin(id)
 }
 
-func (service *adminService) UpdateAdmin(id int, admin entities.Admin) (entities.Admin, error) {
+func (service *adminService) UpdateAdmin(id int, admin entities.Admin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error) {
 
 	oldamin, err := service.repo.GetAdmin(id)
+	if err != nil {
+		return entities.Admin{}, err
+	}
+
+	if file != nil && file.Filename != "" {
+		fileName := uuid.New().String() + ".jpg"
+
+		if err := utils.CheckDirectoryExist(); err != nil {
+			return entities.Admin{}, err
+		}
+
+		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+			return entities.Admin{}, err
+		}
+
+		if oldamin.Image == "" {
+			imageUrl, err := utils.UploadImage(fileName, "/")
+			if err != nil {
+				return entities.Admin{}, fmt.Errorf("failed to upload new image: %w", err)
+			}
+			admin.Image = imageUrl
+		} else {
+			oldImage := path.Base(oldamin.Image)
+			err := utils.UpdateImage(oldImage, fileName)
+			if err != nil {
+				return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
+			}
+
+			admin.Image = oldamin.Image
+		}
+
+		err = os.Remove("./uploads/" + fileName)
+		if err != nil {
+			return entities.Admin{}, fmt.Errorf("failed to remove temporary file: %w", err)
+		}
+	}
 
 	admin.ID = oldamin.ID
 
