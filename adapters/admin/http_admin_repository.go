@@ -193,3 +193,27 @@ func (handler *HttpAdminHandler) LogIn(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.AdminLoginResponse(result, err))
 }
+
+// GetAdminByToken godoc
+//
+//	@Summary		Get an admin by token
+//	@Description	Get an admin by token
+//	@Tags			admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	header		string	true	"Admin Token"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/admin/profile [get]
+func (handler *HttpAdminHandler) GetAdminByToken(c *fiber.Ctx) error {
+	token := c.Get("token")
+
+	result, err := handler.adminUcase.GetAdminByToken(token)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminResponse(result))
+}

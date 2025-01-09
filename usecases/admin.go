@@ -19,6 +19,7 @@ type AdminUsecases interface {
 	UpdateAdmin(token string, admin entities.Admin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error)
 	DeleteAdmin(id int) (entities.Admin, error)
 	LogIn(email string, password string) (string, error)
+	GetAdminByToken(token string) (entities.Admin, error)
 }
 
 type adminService struct {
@@ -79,9 +80,15 @@ func (service *adminService) GetAdmin(id int) (entities.Admin, error) {
 	return service.repo.GetAdmin(id)
 }
 
-func (service *adminService) UpdateAdmin(id int, admin entities.Admin) (entities.Admin, error) {
+func (service *adminService) UpdateAdmin(token string, admin entities.Admin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error) {
 
-	oldamin, err := service.repo.GetAdmin(id)
+	id, err := utils.ExtractToken(token)
+
+	if err != nil {
+		return entities.Admin{}, err
+	}
+
+	oldamin, err := service.repo.GetAdmin(int(id))
 
 	admin.ID = oldamin.ID
 
@@ -93,7 +100,7 @@ func (service *adminService) UpdateAdmin(id int, admin entities.Admin) (entities
 	admin.Password = utils.CheckEmptyValueBeforeUpdate(admin.Password, oldamin.Password)
 	admin.FullName = utils.CheckEmptyValueBeforeUpdate(admin.FullName, oldamin.FullName)
 
-	return service.repo.UpdateAdmin(intID, admin)
+	return service.repo.UpdateAdmin(int(admin.ID), admin)
 }
 
 func (service *adminService) DeleteAdmin(id int) (entities.Admin, error) {
@@ -121,4 +128,14 @@ func (service *adminService) LogIn(email string, password string) (string, error
 	}
 
 	return token, nil
+}
+
+func (service *adminService) GetAdminByToken(token string) (entities.Admin, error) {
+	id, err := utils.ExtractToken(token)
+
+	if err != nil {
+		return entities.Admin{}, err
+	}
+
+	return service.repo.GetAdmin(int(id))
 }
