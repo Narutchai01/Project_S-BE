@@ -1,6 +1,7 @@
 package routes
 
 import (
+	_ "github.com/Narutchai01/Project_S-BE/docs"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )

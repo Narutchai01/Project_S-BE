@@ -14,6 +14,7 @@ func SkincareRoutes(app fiber.Router, admin fiber.Router, db *gorm.DB) {
 	skincareHandler := adapters.NewHttpSkincareHandler(skincareService)
 
 	//user
+
 	userSkincare := app.Group("/skincare")
 	userSkincare.Get("/", skincareHandler.GetSkincares)
 	userSkincare.Get("/:id", skincareHandler.GetSkincareById)

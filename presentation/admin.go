@@ -2,7 +2,6 @@ package presentation
 
 import (
 	"github.com/Narutchai01/Project_S-BE/entities"
-	"github.com/gofiber/fiber/v2"
 )
 
 type Admin struct {
@@ -12,7 +11,13 @@ type Admin struct {
 	Image    string `json:"image"`
 }
 
-func ToAdminResponse(data entities.Admin) *fiber.Map {
+type Responses struct {
+	Status bool        `json:"status"`
+	Data   interface{} `json:"data"`
+	Error  interface{} `json:"error"`
+}
+
+func ToAdminResponse(data entities.Admin) *Responses {
 	admin := Admin{
 		ID:       data.ID,
 		FullName: data.FullName,
@@ -20,14 +25,14 @@ func ToAdminResponse(data entities.Admin) *fiber.Map {
 		Image:    data.Image,
 	}
 
-	return &fiber.Map{
-		"status": true,
-		"admin":  admin,
-		"error":  nil,
+	return &Responses{
+		Status: true,
+		Data:   admin,
+		Error:  nil,
 	}
 }
 
-func ToAdminsResponse(data []entities.Admin) *fiber.Map {
+func ToAdminsResponse(data []entities.Admin) *Responses {
 	admins := []Admin{}
 
 	for _, admin := range data {
@@ -38,40 +43,45 @@ func ToAdminsResponse(data []entities.Admin) *fiber.Map {
 			Image:    admin.Image,
 		})
 	}
-	return &fiber.Map{
-		"status": true,
-		"data":   admins,
-		"error":  nil,
+	return &Responses{
+		Status: true,
+		Data:   admins,
+		Error:  nil,
 	}
 }
 
-func AdminErrorResponse(err error) *fiber.Map {
-	return &fiber.Map{
-		"status": false,
-		"admin":  nil,
-		"error":  err.Error(),
+func AdminErrorResponse(err error) *Responses {
+
+	return &Responses{
+		Status: false,
+		Data:   nil,
+		Error:  err.Error(),
 	}
 }
 
-func DeleteAdminResponse(id int) *fiber.Map {
-	return &fiber.Map{
-		"status":    true,
-		"delete_id": id,
-		"error":     nil,
+func DeleteAdminResponse(id int) *Responses {
+	return &Responses{
+		Status: true,
+		Data: map[string]string{
+			"delete_id": string(rune(id)),
+		},
+		Error: nil,
 	}
 }
 
-func AdminLoginResponse(token string, err error) *fiber.Map {
+func AdminLoginResponse(token string, err error) *Responses {
 	if err != nil {
-		return &fiber.Map{
-			"status": false,
-			"token":  nil,
-			"error":  err.Error(),
+		return &Responses{
+			Status: false,
+			Data:   nil,
+			Error:  err.Error(),
 		}
 	}
-	return &fiber.Map{
-		"status": true,
-		"token":  token,
-		"error":  nil,
+	return &Responses{
+		Status: true,
+		Data: map[string]string{
+			"token": token,
+		},
+		Error: nil,
 	}
 }

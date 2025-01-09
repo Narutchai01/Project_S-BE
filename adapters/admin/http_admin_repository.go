@@ -40,6 +40,17 @@ func (handler *HttpAdminHandler) CreateAdmin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(result)
 }
 
+// GetAdmin godoc
+//
+//	@Summary		Get admins
+//	@Description	Get admins
+//	@Tags			admin
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		404	{object}	presentation.Responses
+//	@Router			/admin/manage [get]
 func (handler *HttpAdminHandler) GetAdmins(c *fiber.Ctx) error {
 	admins, err := handler.adminUcase.GetAdmins()
 
@@ -50,6 +61,18 @@ func (handler *HttpAdminHandler) GetAdmins(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminsResponse(admins))
 }
 
+// GetAdmin godoc
+//
+//	@Summary		Get an admin by ID
+//	@Description	Get an admin by ID
+//	@Tags			admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"Admin ID"
+//	@Success		200	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		404	{object}	presentation.Responses
+//	@Router			/admin/manage/{id} [get]
 func (handler *HttpAdminHandler) GetAdmin(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
@@ -66,6 +89,19 @@ func (handler *HttpAdminHandler) GetAdmin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminResponse(admin))
 }
 
+// UpdateAdmin godoc
+//
+//	@Summary		Update an admin by ID
+//	@Description	Update an admin by ID
+//	@Tags			admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		int				true	"Admin ID"
+//	@Param			admin	body		entities.Admin	true	"Admin Object"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/admin/manage/{id} [put]
 func (handler *HttpAdminHandler) UpdateAdmin(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
@@ -88,6 +124,18 @@ func (handler *HttpAdminHandler) UpdateAdmin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminResponse(result))
 }
 
+// DeleteAdmin godoc
+//
+//	@Summary		Delete an admin by ID
+//	@Description	Delete an admin by ID
+//	@Tags			admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"Admin ID"
+//	@Success		204	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		404	{object}	presentation.Responses
+//	@Router			/admin/manage/{id} [delete]
 func (handler *HttpAdminHandler) DeleteAdmin(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
@@ -106,6 +154,18 @@ func (handler *HttpAdminHandler) DeleteAdmin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteAdminResponse(id))
 }
 
+// LogIn godoc
+
+// @Summary		Log in
+// @Description	Log in
+// @Tags			admin
+// @Accept			json
+// @Produce		json
+// @Param			admin	body		object{email=string,password=string}	true	"Admin Object"
+// @Success		200		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Failure		404		{object}	presentation.Responses
+// @Router			/admin/login [post]
 func (handler *HttpAdminHandler) LogIn(c *fiber.Ctx) error {
 	var admin entities.Admin
 
