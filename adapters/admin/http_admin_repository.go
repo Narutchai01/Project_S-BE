@@ -15,21 +15,30 @@ func NewHttpAdminHandler(adminUcase usecases.AdminUsecases) *HttpAdminHandler {
 	return &HttpAdminHandler{adminUcase}
 }
 
+// CreateAdmin godoc
+//
+//	@Summary		Create an admin
+//	@Description	Create an admin
+//	@Tags			admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			admin	formData		entities.Admin	true	"Admin Object"
+//	@Param			file	formData	file			true	"Admin Image"
+//	@Success		201		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/admin/manage [post]
 func (handler *HttpAdminHandler) CreateAdmin(c *fiber.Ctx) error {
 	var admin entities.Admin
 
 	if err := c.BodyParser(&admin); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.AdminErrorResponse(err))
 	}
 
 	file, err := c.FormFile("file")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.ErrBadGateway.Code).JSON(presentation.AdminErrorResponse(err))
 	}
 
 	result, err := handler.adminUcase.CreateAdmin(admin, *file, c)
@@ -37,7 +46,7 @@ func (handler *HttpAdminHandler) CreateAdmin(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(result)
+	return c.Status(fiber.StatusCreated).JSON(presentation.ToAdminResponse(result))
 }
 
 // GetAdmin godoc

@@ -4,7 +4,7 @@ definitions:
     properties:
       email:
         type: string
-      full_name:
+      fullname:
         type: string
       password:
         type: string
@@ -79,6 +79,43 @@ paths:
           schema:
             $ref: '#/definitions/presentation.Responses'
       summary: Get admins
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      description: Create an admin
+      parameters:
+      - in: formData
+        name: email
+        type: string
+      - in: formData
+        name: fullname
+        type: string
+      - in: formData
+        name: password
+        type: string
+      - description: Admin Image
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create an admin
       tags:
       - admin
   /admin/manage/{id}:
