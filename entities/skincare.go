@@ -5,9 +5,9 @@ import (
 )
 
 type Skincare struct {
-	gorm.Model
-	Image string `json:"image"`
-	Name string `json:"name"`
+	gorm.Model  `swaggerignore:"true"`
+	Image       string `json:"image" swaggerignore:"true"`
+	Name        string `json:"name"`
 	Description string `json:"description"`
-	CreateBY uint `reqHeader:"create_by"`
+	CreateBY    uint   `reqHeader:"create_by" swaggerignore:"true"`
 }

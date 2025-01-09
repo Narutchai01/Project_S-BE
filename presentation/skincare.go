@@ -2,64 +2,65 @@ package presentation
 
 import (
 	"github.com/Narutchai01/Project_S-BE/entities"
-	"github.com/gofiber/fiber/v2"
 )
-
 
 type Skincare struct {
 	ID          uint   `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Image       string `json:"image"`
-	CreateBY    uint `json:"create_by"`
+	CreateBY    uint   `json:"create_by"`
 }
 
-func SkincareResponse(data entities.Skincare) *fiber.Map {
+func SkincareResponse(data entities.Skincare) *Responses {
 	skincare := Skincare{
-		ID:       data.ID,
-		Name: data.Name,
-		Image:    data.Image,
+		ID:          data.ID,
+		Name:        data.Name,
+		Image:       data.Image,
 		Description: data.Description,
-		CreateBY: data.CreateBY,
+		CreateBY:    data.CreateBY,
 	}
 
-	return &fiber.Map{
-		"status": true,
-		"skincare":  skincare,
-		"error":  nil,
+	return &Responses{
+		Status: true,
+		Data:   skincare,
+		Error:  nil,
 	}
 }
 
-func SkincaresResponse(data []entities.Skincare) *fiber.Map {
+func SkincaresResponse(data []entities.Skincare) *Responses {
 	skincares := []Skincare{}
 
 	for _, skincare := range data {
 		skincares = append(skincares, Skincare{
 			ID:       skincare.ID,
-			Name: skincare.Name,
+			Name:     skincare.Name,
 			Image:    skincare.Image,
 			CreateBY: skincare.CreateBY,
 		})
 	}
-	return &fiber.Map{
-		"status": true,
-		"data":   skincares,
-		"error":  nil,
+
+	return &Responses{
+		Status: true,
+		Data:   skincares,
+		Error:  nil,
 	}
 }
 
-func SkincareErrorResponse(err error) *fiber.Map {
-	return &fiber.Map{
-		"status": false,
-		"skincare":  nil,
-		"error":  err.Error(),
+func SkincareErrorResponse(err error) *Responses {
+	return &Responses{
+		Status: false,
+		Data:   nil,
+		Error:  err.Error(),
 	}
 }
 
-func DeleteSkincareResponse(id int) *fiber.Map {
-	return &fiber.Map{
-		"status":    true,
-		"delete_id": id,
-		"error":     nil,
+func DeleteSkincareResponse(id int) *Responses {
+	return &Responses{
+		Status: true,
+		Data: map[string]string{
+			"delete_id": string(rune(id)),
+		},
+		Error: nil,
 	}
 }

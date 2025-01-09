@@ -15,6 +15,22 @@ func NewHttpSkincareHandler(skincareUcase usecases.SkincareUsecases) *HttpSkinca
 	return &HttpSkincareHandler{skincareUcase}
 }
 
+// CreateSkincare godoc
+//
+//	@Summary		Create a skincare
+//	@Description	Create a skincare
+//	@Tags			skincare
+//	@Accept			json
+//	@Produce		json
+//	@Param			skincare	formData	entities.Skincare	true	"Skincare Object"
+//	@Param			file		formData	file				true	"Skincare Image"
+//
+//	@Param			token		header		string				true	"Token"
+//
+//	@Success		201			{object}	presentation.Responses
+//	@Failure		400			{object}	presentation.Responses
+//	@Failure		404			{object}	presentation.Responses
+//	@Router			/admin/skincare [post]
 func (handler *HttpSkincareHandler) CreateSkincare(c *fiber.Ctx) error {
 	var skincare entities.Skincare
 
@@ -41,6 +57,17 @@ func (handler *HttpSkincareHandler) CreateSkincare(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(result)
 }
 
+// GetSkincares godoc
+//
+//	@Summary		Get skincares
+//	@Description	Get skincares
+//	@Tags			skincare
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		404	{object}	presentation.Responses
+//	@Router			/skincare [get]
 func (handler *HttpSkincareHandler) GetSkincares(c *fiber.Ctx) error {
 	skincares, err := handler.skincarenUcase.GetSkincares()
 
@@ -51,6 +78,18 @@ func (handler *HttpSkincareHandler) GetSkincares(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincaresResponse(skincares))
 }
 
+// GetSkincareById godoc
+//
+//	@Summary		Get a skincare
+//	@Description	Get a skincare
+//	@Tags			skincare
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"Skincare ID"
+//	@Success		200	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		404	{object}	presentation.Responses
+//	@Router			/skincare/{id} [get]
 func (handler *HttpSkincareHandler) GetSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
@@ -67,6 +106,19 @@ func (handler *HttpSkincareHandler) GetSkincareById(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincareResponse(skincare))
 }
 
+// UpdateSkincareById godoc
+//
+//	@Summary		Update a skincare
+//	@Description	Update a skincare
+//	@Tags			skincare
+//	@Accept			json
+//	@Produce		json
+//	@Param			id			path		int					true	"Skincare ID"
+//	@Param			skincare	body		entities.Skincare	true	"Skincare Object"
+//	@Success		200			{object}	presentation.Responses
+//	@Failure		400			{object}	presentation.Responses
+//	@Failure		404			{object}	presentation.Responses
+//	@Router			/admin/skincare/{id} [put]
 func (handler *HttpSkincareHandler) UpdateSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
@@ -89,6 +141,18 @@ func (handler *HttpSkincareHandler) UpdateSkincareById(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincareResponse(result))
 }
 
+// DeleteSkincareById godoc
+//
+//	@Summary		Delete a skincare
+//	@Description	Delete a skincare
+//	@Tags			skincare
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"Skincare ID"
+//	@Success		204	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		404	{object}	presentation.Responses
+//	@Router			/admin/skincare/{id} [delete]
 func (handler *HttpSkincareHandler) DeleteSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
