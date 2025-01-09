@@ -161,9 +161,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/manage/{id}": {
-            "get": {
-                "description": "Get an admin by ID",
+        "/admin/manage/": {
+            "put": {
+                "description": "Update an admin by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -173,13 +173,22 @@ const docTemplate = `{
                 "tags": [
                     "admin"
                 ],
-                "summary": "Get an admin by ID",
+                "summary": "Update an admin by ID",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Admin ID",
-                        "name": "id",
-                        "in": "path",
+                        "description": "Admin Object",
+                        "name": "admin",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.Admin"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Admin Token",
+                        "name": "token",
+                        "in": "header",
                         "required": true
                     }
                 ],
@@ -203,9 +212,11 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "put": {
-                "description": "Update an admin by ID",
+            }
+        },
+        "/admin/manage/{id}": {
+            "get": {
+                "description": "Get an admin by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -215,7 +226,7 @@ const docTemplate = `{
                 "tags": [
                     "admin"
                 ],
-                "summary": "Update an admin by ID",
+                "summary": "Get an admin by ID",
                 "parameters": [
                     {
                         "type": "integer",
@@ -223,15 +234,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Admin Object",
-                        "name": "admin",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.Admin"
-                        }
                     }
                 ],
                 "responses": {

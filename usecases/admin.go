@@ -16,7 +16,7 @@ type AdminUsecases interface {
 	CreateAdmin(admin entities.Admin, file multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error)
 	GetAdmins() ([]entities.Admin, error)
 	GetAdmin(id int) (entities.Admin, error)
-	UpdateAdmin(id int, admin entities.Admin) (entities.Admin, error)
+	UpdateAdmin(token string, admin entities.Admin) (entities.Admin, error)
 	DeleteAdmin(id int) (entities.Admin, error)
 	LogIn(email string, password string) (string, error)
 }
@@ -75,9 +75,17 @@ func (service *adminService) GetAdmin(id int) (entities.Admin, error) {
 	return service.repo.GetAdmin(id)
 }
 
-func (service *adminService) UpdateAdmin(id int, admin entities.Admin) (entities.Admin, error) {
+func (service *adminService) UpdateAdmin(token string, admin entities.Admin) (entities.Admin, error) {
 
-	oldamin, err := service.repo.GetAdmin(id)
+	id, err := utils.ExtractToken(token)
+
+	if err != nil {
+		return entities.Admin{}, err
+	}
+
+	intID := int(id)
+
+	oldamin, err := service.repo.GetAdmin(intID)
 
 	admin.ID = oldamin.ID
 
@@ -89,7 +97,7 @@ func (service *adminService) UpdateAdmin(id int, admin entities.Admin) (entities
 	admin.Password = utils.CheckEmptyValueBeforeUpdate(admin.Password, oldamin.Password)
 	admin.FullName = utils.CheckEmptyValueBeforeUpdate(admin.FullName, oldamin.FullName)
 
-	return service.repo.UpdateAdmin(id, admin)
+	return service.repo.UpdateAdmin(intID, admin)
 }
 
 func (service *adminService) DeleteAdmin(id int) (entities.Admin, error) {

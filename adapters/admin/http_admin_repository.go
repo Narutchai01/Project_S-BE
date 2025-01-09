@@ -105,26 +105,22 @@ func (handler *HttpAdminHandler) GetAdmin(c *fiber.Ctx) error {
 //	@Tags			admin
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		int				true	"Admin ID"
 //	@Param			admin	body		entities.Admin	true	"Admin Object"
+//	@Param			token	header		string			true	"Admin Token"
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		404		{object}	presentation.Responses
-//	@Router			/admin/manage/{id} [put]
+//	@Router			/admin/manage/ [put]
 func (handler *HttpAdminHandler) UpdateAdmin(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
-
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.AdminErrorResponse(err))
-	}
-
 	var admin entities.Admin
 
 	if err := c.BodyParser(&admin); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.AdminErrorResponse(err))
 	}
 
-	result, err := handler.adminUcase.UpdateAdmin(id, admin)
+	adminToken := c.Get("token")
+
+	result, err := handler.adminUcase.UpdateAdmin(adminToken, admin)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))

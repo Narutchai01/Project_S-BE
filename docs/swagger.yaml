@@ -125,6 +125,41 @@ paths:
       summary: Create an admin
       tags:
       - admin
+  /admin/manage/:
+    put:
+      consumes:
+      - application/json
+      description: Update an admin by ID
+      parameters:
+      - description: Admin Object
+        in: body
+        name: admin
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Admin'
+      - description: Admin Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Update an admin by ID
+      tags:
+      - admin
   /admin/manage/{id}:
     delete:
       consumes:
@@ -180,40 +215,6 @@ paths:
           schema:
             $ref: '#/definitions/presentation.Responses'
       summary: Get an admin by ID
-      tags:
-      - admin
-    put:
-      consumes:
-      - application/json
-      description: Update an admin by ID
-      parameters:
-      - description: Admin ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Admin Object
-        in: body
-        name: admin
-        required: true
-        schema:
-          $ref: '#/definitions/entities.Admin'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-      summary: Update an admin by ID
       tags:
       - admin
   /admin/skincare:
