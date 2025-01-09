@@ -79,7 +79,12 @@ func (handler *HttpAdminHandler) UpdateAdmin(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.AdminErrorResponse(err))
 	}
 
-	result, err := handler.adminUcase.UpdateAdmin(id, admin)
+	file, err := c.FormFile("file")
+	if err != nil {
+		file = nil
+	}
+
+	result, err := handler.adminUcase.UpdateAdmin(id, admin, file, c)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
