@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"os"
+	"path"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
@@ -16,7 +17,7 @@ type SkincareUsecases interface {
 	CreateSkincare(skincare entities.Skincare, file multipart.FileHeader, token string, c *fiber.Ctx) (entities.Skincare, error)
 	GetSkincares() ([]entities.Skincare, error)
 	GetSkincareById(id int) (entities.Skincare, error)
-	UpdateSkincareById(id int, skincare entities.Skincare) (entities.Skincare, error)
+	UpdateSkincareById(id int, skincare entities.Skincare, file *multipart.FileHeader, c *fiber.Ctx) (entities.Skincare, error)
 	DeleteSkincareById(id int) (entities.Skincare, error)
 }
 
@@ -32,14 +33,9 @@ func (service *skincareService) CreateSkincare(skincare entities.Skincare, file 
 
 	fileName := uuid.New().String() + ".jpg"
 
-	//Aut add this
-	dir := "./uploads"
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		    return entities.Skincare{}, err
-		}
+	if err := utils.CheckDirectoryExist(); err != nil {
+		return entities.Skincare{}, err
 	}
-	//
 
 	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
 		return entities.Skincare{}, err
@@ -81,22 +77,55 @@ func (service *skincareService) GetSkincareById(id int) (entities.Skincare, erro
 	return service.repo.GetSkincareById(id)
 }
 
-func (service *skincareService) UpdateSkincareById(id int, skincare entities.Skincare) (entities.Skincare, error) {
+func (service *skincareService) UpdateSkincareById(id int, skincare entities.Skincare, file *multipart.FileHeader, c *fiber.Ctx) (entities.Skincare, error) {
 
 	old_skincare, err := service.repo.GetSkincareById(id)
-
-	skincare.ID = old_skincare.ID
-
 	if err != nil {
 		return entities.Skincare{}, err
 	}
 
+	if file != nil && file.Filename != "" {
+		fileName := uuid.New().String() + ".jpg"
+
+		if err := utils.CheckDirectoryExist(); err != nil {
+			return entities.Skincare{}, err
+		}
+
+		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+			return entities.Skincare{}, err
+		}
+
+		if old_skincare.Image == "" {
+			imageUrl, err := utils.UploadImage(fileName, "/")
+			if err != nil {
+				return entities.Skincare{}, fmt.Errorf("failed to upload new image: %w", err)
+			}
+			skincare.Image = imageUrl
+		} else {
+			oldImage := path.Base(old_skincare.Image)
+			err := utils.UpdateImage(oldImage, fileName)
+			if err != nil {
+				return entities.Skincare{}, fmt.Errorf("failed to update existing image: %w", err)
+			}
+
+			skincare.Image = old_skincare.Image
+		}
+
+		err = os.Remove("./uploads/" + fileName)
+		if err != nil {
+			return entities.Skincare{}, fmt.Errorf("failed to remove temporary file: %w", err)
+		}
+	}
+
+	skincare.ID = old_skincare.ID
+
 	skincare.Name = utils.CheckEmptyValueBeforeUpdate(skincare.Name, old_skincare.Name)
-	skincare.Image = utils.CheckEmptyValueBeforeUpdate(skincare.Image, old_skincare.Image)
+	skincare.Name = utils.CheckEmptyValueBeforeUpdate(skincare.Image, old_skincare.Image)
 	skincare.Description = utils.CheckEmptyValueBeforeUpdate(skincare.Description, old_skincare.Description)
 
 	return service.repo.UpdateSkincareById(id, skincare)
 }
+
 
 func (service *skincareService) DeleteSkincareById(id int) (entities.Skincare, error) {
 	return service.repo.DeleteSkincareById(id)
