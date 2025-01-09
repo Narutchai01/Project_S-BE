@@ -42,7 +42,6 @@ func (handler *HttpSkincareHandler) CreateSkincare(c *fiber.Ctx) error {
 	create_by_token := c.Get("token")
 
 	file, err := c.FormFile("file")
-
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": err.Error(),
@@ -132,8 +131,12 @@ func (handler *HttpSkincareHandler) UpdateSkincareById(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.SkincareErrorResponse(err))
 	}
 
-	result, err := handler.skincarenUcase.UpdateSkincareById(id, skincare)
+	file, err := c.FormFile("file")
+	if err != nil {
+		file = nil
+	}
 
+	result, err := handler.skincarenUcase.UpdateSkincareById(id, skincare, file, c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.SkincareErrorResponse(err))
 	}

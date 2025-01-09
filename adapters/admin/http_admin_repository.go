@@ -120,7 +120,12 @@ func (handler *HttpAdminHandler) UpdateAdmin(c *fiber.Ctx) error {
 
 	adminToken := c.Get("token")
 
-	result, err := handler.adminUcase.UpdateAdmin(adminToken, admin)
+	file, err := c.FormFile("file")
+	if err != nil {
+		file = nil
+	}
+
+	result, err := handler.adminUcase.UpdateAdmin(adminToken, admin, file, c)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
@@ -161,16 +166,16 @@ func (handler *HttpAdminHandler) DeleteAdmin(c *fiber.Ctx) error {
 
 // LogIn godoc
 
-//	@Summary		Log in
-//	@Description	Log in
-//	@Tags			admin
-//	@Accept			json
-//	@Produce		json
-//	@Param			admin	body		object{email=string,password=string}	true	"Admin Object"
-//	@Success		200		{object}	presentation.Responses
-//	@Failure		400		{object}	presentation.Responses
-//	@Failure		404		{object}	presentation.Responses
-//	@Router			/admin/login [post]
+// @Summary		Log in
+// @Description	Log in
+// @Tags			admin
+// @Accept			json
+// @Produce		json
+// @Param			admin	body		object{email=string,password=string}	true	"Admin Object"
+// @Success		200		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Failure		404		{object}	presentation.Responses
+// @Router			/admin/login [post]
 func (handler *HttpAdminHandler) LogIn(c *fiber.Ctx) error {
 	var admin entities.Admin
 
