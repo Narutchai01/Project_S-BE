@@ -24,15 +24,7 @@ func (handler *HttpUserHandler) Register(c *fiber.Ctx) error {
 		})
 	}
 
-	file, err := c.FormFile("file")
-
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-
-	result, err := handler.userUcase.Register(user, *file, c)
+	result, err := handler.userUcase.Register(user, c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.UserErrorResponse(err))
 	}
