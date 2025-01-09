@@ -15,12 +15,15 @@ func main() {
 	db, err := db.ConnectDB()
 
 	if err != nil {
-		log.Fatal("Could not connect to the database")
+		log.Fatalf("Could not connect to the database")
 	}
-
 	routes.Router(app, db)
 
 	port := config.GetEnv("PORT")
 
-	log.Fatal(app.Listen(":" + port))
+	log.Printf("Starting the server on port %s...", port)
+	
+	if err := app.Listen(":" + port); err != nil {
+		log.Fatalf("Error starting the server: %v", err)
+	}
 }
