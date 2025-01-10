@@ -1,8 +1,10 @@
 package usecases
 
 import (
+	"fmt"
 	"mime/multipart"
 	"os"
+	"path"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
@@ -83,28 +85,70 @@ func (service *adminService) GetAdmin(id int) (entities.Admin, error) {
 func (service *adminService) UpdateAdmin(token string, admin entities.Admin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error) {
 
 	id, err := utils.ExtractToken(token)
-
 	if err != nil {
-		return entities.Admin{}, err
+		return admin, fmt.Errorf("failed to extract token: %w", err)
 	}
 
 	oldamin, err := service.repo.GetAdmin(int(id))
-
-	admin.ID = oldamin.ID
-
 	if err != nil {
 		return entities.Admin{}, err
 	}
+
+	if file != nil && file.Filename != "" {
+		fileName := uuid.New().String() + ".jpg"
+
+		if err := utils.CheckDirectoryExist(); err != nil {
+			return entities.Admin{}, err
+		}
+
+		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+			return entities.Admin{}, err
+		}
+
+		if oldamin.Image == "" {
+			imageUrl, err := utils.UploadImage(fileName, "/")
+			if err != nil {
+				return entities.Admin{}, fmt.Errorf("failed to upload new image: %w", err)
+			}
+			admin.Image = imageUrl
+		} else {
+			oldImage := path.Base(oldamin.Image)
+			err := utils.UpdateImage(oldImage, fileName)
+			if err != nil {
+				return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
+			}
+
+			admin.Image = oldamin.Image
+		}
+
+		err = os.Remove("./uploads/" + fileName)
+		if err != nil {
+			return entities.Admin{}, fmt.Errorf("failed to remove temporary file: %w", err)
+		}
+	}
+
+	admin.ID = oldamin.ID
 
 	admin.Image = utils.CheckEmptyValueBeforeUpdate(admin.Image, oldamin.Image)
 	admin.Password = utils.CheckEmptyValueBeforeUpdate(admin.Password, oldamin.Password)
 	admin.FullName = utils.CheckEmptyValueBeforeUpdate(admin.FullName, oldamin.FullName)
 
-	return service.repo.UpdateAdmin(int(admin.ID), admin)
+	return service.repo.UpdateAdmin(int(id), admin)
 }
 
 func (service *adminService) DeleteAdmin(id int) (entities.Admin, error) {
-	return service.repo.DeleteAdmin(id)
+
+      old_admin, err := service.repo.GetAdmin(id)
+      if err != nil {
+            return entities.Admin{}, err
+      }
+
+      oldImage := path.Base(old_admin.Image)
+      if err := utils.DeleteImage(oldImage); err != nil {
+            return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
+      }
+
+      return service.repo.DeleteAdmin(id)
 }
 
 func (service *adminService) LogIn(email string, password string) (string, error) {
