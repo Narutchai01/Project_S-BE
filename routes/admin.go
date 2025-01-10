@@ -19,4 +19,5 @@ func AdminRoutes(app fiber.Router, db *gorm.DB) {
 	app.Put("/manage/", adminHandler.UpdateAdmin)
 	app.Delete("/manage/:id", adminHandler.DeleteAdmin)
 	app.Post("/login/", adminHandler.LogIn)
+	app.Get("/profile/", adminHandler.GetAdminByToken)
 }
