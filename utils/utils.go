@@ -82,6 +82,21 @@ func UpdateImage(oldFilePath, newFilePath string) error {
 	return nil
 }
 
+func DeleteImage(oldFilePath string) error {
+      supa_api_url := config.GetEnv("SUPA_API_URL")
+      supa_api_key := config.GetEnv("SUPA_API_KEY")
+      bucket_name := config.GetEnv("SUPA_BUCKET_NAME")
+
+      storageClient := storage_go.NewClient(supa_api_url, supa_api_key, nil)
+
+      _, err := storageClient.RemoveFile(bucket_name, []string{oldFilePath})
+      if err != nil {
+            return fmt.Errorf("failed to update file %w", err)
+      }
+
+      return nil
+}
+
 func CreateJWTToken(secretKey string, claims jwt.MapClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(secretKey))

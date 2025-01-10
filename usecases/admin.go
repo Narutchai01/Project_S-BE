@@ -140,7 +140,18 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 }
 
 func (service *adminService) DeleteAdmin(id int) (entities.Admin, error) {
-	return service.repo.DeleteAdmin(id)
+
+      old_admin, err := service.repo.GetAdmin(id)
+      if err != nil {
+            return entities.Admin{}, err
+      }
+
+      oldImage := path.Base(old_admin.Image)
+      if err := utils.DeleteImage(oldImage); err != nil {
+            return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
+      }
+
+      return service.repo.DeleteAdmin(id)
 }
 
 func (service *adminService) LogIn(email string, password string) (string, error) {
