@@ -30,3 +30,8 @@ func (repo *GormAcneRepository) GetAcne(id int) (entities.Acne, error) {
 	err := repo.db.First(&acne, id).Error
 	return acne, err
 }
+
+func (repo *GormAcneRepository) DeleteAcne(id int) error {
+	err := repo.db.Delete(&entities.Acne{}, id).Error
+	return err
+}

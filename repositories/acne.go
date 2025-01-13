@@ -6,4 +6,5 @@ type AcneRepository interface {
 	CreateAcne(acne entities.Acne) (entities.Acne, error)
 	GetAcnes() ([]entities.Acne, error)
 	GetAcne(id int) (entities.Acne, error)
+	DeleteAcne(id int) error
 }
