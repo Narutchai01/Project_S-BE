@@ -9,13 +9,6 @@ definitions:
       password:
         type: string
     type: object
-  entities.Facial:
-    properties:
-      create_by:
-        type: integer
-      name:
-        type: string
-    type: object
   entities.Skincare:
     properties:
       description:
@@ -37,73 +30,151 @@ info:
   title: Project S API
   version: "1.0"
 paths:
-  /admin/facial:
+  /acne:
+    get:
+      consumes:
+      - application/json
+      description: Get acnes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get acnes
+      tags:
+      - acne
+  /acne/:
     post:
       consumes:
       - application/json
-      description: Create facial
+      description: Create an acne
       parameters:
-      - description: Facial image
-        in: formData
-        name: file
-        required: true
-        type: file
       - in: formData
         name: create_by
         type: integer
       - in: formData
         name: name
         type: string
-      - description: Token
-        in: header
-        name: token
+      - description: Acne Image
+        in: formData
+        name: file
         required: true
-        type: string
+        type: file
       produces:
       - application/json
-      responses: {}
-      summary: Create facial
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create an acne
       tags:
-      - facial
-  /admin/facial/{id}:
+      - acne
+  /acne/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete facial by ID
+      description: Delete an acne by ID
       parameters:
-      - description: Facial ID
+      - description: Acne ID
         in: path
         name: id
         required: true
         type: integer
       produces:
       - application/json
-      responses: {}
-      summary: Delete facial by ID
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Delete an acne by ID
       tags:
-      - facial
+      - acne
+    get:
+      consumes:
+      - application/json
+      description: Get acne
+      parameters:
+      - description: Acne ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get acne
+      tags:
+      - acne
     put:
       consumes:
       - application/json
-      description: Update facial by ID
+      description: Update an acne by ID
       parameters:
-      - description: Facial ID
+      - description: Acne ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Facial information
-        in: body
-        name: facial
-        required: true
-        schema:
-          $ref: '#/definitions/entities.Facial'
+      - in: formData
+        name: create_by
+        type: integer
+      - in: formData
+        name: name
+        type: string
       produces:
       - application/json
-      responses: {}
-      summary: Update facial by ID
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Update an acne by ID
       tags:
-      - facial
+      - acne
   /admin/login:
     post:
       consumes:
@@ -423,34 +494,6 @@ paths:
       summary: Update a skincare
       tags:
       - skincare
-  /facial:
-    get:
-      consumes:
-      - application/json
-      description: Get all facials
-      produces:
-      - application/json
-      responses: {}
-      summary: Get all facials
-      tags:
-      - facial
-  /facial/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get facial by ID
-      parameters:
-      - description: Facial ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses: {}
-      summary: Get facial by ID
-      tags:
-      - facial
   /skincare:
     get:
       consumes:

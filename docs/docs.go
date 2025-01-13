@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admin/facial": {
-            "post": {
-                "description": "Create facial",
+        "/acne": {
+            "get": {
+                "description": "Get acnes",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,17 +25,45 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "facial"
+                    "acne"
                 ],
-                "summary": "Create facial",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Facial image",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
+                "summary": "Get acnes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            }
+        },
+        "/acne/": {
+            "post": {
+                "description": "Create an acne",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "acne"
+                ],
+                "summary": "Create an acne",
+                "parameters": [
                     {
                         "type": "integer",
                         "name": "create_by",
@@ -47,19 +75,38 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
-                        "type": "string",
-                        "description": "Token",
-                        "name": "token",
-                        "in": "header",
+                        "type": "file",
+                        "description": "Acne Image",
+                        "name": "file",
+                        "in": "formData",
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
             }
         },
-        "/admin/facial/{id}": {
-            "put": {
-                "description": "Update facial by ID",
+        "/acne/{id}": {
+            "get": {
+                "description": "Get acne",
                 "consumes": [
                     "application/json"
                 ],
@@ -67,31 +114,93 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "facial"
+                    "acne"
                 ],
-                "summary": "Update facial by ID",
+                "summary": "Get acne",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Facial ID",
+                        "description": "Acne ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an acne by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "acne"
+                ],
+                "summary": "Update an acne by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Acne ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Facial information",
-                        "name": "facial",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.Facial"
-                        }
+                        "type": "integer",
+                        "name": "create_by",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "formData"
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
             },
             "delete": {
-                "description": "Delete facial by ID",
+                "description": "Delete an acne by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -99,19 +208,32 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "facial"
+                    "acne"
                 ],
-                "summary": "Delete facial by ID",
+                "summary": "Delete an acne by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Facial ID",
+                        "description": "Acne ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
             }
         },
         "/admin/login": {
@@ -599,47 +721,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/facial": {
-            "get": {
-                "description": "Get all facials",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "facial"
-                ],
-                "summary": "Get all facials",
-                "responses": {}
-            }
-        },
-        "/facial/{id}": {
-            "get": {
-                "description": "Get facial by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "facial"
-                ],
-                "summary": "Get facial by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Facial ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
         "/skincare": {
             "get": {
                 "description": "Get skincares",
@@ -731,17 +812,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "entities.Facial": {
-            "type": "object",
-            "properties": {
-                "create_by": {
-                    "type": "integer"
-                },
-                "name": {
                     "type": "string"
                 }
             }
