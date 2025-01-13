@@ -1,6 +1,8 @@
 package adapters
 
 import (
+	"strconv"
+
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
@@ -36,4 +38,30 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(result)
+}
+
+func (handler *HttpFacialHandler) GetFacials(c *fiber.Ctx) error {
+	facial, err := handler.facialUsecase.GetFacials()
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(facial)
+}
+
+func (handler *HttpFacialHandler) GetFacial(c *fiber.Ctx) error {
+	id := c.Params("id")
+	intID, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+	}
+
+	facial, err := handler.facialUsecase.GetFacial(intID)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(facial)
 }

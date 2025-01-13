@@ -24,3 +24,9 @@ func (repo *GormFacialRepository) GetFacials() ([]entities.Facial, error) {
 	err := repo.db.Find(&facials).Error
 	return facials, err
 }
+
+func (repo *GormFacialRepository) GetFacial(id int) (entities.Facial, error) {
+	var facial entities.Facial
+	err := repo.db.First(&facial, id).Error
+	return facial, err
+}

@@ -16,6 +16,9 @@ func FacialRouters(app fiber.Router, admin fiber.Router, db *gorm.DB) {
 	facialAdmin := admin.Group("/facial")
 
 	facialAdmin.Post("/", facialHandler.CreateFacial)
-	// facialAdmin.Get("/", facialHandler.GetFacials)
+
+	facialUser := app.Group("/facial")
+	facialUser.Get("/", facialHandler.GetFacials)
+	facialUser.Get("/:id", facialHandler.GetFacial)
 
 }
