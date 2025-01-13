@@ -15,6 +15,8 @@ type FacialUsecases interface {
 	CreateFacial(facial entities.Facial, file multipart.FileHeader, c *fiber.Ctx, token string) (entities.Facial, error)
 	GetFacials() ([]entities.Facial, error)
 	GetFacial(id int) (entities.Facial, error)
+	UpdateFacial(id int, facial entities.Facial) (entities.Facial, error)
+	DeleteFacial(id int) error
 }
 
 type facialService struct {
@@ -74,4 +76,12 @@ func (service *facialService) GetFacials() ([]entities.Facial, error) {
 
 func (service *facialService) GetFacial(id int) (entities.Facial, error) {
 	return service.repo.GetFacial(id)
+}
+
+func (service *facialService) UpdateFacial(id int, facial entities.Facial) (entities.Facial, error) {
+	return service.repo.UpdateFacial(id, facial)
+}
+
+func (service *facialService) DeleteFacial(id int) error {
+	return service.repo.DeleteFacial(id)
 }

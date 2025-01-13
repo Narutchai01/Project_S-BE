@@ -14,8 +14,9 @@ func FacialRouters(app fiber.Router, admin fiber.Router, db *gorm.DB) {
 	facialHandler := adapters.NewHttpFacialHandler(facialService)
 
 	facialAdmin := admin.Group("/facial")
-
 	facialAdmin.Post("/", facialHandler.CreateFacial)
+	facialAdmin.Delete("/:id", facialHandler.DeleteFacial)
+	facialAdmin.Put("/:id", facialHandler.UpdateFacial)
 
 	facialUser := app.Group("/facial")
 	facialUser.Get("/", facialHandler.GetFacials)

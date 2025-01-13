@@ -65,3 +65,41 @@ func (handler *HttpFacialHandler) GetFacial(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(facial)
 }
+
+func (handler *HttpFacialHandler) UpdateFacial(c *fiber.Ctx) error {
+	id := c.Params("id")
+	intID, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+	}
+
+	var facial entities.Facial
+
+	if err := c.BodyParser(&facial); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(facial)
+	}
+
+	result, err := handler.facialUsecase.UpdateFacial(intID, facial)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
+}
+
+func (handler *HttpFacialHandler) DeleteFacial(c *fiber.Ctx) error {
+	id := c.Params("id")
+	intID, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+	}
+
+	err = handler.facialUsecase.DeleteFacial(intID)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(err)
+	}
+
+	return c.Status(fiber.StatusNoContent).JSON(nil)
+}

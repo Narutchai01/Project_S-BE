@@ -30,3 +30,13 @@ func (repo *GormFacialRepository) GetFacial(id int) (entities.Facial, error) {
 	err := repo.db.First(&facial, id).Error
 	return facial, err
 }
+
+func (repo *GormFacialRepository) UpdateFacial(id int, facial entities.Facial) (entities.Facial, error) {
+	err := repo.db.Model(&entities.Facial{}).Where("id = ?", id).Updates(facial).Error
+	return facial, err
+}
+
+func (repo *GormFacialRepository) DeleteFacial(id int) error {
+	err := repo.db.Delete(&entities.Facial{}, id).Error
+	return err
+}
