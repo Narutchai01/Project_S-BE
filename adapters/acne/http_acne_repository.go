@@ -64,7 +64,7 @@ func (handler *HttpAcneHandler) CreateAcne(c *fiber.Ctx) error {
 //	@Failure		400	{object}	presentation.Responses
 //	@Failure		404	{object}	presentation.Responses
 //
-// @Router	/acne [get]
+//	@Router			/acne [get]
 func (handler *HttpAcneHandler) GetAcnes(c *fiber.Ctx) error {
 	result, err := handler.acneUsecase.GetAcnes()
 
@@ -148,7 +148,7 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 //	@Param			id	path		int	true	"Acne ID"
 //	@Success		204	{object}	presentation.Responses
 //	@Failure		400	{object}	presentation.Responses
-//	@Router	/acne/{id} [delete]
+//	@Router			/acne/{id} [delete]
 func (handler *HttpAcneHandler) DeleteAcne(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)

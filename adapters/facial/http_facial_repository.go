@@ -16,6 +16,16 @@ func NewHttpFacialHandler(facialUcase usecases.FacialUsecases) *HttpFacialHandle
 	return &HttpFacialHandler{facialUcase}
 }
 
+// CreateFacial godoc
+//	@Summary		Create facial
+//	@Description	Create facial
+//	@Tags			facial
+//	@Accept			json
+//	@Produce		json
+//	@Param			file	formData	file			true	"Facial image"
+//	@Param			facial	formData	entities.Facial	true	"Facial information"
+//	@Param			token	header		string			true	"Token"
+//	@Router			/admin/facial [post]
 func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 	var facial entities.Facial
 
@@ -40,6 +50,13 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(result)
 }
 
+// GetFacials godoc
+//	@Summary		Get all facials
+//	@Description	Get all facials
+//	@Tags			facial
+//	@Accept			json
+//	@Produce		json
+//	@Router			/facial [get]
 func (handler *HttpFacialHandler) GetFacials(c *fiber.Ctx) error {
 	facial, err := handler.facialUsecase.GetFacials()
 
@@ -50,6 +67,14 @@ func (handler *HttpFacialHandler) GetFacials(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(facial)
 }
 
+// GetFacial godoc
+//	@Summary		Get facial by ID
+//	@Description	Get facial by ID
+//	@Tags			facial
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"Facial ID"
+//	@Router			/facial/{id} [get]
 func (handler *HttpFacialHandler) GetFacial(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
@@ -66,6 +91,15 @@ func (handler *HttpFacialHandler) GetFacial(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(facial)
 }
 
+// UpdateFacial godoc
+//	@Summary		Update facial by ID
+//	@Description	Update facial by ID
+//	@Tags			facial
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path	int				true	"Facial ID"
+//	@Param			facial	body	entities.Facial	true	"Facial information"
+//	@Router			/admin/facial/{id} [put]
 func (handler *HttpFacialHandler) UpdateFacial(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
@@ -88,6 +122,14 @@ func (handler *HttpFacialHandler) UpdateFacial(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(result)
 }
 
+// DeleteFacial godoc
+//	@Summary		Delete facial by ID
+//	@Description	Delete facial by ID
+//	@Tags			facial
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"Facial ID"
+//	@Router			/admin/facial/{id} [delete]
 func (handler *HttpFacialHandler) DeleteFacial(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
