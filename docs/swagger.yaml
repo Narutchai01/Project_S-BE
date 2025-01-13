@@ -30,6 +30,151 @@ info:
   title: Project S API
   version: "1.0"
 paths:
+  /acne:
+    get:
+      consumes:
+      - application/json
+      description: Get acnes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get acnes
+      tags:
+      - acne
+  /acne/:
+    post:
+      consumes:
+      - application/json
+      description: Create an acne
+      parameters:
+      - in: formData
+        name: create_by
+        type: integer
+      - in: formData
+        name: name
+        type: string
+      - description: Acne Image
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create an acne
+      tags:
+      - acne
+  /acne/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an acne by ID
+      parameters:
+      - description: Acne ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Delete an acne by ID
+      tags:
+      - acne
+    get:
+      consumes:
+      - application/json
+      description: Get acne
+      parameters:
+      - description: Acne ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get acne
+      tags:
+      - acne
+    put:
+      consumes:
+      - application/json
+      description: Update an acne by ID
+      parameters:
+      - description: Acne ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - in: formData
+        name: create_by
+        type: integer
+      - in: formData
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Update an acne by ID
+      tags:
+      - acne
   /admin/login:
     post:
       consumes:
