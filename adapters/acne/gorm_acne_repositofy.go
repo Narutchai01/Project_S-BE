@@ -31,6 +31,11 @@ func (repo *GormAcneRepository) GetAcne(id int) (entities.Acne, error) {
 	return acne, err
 }
 
+func (repo *GormAcneRepository) UpdateAcne(id int, acne entities.Acne) (entities.Acne, error) {
+	err := repo.db.Model(&entities.Acne{}).Where("id = ?", id).Updates(acne).Error
+	return acne, err
+}
+
 func (repo *GormAcneRepository) DeleteAcne(id int) error {
 	err := repo.db.Delete(&entities.Acne{}, id).Error
 	return err

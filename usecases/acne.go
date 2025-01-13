@@ -15,6 +15,7 @@ type AcneUseCase interface {
 	CreateAcne(acne entities.Acne, file multipart.FileHeader, c *fiber.Ctx, token string) (entities.Acne, error)
 	GetAcnes() ([]entities.Acne, error)
 	GetAcne(id int) (entities.Acne, error)
+	UpdateAcne(id int, acne entities.Acne) (entities.Acne, error)
 	DeleteAcne(id int) error
 }
 
@@ -76,6 +77,10 @@ func (service *acneService) GetAcnes() ([]entities.Acne, error) {
 
 func (service *acneService) GetAcne(id int) (entities.Acne, error) {
 	return service.repo.GetAcne(id)
+}
+
+func (service *acneService) UpdateAcne(id int, acne entities.Acne) (entities.Acne, error) {
+	return service.repo.UpdateAcne(id, acne)
 }
 
 func (service *acneService) DeleteAcne(id int) error {

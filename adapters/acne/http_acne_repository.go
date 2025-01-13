@@ -66,6 +66,28 @@ func (handler *HttpAcneHandler) GetAcne(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(result)
 }
 
+func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
+	id := c.Params("id")
+	intID, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+	}
+
+	var acne entities.Acne
+
+	if err := c.BodyParser(&acne); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(acne)
+	}
+
+	result, err := handler.acneUsecase.UpdateAcne(intID, acne)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
+}
+
 func (handler *HttpAcneHandler) DeleteAcne(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
