@@ -60,7 +60,36 @@ paths:
       summary: Get acnes
       tags:
       - acne
-  /acne/:
+  /acne/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get acne
+      parameters:
+      - description: Acne ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get acne
+      tags:
+      - acne
+  /admin/acne/:
     post:
       consumes:
       - application/json
@@ -95,7 +124,7 @@ paths:
       summary: Create an acne
       tags:
       - acne
-  /acne/{id}:
+  /admin/acne/{id}:
     delete:
       consumes:
       - application/json
@@ -118,34 +147,6 @@ paths:
           schema:
             $ref: '#/definitions/presentation.Responses'
       summary: Delete an acne by ID
-      tags:
-      - acne
-    get:
-      consumes:
-      - application/json
-      description: Get acne
-      parameters:
-      - description: Acne ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-      summary: Get acne
       tags:
       - acne
     put:
