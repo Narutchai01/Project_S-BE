@@ -3,12 +3,14 @@ package usecases
 import (
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
+	"github.com/Narutchai01/Project_S-BE/utils"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserUsecases interface {
 	Register(user entities.User, c *fiber.Ctx) (entities.User, error)
+	LogIn(email string, password string) (string, error)
 }
 
 type userService struct {
@@ -32,4 +34,22 @@ func (service *userService) Register(user entities.User, c *fiber.Ctx) (entities
 	user.Password = string(hashedPassword)
 
 	return service.repo.CreateUser(user)
+}
+
+func (service *userService) LogIn(email string, password string) (string, error) {
+	user, err := service.repo.GetUserByEmail(email)
+	if err != nil {
+		return "something wrong!", err
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return "something wrong!", err
+	}
+
+	token, err := utils.GenerateToken(int(user.ID))
+	if err != nil {
+		return "something wrong!", err
+	}
+
+	return token, nil
 }
