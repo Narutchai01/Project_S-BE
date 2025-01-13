@@ -5,12 +5,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type Recovery struct {
-	ID     uint   `json:"id"`
-	UserId int   `json:"user_id"`
-	OTP    string `json:"otp"`
-}
-
 func RecoveryResponse(data entities.Recovery) *fiber.Map {
 	recovery := Recovery{
 		ID:     data.ID,

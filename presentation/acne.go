@@ -2,12 +2,6 @@ package presentation
 
 import "github.com/Narutchai01/Project_S-BE/entities"
 
-type Acne struct {
-	ID    uint   `json:"id"`
-	Name  string `json:"name"`
-	Image string `json:"image"`
-}
-
 func ToAcneResponse(data entities.Acne) *Responses {
 	acne := Acne{
 		ID:    data.ID,

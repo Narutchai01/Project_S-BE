@@ -16,6 +16,7 @@ type FacialUsecases interface {
 	GetFacials() ([]entities.Facial, error)
 	GetFacial(id int) (entities.Facial, error)
 	UpdateFacial(id int, facial entities.Facial) (entities.Facial, error)
+	UpdateFacialWithImage(id int, facial entities.Facial, file multipart.FileHeader, c *fiber.Ctx) (entities.Facial, error)
 	DeleteFacial(id int) error
 }
 
@@ -79,6 +80,54 @@ func (service *facialService) GetFacial(id int) (entities.Facial, error) {
 }
 
 func (service *facialService) UpdateFacial(id int, facial entities.Facial) (entities.Facial, error) {
+	oldvalue, err := service.repo.GetFacial(id)
+
+	if err != nil {
+		return entities.Facial{}, err
+	}
+
+	facial.ID = oldvalue.ID
+
+	facial.Name = utils.CheckEmptyValueBeforeUpdate(facial.Name, oldvalue.Name)
+	facial.Image = utils.CheckEmptyValueBeforeUpdate(facial.Image, oldvalue.Image)
+
+	return service.repo.UpdateFacial(id, facial)
+}
+
+func (service *facialService) UpdateFacialWithImage(id int, facial entities.Facial, file multipart.FileHeader, c *fiber.Ctx) (entities.Facial, error) {
+
+	fileName := uuid.New().String() + ".jpg"
+
+	if err := utils.CheckDirectoryExist(); err != nil {
+		return entities.Facial{}, err
+	}
+
+	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
+		return entities.Facial{}, err
+	}
+
+	imageUrl, err := utils.UploadImage(fileName, "/facial")
+
+	if err != nil {
+		return entities.Facial{}, err
+	}
+
+	err = os.Remove("./uploads/" + fileName)
+
+	if err != nil {
+		return entities.Facial{}, err
+	}
+
+	oldvalue, err := service.repo.GetFacial(id)
+
+	if err != nil {
+		return entities.Facial{}, err
+	}
+
+	facial.ID = oldvalue.ID
+	facial.Name = utils.CheckEmptyValueBeforeUpdate(facial.Name, oldvalue.Name)
+	facial.Image = imageUrl
+
 	return service.repo.UpdateFacial(id, facial)
 }
 

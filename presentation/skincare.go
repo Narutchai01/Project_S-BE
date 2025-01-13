@@ -4,14 +4,6 @@ import (
 	"github.com/Narutchai01/Project_S-BE/entities"
 )
 
-type Skincare struct {
-	ID          uint   `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Image       string `json:"image"`
-	CreateBY    uint   `json:"create_by"`
-}
-
 func SkincareResponse(data entities.Skincare) *Responses {
 	skincare := Skincare{
 		ID:          data.ID,

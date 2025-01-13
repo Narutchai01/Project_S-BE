@@ -4,19 +4,6 @@ import (
 	"github.com/Narutchai01/Project_S-BE/entities"
 )
 
-type Admin struct {
-	ID       uint   `json:"id"`
-	FullName string `json:"full_name"`
-	Email    string `json:"email"`
-	Image    string `json:"image"`
-}
-
-type Responses struct {
-	Status bool        `json:"status"`
-	Data   interface{} `json:"data"`
-	Error  interface{} `json:"error"`
-}
-
 func ToAdminResponse(data entities.Admin) *Responses {
 	admin := Admin{
 		ID:       data.ID,
