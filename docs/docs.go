@@ -15,6 +15,105 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/facial": {
+            "post": {
+                "description": "Create facial",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "facial"
+                ],
+                "summary": "Create facial",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Facial image",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "create_by",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/admin/facial/{id}": {
+            "put": {
+                "description": "Update facial by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "facial"
+                ],
+                "summary": "Update facial by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Facial ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Facial information",
+                        "name": "facial",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.Facial"
+                        }
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "description": "Delete facial by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "facial"
+                ],
+                "summary": "Delete facial by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Facial ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/admin/login": {
             "post": {
                 "description": "Log in",
@@ -500,6 +599,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/facial": {
+            "get": {
+                "description": "Get all facials",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "facial"
+                ],
+                "summary": "Get all facials",
+                "responses": {}
+            }
+        },
+        "/facial/{id}": {
+            "get": {
+                "description": "Get facial by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "facial"
+                ],
+                "summary": "Get facial by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Facial ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/skincare": {
             "get": {
                 "description": "Get skincares",
@@ -591,6 +731,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Facial": {
+            "type": "object",
+            "properties": {
+                "create_by": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }

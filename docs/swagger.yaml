@@ -9,6 +9,13 @@ definitions:
       password:
         type: string
     type: object
+  entities.Facial:
+    properties:
+      create_by:
+        type: integer
+      name:
+        type: string
+    type: object
   entities.Skincare:
     properties:
       description:
@@ -30,6 +37,73 @@ info:
   title: Project S API
   version: "1.0"
 paths:
+  /admin/facial:
+    post:
+      consumes:
+      - application/json
+      description: Create facial
+      parameters:
+      - description: Facial image
+        in: formData
+        name: file
+        required: true
+        type: file
+      - in: formData
+        name: create_by
+        type: integer
+      - in: formData
+        name: name
+        type: string
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Create facial
+      tags:
+      - facial
+  /admin/facial/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete facial by ID
+      parameters:
+      - description: Facial ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Delete facial by ID
+      tags:
+      - facial
+    put:
+      consumes:
+      - application/json
+      description: Update facial by ID
+      parameters:
+      - description: Facial ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Facial information
+        in: body
+        name: facial
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Facial'
+      produces:
+      - application/json
+      responses: {}
+      summary: Update facial by ID
+      tags:
+      - facial
   /admin/login:
     post:
       consumes:
@@ -349,6 +423,34 @@ paths:
       summary: Update a skincare
       tags:
       - skincare
+  /facial:
+    get:
+      consumes:
+      - application/json
+      description: Get all facials
+      produces:
+      - application/json
+      responses: {}
+      summary: Get all facials
+      tags:
+      - facial
+  /facial/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get facial by ID
+      parameters:
+      - description: Facial ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Get facial by ID
+      tags:
+      - facial
   /skincare:
     get:
       consumes:
