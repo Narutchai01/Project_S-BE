@@ -50,7 +50,51 @@ const docTemplate = `{
                 }
             }
         },
-        "/acne/": {
+        "/acne/{id}": {
+            "get": {
+                "description": "Get acne",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "acne"
+                ],
+                "summary": "Get acne",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Acne ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/acne/": {
             "post": {
                 "description": "Create an acne",
                 "consumes": [
@@ -104,49 +148,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/acne/{id}": {
-            "get": {
-                "description": "Get acne",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "acne"
-                ],
-                "summary": "Get acne",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Acne ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            },
+        "/admin/acne/{id}": {
             "put": {
                 "description": "Update an acne by ID",
                 "consumes": [
