@@ -17,7 +17,7 @@ func NewHttpAcneHandler(acneUcase usecases.AcneUseCase) *HttpAcneHandler {
 	return &HttpAcneHandler{acneUcase}
 }
 
-// CreaetAcne godoc
+// CreateAcne godoc
 //
 //	@Summary		Create an acne
 //	@Description	Create an acne
@@ -26,6 +26,7 @@ func NewHttpAcneHandler(acneUcase usecases.AcneUseCase) *HttpAcneHandler {
 //	@Produce		json
 //	@Param			acne	formData	entities.Acne	true	"Acne Object"
 //	@Param			file	formData	file			true	"Acne Image"
+//	@Param			token	header		string			true	"Token"
 //	@Success		201		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		404		{object}	presentation.Responses
