@@ -18,3 +18,15 @@ func (repo *GormAcneRepository) CreateAcne(acne entities.Acne) (entities.Acne, e
 	err := repo.db.Create(&acne).Error
 	return acne, err
 }
+
+func (repo *GormAcneRepository) GetAcnes() ([]entities.Acne, error) {
+	var acnes []entities.Acne
+	err := repo.db.Find(&acnes).Error
+	return acnes, err
+}
+
+func (repo *GormAcneRepository) GetAcne(id int) (entities.Acne, error) {
+	var acne entities.Acne
+	err := repo.db.First(&acne, id).Error
+	return acne, err
+}

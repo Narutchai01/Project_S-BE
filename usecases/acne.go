@@ -13,6 +13,8 @@ import (
 
 type AcneUseCase interface {
 	CreateAcne(acne entities.Acne, file multipart.FileHeader, c *fiber.Ctx, token string) (entities.Acne, error)
+	GetAcnes() ([]entities.Acne, error)
+	GetAcne(id int) (entities.Acne, error)
 }
 
 type acneService struct {
@@ -65,4 +67,12 @@ func (service *acneService) CreateAcne(acne entities.Acne, file multipart.FileHe
 	acne.CreateBY = create_by
 
 	return service.repo.CreateAcne(acne)
+}
+
+func (service *acneService) GetAcnes() ([]entities.Acne, error) {
+	return service.repo.GetAcnes()
+}
+
+func (service *acneService) GetAcne(id int) (entities.Acne, error) {
+	return service.repo.GetAcne(id)
 }

@@ -18,7 +18,7 @@ func AcneRouters(app fiber.Router, admin fiber.Router, db *gorm.DB) {
 	// acneAdmin.Delete("/:id", acneHandler.DeleteAcne)
 	// acneAdmin.Put("/:id", acneHandler.UpdateAcne)
 
-	// acneUser := app.Group("/acne")
-	// acneUser.Get("/", acneHandler.GetAcnes)
-	// acneUser.Get("/:id", acneHandler.GetAcne)
+	acneUser := app.Group("/acne")
+	acneUser.Get("/", acneHandler.GetAcnes)
+	acneUser.Get("/:id", acneHandler.GetAcne)
 }
