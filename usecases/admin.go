@@ -44,7 +44,7 @@ func (service *adminService) CreateAdmin(admin entities.Admin, file multipart.Fi
 		return entities.Admin{}, err
 	}
 
-	imageUrl, err := utils.UploadImage(fileName, "/")
+	imageUrl, err := utils.UploadImage(fileName, "/admin")
 
 	if err != nil {
 		return admin, c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -94,7 +94,7 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 		return entities.Admin{}, err
 	}
 
-	if file != nil && file.Filename != "" {
+	if file != nil {
 		fileName := uuid.New().String() + ".jpg"
 
 		if err := utils.CheckDirectoryExist(); err != nil {
@@ -106,14 +106,15 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 		}
 
 		if oldamin.Image == "" {
-			imageUrl, err := utils.UploadImage(fileName, "/")
+			imageUrl, err := utils.UploadImage(fileName, "/admin")
 			if err != nil {
 				return entities.Admin{}, fmt.Errorf("failed to upload new image: %w", err)
 			}
 			admin.Image = imageUrl
 		} else {
 			oldImage := path.Base(oldamin.Image)
-			err := utils.UpdateImage(oldImage, fileName)
+			fmt.Println("Old Image Path:", oldImage)
+			err := utils.UpdateImage(oldImage, fileName, "admin")
 			if err != nil {
 				return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
 			}
@@ -132,6 +133,7 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 	admin.Image = utils.CheckEmptyValueBeforeUpdate(admin.Image, oldamin.Image)
 	admin.Password = utils.CheckEmptyValueBeforeUpdate(admin.Password, oldamin.Password)
 	admin.FullName = utils.CheckEmptyValueBeforeUpdate(admin.FullName, oldamin.FullName)
+	admin.Email = utils.CheckEmptyValueBeforeUpdate(admin.Email, oldamin.Email)
 
 	return service.repo.UpdateAdmin(int(id), admin)
 }
