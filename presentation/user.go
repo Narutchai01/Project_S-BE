@@ -43,3 +43,20 @@ func UserErrorResponse(err error) *fiber.Map {
 		"error":  err.Error(),
 	}
 }
+
+func UserLoginResponse(token string, err error) *Responses {
+	if err != nil {
+		return &Responses{
+			Status: false,
+			Data:   nil,
+			Error:  err.Error(),
+		}
+	}
+	return &Responses{
+		Status: true,
+		Data: map[string]string{
+			"token": token,
+		},
+		Error: nil,
+	}
+}

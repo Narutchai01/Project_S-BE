@@ -14,4 +14,6 @@ func UserRoutes(app fiber.Router, db *gorm.DB) {
 	userHandler := adapters.NewHttpUserHandler(userService)
 
 	app.Post("/register", userHandler.Register)
+	app.Post("/login/", userHandler.LogIn)
+	app.Put("/forget-password", userHandler.ForgetPassword)
 }
