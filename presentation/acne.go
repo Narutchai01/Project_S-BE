@@ -4,9 +4,10 @@ import "github.com/Narutchai01/Project_S-BE/entities"
 
 func ToAcneResponse(data entities.Acne) *Responses {
 	acne := Acne{
-		ID:    data.ID,
-		Name:  data.Name,
-		Image: data.Image,
+		ID:       data.ID,
+		Name:     data.Name,
+		Image:    data.Image,
+		CreateBY: data.CreateBY,
 	}
 	return &Responses{
 		Status: true,
@@ -20,9 +21,10 @@ func ToAcnesResponse(data []entities.Acne) *Responses {
 
 	for _, acne := range data {
 		acnes = append(acnes, Acne{
-			ID:    acne.ID,
-			Name:  acne.Name,
-			Image: acne.Image,
+			ID:       acne.ID,
+			Name:     acne.Name,
+			Image:    acne.Image,
+			CreateBY: acne.CreateBY,
 		})
 	}
 	return &Responses{

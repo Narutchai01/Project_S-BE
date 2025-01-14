@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"fmt"
 	"mime/multipart"
 	"os"
 
@@ -15,8 +16,7 @@ type AcneUseCase interface {
 	CreateAcne(acne entities.Acne, file multipart.FileHeader, c *fiber.Ctx, token string) (entities.Acne, error)
 	GetAcnes() ([]entities.Acne, error)
 	GetAcne(id int) (entities.Acne, error)
-	UpdateAcne(id int, acne entities.Acne) (entities.Acne, error)
-	UpdateAcneWithImage(id int, acne entities.Acne, file multipart.FileHeader, c *fiber.Ctx) (entities.Acne, error)
+	UpdateAcne(id int, acne entities.Acne, file *multipart.FileHeader, c *fiber.Ctx) (entities.Acne, error)
 	DeleteAcne(id int) error
 }
 
@@ -80,52 +80,40 @@ func (service *acneService) GetAcne(id int) (entities.Acne, error) {
 	return service.repo.GetAcne(id)
 }
 
-func (service *acneService) UpdateAcne(id int, acne entities.Acne) (entities.Acne, error) {
+func (service *acneService) UpdateAcne(id int, acne entities.Acne, file *multipart.FileHeader, c *fiber.Ctx) (entities.Acne, error) {
 
 	oldvalue, err := service.repo.GetAcne(id)
-
 	if err != nil {
-		return entities.Acne{}, err
-	}
-	acne.ID = oldvalue.ID
-	acne.Name = utils.CheckEmptyValueBeforeUpdate(acne.Name, oldvalue.Name)
-	acne.Image = utils.CheckEmptyValueBeforeUpdate(acne.Image, oldvalue.Image)
-	return service.repo.UpdateAcne(id, acne)
-}
-
-func (service *acneService) UpdateAcneWithImage(id int, acne entities.Acne, file multipart.FileHeader, c *fiber.Ctx) (entities.Acne, error) {
-
-	fileName := uuid.New().String() + ".jpg"
-
-	if err := utils.CheckDirectoryExist(); err != nil {
-		return entities.Acne{}, err
+		return entities.Acne{}, fmt.Errorf("failed to get acne: %w", err)
 	}
 
-	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
-		return entities.Acne{}, err
-	}
+	if file != nil {
+		fileName := uuid.New().String() + ".jpg"
 
-	imageUrl, err := utils.UploadImage(fileName, "/acne")
+		if err := utils.CheckDirectoryExist(); err != nil {
+			return entities.Acne{}, fmt.Errorf("failed to check directory: %w", err)
+		}
 
-	if err != nil {
-		return entities.Acne{}, err
-	}
+		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+			return entities.Acne{}, fmt.Errorf("failed to save file: %w", err)
+		}
 
-	err = os.Remove("./uploads/" + fileName)
+		imageUrl, err := utils.UploadImage(fileName, "/acne")
 
-	if err != nil {
-		return entities.Acne{}, err
-	}
-
-	oldvalue, err := service.repo.GetAcne(id)
-
-	if err != nil {
-		return entities.Acne{}, err
+		if err != nil {
+			return entities.Acne{}, fmt.Errorf("failed to upload image: %w", err)
+		}
+		err = os.Remove("./uploads/" + fileName)
+		if err != nil {
+			return entities.Acne{}, fmt.Errorf("failed to remove file: %w", err)
+		}
+		acne.Image = imageUrl
 	}
 
 	acne.ID = oldvalue.ID
 	acne.Name = utils.CheckEmptyValueBeforeUpdate(acne.Name, oldvalue.Name)
-	acne.Image = imageUrl
+	acne.Image = utils.CheckEmptyValueBeforeUpdate(acne.Image, oldvalue.Image)
+	acne.CreateBY = oldvalue.CreateBY
 
 	return service.repo.UpdateAcne(id, acne)
 }

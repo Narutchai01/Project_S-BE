@@ -132,19 +132,12 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.AcneErrorResponse(err))
 	}
 
-	file, _ := c.FormFile("file")
-
-	if file != nil {
-		result, err := handler.acneUsecase.UpdateAcneWithImage(intID, acne, *file, c)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(presentation.AcneErrorResponse(err))
-		}
-
-		return c.Status(fiber.StatusOK).JSON(presentation.ToAcneResponse(result))
+	file, err := c.FormFile("file")
+	if err != nil {
+		file = nil
 	}
 
-	result, err := handler.acneUsecase.UpdateAcne(intID, acne)
-
+	result, err := handler.acneUsecase.UpdateAcne(intID, acne, file, c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AcneErrorResponse(err))
 	}
