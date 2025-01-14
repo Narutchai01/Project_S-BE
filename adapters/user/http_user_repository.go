@@ -31,3 +31,37 @@ func (handler *HttpUserHandler) Register(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(result)
 }
+
+func (handler *HttpUserHandler) LogIn(c *fiber.Ctx) error {
+	var user entities.User
+
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	result, err := handler.userUcase.LogIn(user.Email, user.Password)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.UserErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.UserLoginResponse(result, err))
+}
+
+func (handler *HttpUserHandler) ForgetPassword(c *fiber.Ctx) error {
+	var user entities.User
+
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	result, err := handler.userUcase.ChangePassword(int(user.ID), user.Password, c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.UserErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
+}
