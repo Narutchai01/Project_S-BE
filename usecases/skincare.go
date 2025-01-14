@@ -84,7 +84,7 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 		return entities.Skincare{}, err
 	}
 
-	if file != nil && file.Filename != "" {
+	if file != nil {
 		fileName := uuid.New().String() + ".jpg"
 
 		if err := utils.CheckDirectoryExist(); err != nil {
@@ -96,14 +96,14 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 		}
 
 		if old_skincare.Image == "" {
-			imageUrl, err := utils.UploadImage(fileName, "/")
+			imageUrl, err := utils.UploadImage(fileName, "/skincare")
 			if err != nil {
 				return entities.Skincare{}, fmt.Errorf("failed to upload new image: %w", err)
 			}
 			skincare.Image = imageUrl
 		} else {
 			oldImage := path.Base(old_skincare.Image)
-			err := utils.UpdateImage(oldImage, fileName)
+			err := utils.UpdateImage(oldImage, fileName, "skincare")
 			if err != nil {
 				return entities.Skincare{}, fmt.Errorf("failed to update existing image: %w", err)
 			}
