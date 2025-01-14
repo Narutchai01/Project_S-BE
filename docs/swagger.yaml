@@ -96,9 +96,6 @@ paths:
       description: Create an acne
       parameters:
       - in: formData
-        name: create_by
-        type: integer
-      - in: formData
         name: name
         type: string
       - description: Acne Image
@@ -146,6 +143,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
       summary: Delete an acne by ID
       tags:
       - acne
@@ -160,11 +161,12 @@ paths:
         required: true
         type: integer
       - in: formData
-        name: create_by
-        type: integer
-      - in: formData
         name: name
         type: string
+      - description: Acne Image
+        in: formData
+        name: file
+        type: file
       produces:
       - application/json
       responses:

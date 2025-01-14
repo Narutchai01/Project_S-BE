@@ -109,11 +109,6 @@ const docTemplate = `{
                 "summary": "Create an acne",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "name": "create_by",
-                        "in": "formData"
-                    },
-                    {
                         "type": "string",
                         "name": "name",
                         "in": "formData"
@@ -170,13 +165,14 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "create_by",
+                        "type": "string",
+                        "name": "name",
                         "in": "formData"
                     },
                     {
-                        "type": "string",
-                        "name": "name",
+                        "type": "file",
+                        "description": "Acne Image",
+                        "name": "file",
                         "in": "formData"
                     }
                 ],
@@ -231,6 +227,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/presentation.Responses"
                         }

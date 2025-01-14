@@ -113,6 +113,7 @@ func (handler *HttpAcneHandler) GetAcne(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			id		path		int				true	"Acne ID"
 //	@Param			acne	formData	entities.Acne	true	"Acne Object"
+//	@Param			file	formData	file			false	"Acne Image"
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		404		{object}	presentation.Responses
@@ -128,6 +129,17 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&acne); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.AcneErrorResponse(err))
+	}
+
+	file, _ := c.FormFile("file")
+
+	if file != nil {
+		result, err := handler.acneUsecase.UpdateAcneWithImage(intID, acne, *file, c)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.AcneErrorResponse(err))
+		}
+
+		return c.Status(fiber.StatusOK).JSON(presentation.ToAcneResponse(result))
 	}
 
 	result, err := handler.acneUsecase.UpdateAcne(intID, acne)
