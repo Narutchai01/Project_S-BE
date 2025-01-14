@@ -9,13 +9,6 @@ definitions:
       password:
         type: string
     type: object
-  entities.Facial:
-    properties:
-      create_by:
-        type: integer
-      name:
-        type: string
-    type: object
   entities.Skincare:
     properties:
       description:
@@ -103,6 +96,11 @@ paths:
         name: file
         required: true
         type: file
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -197,9 +195,6 @@ paths:
         required: true
         type: file
       - in: formData
-        name: create_by
-        type: integer
-      - in: formData
         name: name
         type: string
       - description: Token
@@ -240,12 +235,13 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Facial information
-        in: body
-        name: facial
-        required: true
-        schema:
-          $ref: '#/definitions/entities.Facial'
+      - in: formData
+        name: name
+        type: string
+      - description: Facial image
+        in: formData
+        name: file
+        type: file
       produces:
       - application/json
       responses: {}

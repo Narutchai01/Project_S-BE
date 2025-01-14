@@ -119,6 +119,13 @@ const docTemplate = `{
                         "name": "file",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -262,11 +269,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "name": "create_by",
-                        "in": "formData"
-                    },
-                    {
                         "type": "string",
                         "name": "name",
                         "in": "formData"
@@ -304,13 +306,15 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Facial information",
-                        "name": "facial",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.Facial"
-                        }
+                        "type": "string",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Facial image",
+                        "name": "file",
+                        "in": "formData"
                     }
                 ],
                 "responses": {}
@@ -956,17 +960,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "entities.Facial": {
-            "type": "object",
-            "properties": {
-                "create_by": {
-                    "type": "integer"
-                },
-                "name": {
                     "type": "string"
                 }
             }

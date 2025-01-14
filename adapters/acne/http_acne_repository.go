@@ -17,7 +17,7 @@ func NewHttpAcneHandler(acneUcase usecases.AcneUseCase) *HttpAcneHandler {
 	return &HttpAcneHandler{acneUcase}
 }
 
-// CreaetAcne godoc
+// CreateAcne godoc
 //
 //	@Summary		Create an acne
 //	@Description	Create an acne
@@ -26,6 +26,7 @@ func NewHttpAcneHandler(acneUcase usecases.AcneUseCase) *HttpAcneHandler {
 //	@Produce		json
 //	@Param			acne	formData	entities.Acne	true	"Acne Object"
 //	@Param			file	formData	file			true	"Acne Image"
+//	@Param			token	header		string			true	"Token"
 //	@Success		201		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		404		{object}	presentation.Responses
@@ -131,19 +132,12 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.AcneErrorResponse(err))
 	}
 
-	file, _ := c.FormFile("file")
-
-	if file != nil {
-		result, err := handler.acneUsecase.UpdateAcneWithImage(intID, acne, *file, c)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(presentation.AcneErrorResponse(err))
-		}
-
-		return c.Status(fiber.StatusOK).JSON(presentation.ToAcneResponse(result))
+	file, err := c.FormFile("file")
+	if err != nil {
+		file = nil
 	}
 
-	result, err := handler.acneUsecase.UpdateAcne(intID, acne)
-
+	result, err := handler.acneUsecase.UpdateAcne(intID, acne, file, c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AcneErrorResponse(err))
 	}
