@@ -82,14 +82,14 @@ func UpdateImage(oldFilePath string, newFilePath string, folderName string) erro
 	return nil
 }
 
-func DeleteImage(oldFilePath string) error {
+func DeleteImage(oldFilePath string, folderName string) error {
       supa_api_url := config.GetEnv("SUPA_API_URL")
       supa_api_key := config.GetEnv("SUPA_API_KEY")
       bucket_name := config.GetEnv("SUPA_BUCKET_NAME")
 
       storageClient := storage_go.NewClient(supa_api_url, supa_api_key, nil)
 
-      _, err := storageClient.RemoveFile(bucket_name, []string{oldFilePath})
+      _, err := storageClient.RemoveFile(bucket_name, []string{folderName + "/" + oldFilePath})
       if err != nil {
             return fmt.Errorf("failed to update file %w", err)
       }
