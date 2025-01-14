@@ -57,7 +57,7 @@ func UploadImage(fileName string, dir string) (string, error) {
 	return url, nil
 }
 
-func UpdateImage(oldFilePath, newFilePath string) error {
+func UpdateImage(oldFilePath string, newFilePath string, folderName string) error {
 	supa_api_url := config.GetEnv("SUPA_API_URL")
 	supa_api_key := config.GetEnv("SUPA_API_KEY")
 	bucket_name := config.GetEnv("SUPA_BUCKET_NAME")
@@ -71,10 +71,10 @@ func UpdateImage(oldFilePath, newFilePath string) error {
 	storageClient := storage_go.NewClient(supa_api_url, supa_api_key, nil)
 
 	options := storage_go.FileOptions{
-		ContentType: func() *string { s := "image/jpeg"; return &s }(),
+		ContentType: func() *string { contentType := "image/jpeg"; return &contentType }(),
 	}
 
-	_, err = storageClient.UpdateFile(bucket_name, oldFilePath, file, options)
+	_, err = storageClient.UpdateFile(bucket_name, folderName + "/" + oldFilePath, file, options)
 	if err != nil {
 		return fmt.Errorf("failed to update file %w", err)
 	}

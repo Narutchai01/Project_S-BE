@@ -84,7 +84,7 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 		return entities.Skincare{}, err
 	}
 
-	if file != nil && file.Filename != "" {
+	if file != nil {
 		fileName := uuid.New().String() + ".jpg"
 
 		if err := utils.CheckDirectoryExist(); err != nil {

@@ -111,14 +111,14 @@ func (service *skinService) UpdateSkinWithImage(id int, skin entities.Skin, file
 	}
 
 	if oldvalue.Image == "" {
-		imageUrl, err := utils.UploadImage(fileName, "/acne")
+		imageUrl, err := utils.UploadImage(fileName, "/skin")
 		if err != nil {
 			return entities.Skin{}, fmt.Errorf("failed to upload new image: %w", err)
 		}
 		skin.Image = imageUrl
 	} else {
 		oldImage := path.Base(oldvalue.Image)
-		err := utils.UpdateImage(oldImage, fileName)
+		err := utils.UpdateImage(oldImage, fileName, "skin")
 		if err != nil {
 			return entities.Skin{}, fmt.Errorf("failed to update existing image: %w", err)
 		}
