@@ -17,7 +17,7 @@ type SkinUsecases interface {
 	CreateSkin(skin entities.Skin, file multipart.FileHeader, c *fiber.Ctx, token string) (entities.Skin, error)
 	GetSkins() ([]entities.Skin, error)
 	GetSkin(id int) (entities.Skin, error)
-	UpdateSkin(id int, facial entities.Skin) (entities.Skin, error)
+	UpdateSkin(id int, facial entities.Skin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Skin, error)
 	DeleteSkin(id int) error
 }
 
@@ -80,60 +80,46 @@ func (service *skinService) GetSkin(id int) (entities.Skin, error) {
 	return service.repo.GetSkin(id)
 }
 
-func (service *skinService) UpdateSkin(id int, skin entities.Skin) (entities.Skin, error) {
+func (service *skinService) UpdateSkin(id int, skin entities.Skin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Skin, error) {
 
-	oldvalue, err := service.repo.GetSkin(id)
-
+	oldValue, err := service.repo.GetSkin(id)
 	if err != nil {
-		return entities.Skin{}, err
-	}
-	skin.ID = oldvalue.ID
-	skin.Name = utils.CheckEmptyValueBeforeUpdate(skin.Name, oldvalue.Name)
-	skin.Image = utils.CheckEmptyValueBeforeUpdate(skin.Image, oldvalue.Image)
-	return service.repo.UpdateSkin(id, skin)
-}
-
-func (service *skinService) UpdateSkinWithImage(id int, skin entities.Skin, file multipart.FileHeader, c *fiber.Ctx) (entities.Skin, error) {
-
-	oldvalue, err := service.repo.GetSkin(id)
-	if err != nil {
-		return entities.Skin{}, err
+		return entities.Skin{}, fmt.Errorf("failed to get skin: %w", err)
 	}
 
-	fileName := uuid.New().String() + ".jpg"
 
-	if err := utils.CheckDirectoryExist(); err != nil {
-		return entities.Skin{}, err
-	}
+	if file != nil {
+		fileName := uuid.New().String() + ".jpg"
 
-	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
-		return entities.Skin{}, err
-	}
-
-	if oldvalue.Image == "" {
-		imageUrl, err := utils.UploadImage(fileName, "/skin")
-		if err != nil {
-			return entities.Skin{}, fmt.Errorf("failed to upload new image: %w", err)
-		}
-		skin.Image = imageUrl
-	} else {
-		oldImage := path.Base(oldvalue.Image)
-		err := utils.UpdateImage(oldImage, fileName, "skin")
-		if err != nil {
-			return entities.Skin{}, fmt.Errorf("failed to update existing image: %w", err)
+		if err := utils.CheckDirectoryExist(); err != nil {
+			return entities.Skin{}, fmt.Errorf("failed to check directory: %w", err)
 		}
 
-		skin.Image = oldvalue.Image
+		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+			return entities.Skin{}, fmt.Errorf("failed to save file: %w", err)
+		}
+
+		if oldValue.Image != "" {
+			imageUrl, err := utils.UploadImage(fileName, "/skin")
+			if err != nil {
+				return skin, fmt.Errorf("failed to upload image: %w", err)
+			}
+
+			skin.Image = imageUrl
+		} else {
+			oldImage := path.Base(oldValue.Image)
+			err := utils.UpdateImage(oldImage, fileName, "/skin")
+
+			if err != nil {
+				return entities.Skin{}, fmt.Errorf("failed to update image: %w", err)
+			}
+			skin.Image = oldValue.Image
+		}
 	}
 
-	err = os.Remove("./uploads/" + fileName)
-	if err != nil {
-		return entities.Skin{}, fmt.Errorf("failed to remove temporary file: %w", err)
-	}
-
-	skin.ID = oldvalue.ID
-	skin.Name = utils.CheckEmptyValueBeforeUpdate(skin.Name, oldvalue.Name)
-
+	skin.ID = oldValue.ID
+	skin.Name = utils.CheckEmptyValueBeforeUpdate(skin.Name, oldValue.Name)
+	skin.Image = utils.CheckEmptyValueBeforeUpdate(skin.Image, oldValue.Image)
 	return service.repo.UpdateSkin(id, skin)
 }
 

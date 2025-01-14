@@ -113,7 +113,7 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 			admin.Image = imageUrl
 		} else {
 			oldImage := path.Base(oldamin.Image)
-			err := utils.UpdateImage(oldImage, fileName)
+			err := utils.UpdateImage(oldImage, fileName, "admin")
 			if err != nil {
 				return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
 			}

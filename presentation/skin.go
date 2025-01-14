@@ -31,6 +31,7 @@ package presentation
  			ID:    skin.ID,
  			Name:  skin.Name,
  			Image: skin.Image,
+			CreateBY: skin.CreateBY,
  		})
  	}
  	return &Responses{

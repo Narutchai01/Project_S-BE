@@ -77,17 +77,19 @@ func (handler *HttpSkinHandler) UpdateSkin(c *fiber.Ctx) error {
 	var skin entities.Skin
 
 	if err := c.BodyParser(&skin); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.SkinErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(skin)
 	}
 
-	result, err := handler.skinUsecase.UpdateSkin(intID, skin)
+	file, _ := c.FormFile("file")
 
+	result, err := handler.skinUsecase.UpdateSkin(intID, skin, file, c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.SkinErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToSkinResponse(result))
 }
+
 
 func (handler *HttpSkinHandler) DeleteSkin(c *fiber.Ctx) error {
 	id := c.Params("id")
