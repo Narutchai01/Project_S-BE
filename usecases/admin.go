@@ -146,7 +146,7 @@ func (service *adminService) DeleteAdmin(id int) (entities.Admin, error) {
       }
 
       oldImage := path.Base(old_admin.Image)
-      if err := utils.DeleteImage(oldImage); err != nil {
+      if err := utils.DeleteImage(oldImage, "admin"); err != nil {
             return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
       }
 

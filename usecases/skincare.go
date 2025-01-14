@@ -126,7 +126,6 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 	return service.repo.UpdateSkincareById(id, skincare)
 }
 
-
 func (service *skincareService) DeleteSkincareById(id int) (entities.Skincare, error) {
 
       old_skincare, err := service.repo.GetSkincareById(id)
@@ -135,7 +134,7 @@ func (service *skincareService) DeleteSkincareById(id int) (entities.Skincare, e
       }
 
       oldImage := path.Base(old_skincare.Image)
-      if err := utils.DeleteImage(oldImage); err != nil {
+      if err := utils.DeleteImage(oldImage, "skincare"); err != nil {
             return entities.Skincare{}, fmt.Errorf("failed to update existing image: %w", err)
       }
 
