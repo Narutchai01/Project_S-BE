@@ -1,8 +1,10 @@
 package usecases
 
 import (
+	"fmt"
 	"mime/multipart"
 	"os"
+	"path"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
@@ -15,8 +17,7 @@ type FacialUsecases interface {
 	CreateFacial(facial entities.Facial, file multipart.FileHeader, c *fiber.Ctx, token string) (entities.Facial, error)
 	GetFacials() ([]entities.Facial, error)
 	GetFacial(id int) (entities.Facial, error)
-	UpdateFacial(id int, facial entities.Facial) (entities.Facial, error)
-	UpdateFacialWithImage(id int, facial entities.Facial, file multipart.FileHeader, c *fiber.Ctx) (entities.Facial, error)
+	UpdateFacial(id int, facial entities.Facial, file *multipart.FileHeader, c *fiber.Ctx) (entities.Facial, error)
 	DeleteFacial(id int) error
 }
 
@@ -79,56 +80,48 @@ func (service *facialService) GetFacial(id int) (entities.Facial, error) {
 	return service.repo.GetFacial(id)
 }
 
-func (service *facialService) UpdateFacial(id int, facial entities.Facial) (entities.Facial, error) {
-	oldvalue, err := service.repo.GetFacial(id)
-
+func (service *facialService) UpdateFacial(id int, facial entities.Facial, file *multipart.FileHeader, c *fiber.Ctx) (entities.Facial, error) {
+	oldValue, err := service.repo.GetFacial(id)
 	if err != nil {
-		return entities.Facial{}, err
+		return entities.Facial{}, fmt.Errorf("failed to get facial: %w", err)
 	}
 
-	facial.ID = oldvalue.ID
+	if file != nil {
+		fileName := uuid.New().String() + ".jpg"
 
-	facial.Name = utils.CheckEmptyValueBeforeUpdate(facial.Name, oldvalue.Name)
-	facial.Image = utils.CheckEmptyValueBeforeUpdate(facial.Image, oldvalue.Image)
+		if err := utils.CheckDirectoryExist(); err != nil {
+			return entities.Facial{}, fmt.Errorf("failed to check directory: %w", err)
+		}
+
+		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+			return entities.Facial{}, fmt.Errorf("failed to save file: %w", err)
+		}
+
+		if oldValue.Image != "" {
+			imageUrl, err := utils.UploadImage(fileName, "/acne")
+			if err != nil {
+				return facial, fmt.Errorf("failed to upload image: %w", err)
+			}
+
+			facial.Image = imageUrl
+		} else {
+			oldImage := path.Base(oldValue.Image)
+			err := utils.UpdateImage(oldImage, fileName, "/acne")
+
+			if err != nil {
+				return entities.Facial{}, fmt.Errorf("failed to update image: %w", err)
+			}
+			facial.Image = oldValue.Image
+		}
+	}
+
+	facial.ID = oldValue.ID
+	facial.CreateBY = oldValue.CreateBY
+	facial.Name = utils.CheckEmptyValueBeforeUpdate(facial.Name, oldValue.Name)
+	facial.Image = utils.CheckEmptyValueBeforeUpdate(facial.Image, oldValue.Image)
 
 	return service.repo.UpdateFacial(id, facial)
-}
 
-func (service *facialService) UpdateFacialWithImage(id int, facial entities.Facial, file multipart.FileHeader, c *fiber.Ctx) (entities.Facial, error) {
-
-	fileName := uuid.New().String() + ".jpg"
-
-	if err := utils.CheckDirectoryExist(); err != nil {
-		return entities.Facial{}, err
-	}
-
-	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
-		return entities.Facial{}, err
-	}
-
-	imageUrl, err := utils.UploadImage(fileName, "/facial")
-
-	if err != nil {
-		return entities.Facial{}, err
-	}
-
-	err = os.Remove("./uploads/" + fileName)
-
-	if err != nil {
-		return entities.Facial{}, err
-	}
-
-	oldvalue, err := service.repo.GetFacial(id)
-
-	if err != nil {
-		return entities.Facial{}, err
-	}
-
-	facial.ID = oldvalue.ID
-	facial.Name = utils.CheckEmptyValueBeforeUpdate(facial.Name, oldvalue.Name)
-	facial.Image = imageUrl
-
-	return service.repo.UpdateFacial(id, facial)
 }
 
 func (service *facialService) DeleteFacial(id int) error {

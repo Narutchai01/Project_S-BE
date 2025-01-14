@@ -102,9 +102,7 @@ func (service *acneService) UpdateAcne(id int, acne entities.Acne, file *multipa
 		if oldvalue.Image != "" {
 			imageUrl, err := utils.UploadImage(fileName, "/acne")
 			if err != nil {
-				return acne, c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"message": err.Error(),
-				})
+				return acne, fmt.Errorf("failed to upload image: %w", err)
 			}
 
 			acne.Image = imageUrl

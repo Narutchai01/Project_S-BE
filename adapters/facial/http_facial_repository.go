@@ -121,20 +121,9 @@ func (handler *HttpFacialHandler) UpdateFacial(c *fiber.Ctx) error {
 
 	file, _ := c.FormFile("file")
 
-	if file != nil {
-		result, err := handler.facialUsecase.UpdateFacialWithImage(intID, facial, *file, c)
-
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(err)
-		}
-
-		return c.Status(fiber.StatusOK).JSON(presentation.ToFacialResponse(result))
-	}
-
-	result, err := handler.facialUsecase.UpdateFacial(intID, facial)
-
+	result, err := handler.facialUsecase.UpdateFacial(intID, facial, file, c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.FacialErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToFacialResponse(result))
