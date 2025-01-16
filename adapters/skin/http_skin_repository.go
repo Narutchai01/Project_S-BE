@@ -17,6 +17,21 @@ func NewHttpSkinHandler(skinUcase usecases.SkinUsecases) *HttpSkinHandler {
 	return &HttpSkinHandler{skinUcase}
 }
 
+// CreateSkin godoc
+//
+//	@Summary		Create an skin
+//	@Description	Create an skin
+//	@Tags			skin
+//	@Accept			json
+//	@Produce		json
+//	@Param			skin	formData	entities.Skin	true	"Skin Object"
+//	@Param			file	formData	file			true	"Skin Image"
+//	@Param			token	header		string			true	"Token"
+//	@Success		201		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//
+//	@Router			/admin/skin [post]
 func (handler *HttpSkinHandler) CreateSkin(c *fiber.Ctx) error {
 	var skin entities.Skin
 
@@ -41,6 +56,18 @@ func (handler *HttpSkinHandler) CreateSkin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToSkinResponse(result))
 }
 
+// GetSkins godoc
+//
+//	@Summary		Get skins
+//	@Description	Get skins
+//	@Tags			skin
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		404	{object}	presentation.Responses
+//
+//	@Router			/skin [get]
 func (handler *HttpSkinHandler) GetSkins(c *fiber.Ctx) error {
 	skins, err := handler.skinUsecase.GetSkins()
 
@@ -51,6 +78,19 @@ func (handler *HttpSkinHandler) GetSkins(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToSkinsResponse(skins))
 }
 
+// GetSkin godoc
+//
+//	@Summary		Get skin
+//	@Description	Get skin
+//	@Tags			skin
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Skin ID"
+//	@Success		200	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		404	{object}	presentation.Responses
+//
+//	@Router			/skin/{id} [get]
 func (handler *HttpSkinHandler) GetSkin(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
@@ -67,6 +107,22 @@ func (handler *HttpSkinHandler) GetSkin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToSkinResponse(skin))
 }
 
+// UpdateSkin godoc
+//
+//	@Summary		Update skin
+//	@Description	Update skin
+//	@Tags			skin
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string			true	"Skin ID"
+//	@Param			skin	formData	entities.Skin	true	"Skin Object"
+//	@Param			file	formData	file			false	"Skin Image"
+//	@Param			token	header		string			true	"Token"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//
+//	@Router			/admin/skin/{id} [put]
 func (handler *HttpSkinHandler) UpdateSkin(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
@@ -90,7 +146,19 @@ func (handler *HttpSkinHandler) UpdateSkin(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToSkinResponse(result))
 }
 
-
+// DeleteSkin godoc
+//
+//	@Summary		Delete skin
+//	@Description	Delete skin
+//	@Tags			skin
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Skin ID"
+//	@Success		204	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		404	{object}	presentation.Responses
+//
+//	@Router			/admin/skin/{id} [delete]
 func (handler *HttpSkinHandler) DeleteSkin(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
