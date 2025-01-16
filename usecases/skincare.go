@@ -88,35 +88,29 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 		fileName := uuid.New().String() + ".jpg"
 
 		if err := utils.CheckDirectoryExist(); err != nil {
-			return entities.Skincare{}, err
+			return entities.Skincare{}, fmt.Errorf("failed to check directory: %w", err)
 		}
 
 		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
-			return entities.Skincare{}, err
+			return entities.Skincare{}, fmt.Errorf("failed to save file: %w", err)
 		}
 
-		if old_skincare.Image == "" {
+		if old_skincare.Image != "" {
 			imageUrl, err := utils.UploadImage(fileName, "/skincare")
 			if err != nil {
-				return entities.Skincare{}, fmt.Errorf("failed to upload new image: %w", err)
+				return entities.Skincare{}, fmt.Errorf("failed to upload image: %w", err)
 			}
+
 			skincare.Image = imageUrl
 		} else {
 			oldImage := path.Base(old_skincare.Image)
-			err := utils.UpdateImage(oldImage, fileName, "skincare")
-			if err != nil {
-				return entities.Skincare{}, fmt.Errorf("failed to update existing image: %w", err)
-			}
+			err := utils.UpdateImage(oldImage, fileName, "/skincare")
 
+			if err != nil {
+				return entities.Skincare{}, fmt.Errorf("failed to update image: %w", err)
+			}
 			skincare.Image = old_skincare.Image
 		}
-
-		err = os.Remove("./uploads/" + fileName)
-		if err != nil {
-			return entities.Skincare{}, fmt.Errorf("failed to remove temporary file: %w", err)
-		}
-	} else {
-		skincare.Image = old_skincare.Image
 	}
 
 	skincare.ID = old_skincare.ID
