@@ -49,3 +49,31 @@ type Facial struct {
 	Image    string `json:"image"`
 	CreateBY uint   `json:"create_by"`
 }
+
+func DeleteResponse(id int) *Responses {
+	return &Responses{
+		Status: true,
+		Data: map[string]string{
+			"delete_id": string(rune(id)),
+		},
+		Error: nil,
+	}
+}
+
+func ErrorResponse(err error) *Responses {
+	return &Responses{
+		Status: false,
+		Data:   nil,
+		Error:  err.Error(),
+	}
+}
+
+func TokenResponse(token string) *Responses {
+	return &Responses{
+		Status: true,
+		Data: map[string]string{
+			"token": token,
+		},
+		Error: nil,
+	}
+}

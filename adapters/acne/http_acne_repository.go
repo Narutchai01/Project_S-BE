@@ -35,13 +35,13 @@ func (handler *HttpAcneHandler) CreateAcne(c *fiber.Ctx) error {
 	var acne entities.Acne
 
 	if err := c.BodyParser(&acne); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	file, err := c.FormFile("file")
 
 	if err != nil {
-		return c.Status(fiber.ErrBadGateway.Code).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.ErrBadGateway.Code).JSON(presentation.ErrorResponse(err))
 	}
 
 	create_by_token := c.Get("token")
@@ -49,7 +49,7 @@ func (handler *HttpAcneHandler) CreateAcne(c *fiber.Ctx) error {
 	result, err := handler.acneUsecase.CreateAcne(acne, *file, c, create_by_token)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToAcneResponse(result))
@@ -71,7 +71,7 @@ func (handler *HttpAcneHandler) GetAcnes(c *fiber.Ctx) error {
 	result, err := handler.acneUsecase.GetAcnes()
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAcnesResponse(result))
@@ -93,13 +93,13 @@ func (handler *HttpAcneHandler) GetAcne(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	result, err := handler.acneUsecase.GetAcne(intID)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAcneResponse(result))
@@ -123,13 +123,13 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	var acne entities.Acne
 
 	if err := c.BodyParser(&acne); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	file, err := c.FormFile("file")
@@ -139,7 +139,7 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 
 	result, err := handler.acneUsecase.UpdateAcne(intID, acne, file, c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAcneResponse(result))
@@ -161,14 +161,14 @@ func (handler *HttpAcneHandler) DeleteAcne(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	err = handler.acneUsecase.DeleteAcne(intID)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteAcneResponse(intID))
+	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteResponse(intID))
 }

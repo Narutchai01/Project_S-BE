@@ -18,16 +18,14 @@ func NewHttpRecoveryHandler(recoveryUcase usecases.RecoveryUsecases) *HttpRecove
 func (handler *HttpRecoveryHandler) CreateRecovery(c *fiber.Ctx) error {
 	type RequestBody struct {
 		Email  string `json:"email"`
-		UserId int   `json:"user_id"`
+		UserId int    `json:"user_id"`
 		OTP    string `json:"otp"`
 	}
 
 	var requestBody RequestBody
 
 	if err := c.BodyParser(&requestBody); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	recovery := entities.Recovery{
@@ -39,7 +37,7 @@ func (handler *HttpRecoveryHandler) CreateRecovery(c *fiber.Ctx) error {
 	if (err == nil) || (oldRecovery != entities.Recovery{}) {
 		updateOtp, err := handler.recoveryUcase.UpdateRecoveryOtpById(oldRecovery, requestBody.Email)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(presentation.RecoveryErrorResponse(err))
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 		}
 
 		return c.Status(fiber.StatusOK).JSON(updateOtp)
@@ -47,10 +45,10 @@ func (handler *HttpRecoveryHandler) CreateRecovery(c *fiber.Ctx) error {
 
 	result, err := handler.recoveryUcase.CreateRecovery(recovery, requestBody.Email, c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.RecoveryErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(result)
+	return c.Status(fiber.StatusCreated).JSON(presentation.RecoveryResponse(result))
 }
 
 func (handler *HttpRecoveryHandler) DeleteRecoveryById(c *fiber.Ctx) error {
@@ -65,17 +63,17 @@ func (handler *HttpRecoveryHandler) DeleteRecoveryById(c *fiber.Ctx) error {
 	_, err = handler.recoveryUcase.DeleteRecoveryById(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.RecoveryErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteRecoveryResponse(id))
+	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteResponse(id))
 }
 
 func (handler *HttpRecoveryHandler) GetRecoveries(c *fiber.Ctx) error {
 	recoveries, err := handler.recoveryUcase.GetRecoveries()
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.RecoveryErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.RecoveriesResponse(recoveries))
@@ -98,7 +96,7 @@ func (handler *HttpRecoveryHandler) OtpValidation(c *fiber.Ctx) error {
 
 	_, err = handler.recoveryUcase.DeleteRecoveryById(int(recovery.ID))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.RecoveryErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.RecoveryResponse(recovery))

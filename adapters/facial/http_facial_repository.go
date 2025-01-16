@@ -32,13 +32,13 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 	var facial entities.Facial
 
 	if err := c.BodyParser(&facial); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.FacialErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	file, err := c.FormFile("file")
 
 	if err != nil {
-		return c.Status(fiber.ErrBadGateway.Code).JSON(presentation.FacialErrorResponse(err))
+		return c.Status(fiber.ErrBadGateway.Code).JSON(presentation.ErrorResponse(err))
 	}
 
 	create_by_token := c.Get("token")
@@ -46,7 +46,7 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 	result, err := handler.facialUsecase.CreateFacial(facial, *file, c, create_by_token)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.FacialErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToFacialResponse(result))
@@ -64,7 +64,7 @@ func (handler *HttpFacialHandler) GetFacials(c *fiber.Ctx) error {
 	facial, err := handler.facialUsecase.GetFacials()
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.FacialErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToFacialsResponse(facial))
@@ -83,13 +83,13 @@ func (handler *HttpFacialHandler) GetFacial(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.FacialErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	facial, err := handler.facialUsecase.GetFacial(intID)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(presentation.FacialErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToFacialResponse(facial))
@@ -110,20 +110,20 @@ func (handler *HttpFacialHandler) UpdateFacial(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	var facial entities.Facial
 
 	if err := c.BodyParser(&facial); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(facial)
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	file, _ := c.FormFile("file")
 
 	result, err := handler.facialUsecase.UpdateFacial(intID, facial, file, c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.FacialErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToFacialResponse(result))
@@ -142,14 +142,14 @@ func (handler *HttpFacialHandler) DeleteFacial(c *fiber.Ctx) error {
 	id := c.Params("id")
 	intID, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	err = handler.facialUsecase.DeleteFacial(intID)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(nil)
+	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteResponse(intID))
 }

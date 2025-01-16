@@ -38,21 +38,3 @@ func SkincaresResponse(data []entities.Skincare) *Responses {
 		Error:  nil,
 	}
 }
-
-func SkincareErrorResponse(err error) *Responses {
-	return &Responses{
-		Status: false,
-		Data:   nil,
-		Error:  err.Error(),
-	}
-}
-
-func DeleteSkincareResponse(id int) *Responses {
-	return &Responses{
-		Status: true,
-		Data: map[string]string{
-			"delete_id": string(rune(id)),
-		},
-		Error: nil,
-	}
-}
