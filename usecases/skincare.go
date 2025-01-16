@@ -41,7 +41,7 @@ func (service *skincareService) CreateSkincare(skincare entities.Skincare, file 
 		return entities.Skincare{}, err
 	}
 
-	imageUrl, err := utils.UploadImage(fileName, "/")
+	imageUrl, err := utils.UploadImage(fileName, "/skincare")
 
 	if err != nil {
 		return skincare, c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -115,12 +115,14 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 		if err != nil {
 			return entities.Skincare{}, fmt.Errorf("failed to remove temporary file: %w", err)
 		}
+	} else {
+		skincare.Image = old_skincare.Image
 	}
 
 	skincare.ID = old_skincare.ID
 
 	skincare.Name = utils.CheckEmptyValueBeforeUpdate(skincare.Name, old_skincare.Name)
-	skincare.Name = utils.CheckEmptyValueBeforeUpdate(skincare.Image, old_skincare.Image)
+	skincare.Image = utils.CheckEmptyValueBeforeUpdate(skincare.Image, old_skincare.Image)
 	skincare.Description = utils.CheckEmptyValueBeforeUpdate(skincare.Description, old_skincare.Description)
 
 	return service.repo.UpdateSkincareById(id, skincare)
@@ -128,15 +130,15 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 
 func (service *skincareService) DeleteSkincareById(id int) (entities.Skincare, error) {
 
-      old_skincare, err := service.repo.GetSkincareById(id)
-      if err != nil {
-            return entities.Skincare{}, err
-      }
+	old_skincare, err := service.repo.GetSkincareById(id)
+	if err != nil {
+		return entities.Skincare{}, err
+	}
 
-      oldImage := path.Base(old_skincare.Image)
-      if err := utils.DeleteImage(oldImage, "skincare"); err != nil {
-            return entities.Skincare{}, fmt.Errorf("failed to update existing image: %w", err)
-      }
+	oldImage := path.Base(old_skincare.Image)
+	if err := utils.DeleteImage(oldImage, "skincare"); err != nil {
+		return entities.Skincare{}, fmt.Errorf("failed to update existing image: %w", err)
+	}
 
-      return service.repo.DeleteSkincareById(id)
+	return service.repo.DeleteSkincareById(id)
 }

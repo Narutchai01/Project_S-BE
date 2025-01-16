@@ -113,7 +113,8 @@ func (handler *HttpSkincareHandler) GetSkincareById(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id			path		int					true	"Skincare ID"
-//	@Param			skincare	body		entities.Skincare	true	"Skincare Object"
+//	@Param			skincare	formData	entities.Skincare	true	"Skincare Object"
+//	@Param			file		formData	file				false	"Skincare Image"
 //	@Success		200			{object}	presentation.Responses
 //	@Failure		400			{object}	presentation.Responses
 //	@Failure		404			{object}	presentation.Responses

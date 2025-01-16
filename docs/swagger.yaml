@@ -9,13 +9,6 @@ definitions:
       password:
         type: string
     type: object
-  entities.Skincare:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-    type: object
   presentation.Responses:
     properties:
       data: {}
@@ -543,12 +536,16 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Skincare Object
-        in: body
-        name: skincare
-        required: true
-        schema:
-          $ref: '#/definitions/entities.Skincare'
+      - in: formData
+        name: description
+        type: string
+      - in: formData
+        name: name
+        type: string
+      - description: Skincare Image
+        in: formData
+        name: file
+        type: file
       produces:
       - application/json
       responses:
