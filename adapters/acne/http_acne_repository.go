@@ -99,7 +99,7 @@ func (handler *HttpAcneHandler) GetAcne(c *fiber.Ctx) error {
 	result, err := handler.acneUsecase.GetAcne(intID)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AcneErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.AcneErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAcneResponse(result))
