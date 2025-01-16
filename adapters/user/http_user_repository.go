@@ -19,9 +19,7 @@ func (handler *HttpUserHandler) Register(c *fiber.Ctx) error {
 	var user entities.User
 
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	result, err := handler.userUcase.Register(user, c)

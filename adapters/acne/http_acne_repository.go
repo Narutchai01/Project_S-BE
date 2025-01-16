@@ -41,7 +41,7 @@ func (handler *HttpAcneHandler) CreateAcne(c *fiber.Ctx) error {
 	file, err := c.FormFile("file")
 
 	if err != nil {
-		return c.Status(fiber.ErrBadGateway.Code).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	create_by_token := c.Get("token")

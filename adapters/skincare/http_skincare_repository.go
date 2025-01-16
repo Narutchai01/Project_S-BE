@@ -41,9 +41,7 @@ func (handler *HttpSkincareHandler) CreateSkincare(c *fiber.Ctx) error {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	result, err := handler.skincarenUcase.CreateSkincare(skincare, *file, create_by_token, c)
@@ -159,9 +157,7 @@ func (handler *HttpSkincareHandler) DeleteSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	_, err = handler.skincarenUcase.DeleteSkincareById(id)

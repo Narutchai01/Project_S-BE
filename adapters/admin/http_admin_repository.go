@@ -38,7 +38,7 @@ func (handler *HttpAdminHandler) CreateAdmin(c *fiber.Ctx) error {
 	file, err := c.FormFile("file")
 
 	if err != nil {
-		return c.Status(fiber.ErrBadGateway.Code).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	result, err := handler.adminUcase.CreateAdmin(admin, *file, c)
@@ -150,9 +150,7 @@ func (handler *HttpAdminHandler) DeleteAdmin(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	_, err = handler.adminUcase.DeleteAdmin(id)
