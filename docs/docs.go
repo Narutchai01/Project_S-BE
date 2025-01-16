@@ -755,13 +755,20 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Skincare Object",
-                        "name": "skincare",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.Skincare"
-                        }
+                        "type": "string",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Skincare Image",
+                        "name": "file",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -960,17 +967,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "entities.Skincare": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
                     "type": "string"
                 }
             }
