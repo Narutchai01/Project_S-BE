@@ -32,18 +32,18 @@ func (handler *HttpAdminHandler) CreateAdmin(c *fiber.Ctx) error {
 	var admin entities.Admin
 
 	if err := c.BodyParser(&admin); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	file, err := c.FormFile("file")
 
 	if err != nil {
-		return c.Status(fiber.ErrBadGateway.Code).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	result, err := handler.adminUcase.CreateAdmin(admin, *file, c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToAdminResponse(result))
@@ -64,7 +64,7 @@ func (handler *HttpAdminHandler) GetAdmins(c *fiber.Ctx) error {
 	admins, err := handler.adminUcase.GetAdmins()
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminsResponse(admins))
@@ -86,13 +86,13 @@ func (handler *HttpAdminHandler) GetAdmin(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	admin, err := handler.adminUcase.GetAdmin(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminResponse(admin))
@@ -115,7 +115,7 @@ func (handler *HttpAdminHandler) UpdateAdmin(c *fiber.Ctx) error {
 	var admin entities.Admin
 
 	if err := c.BodyParser(&admin); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	adminToken := c.Get("token")
@@ -128,7 +128,7 @@ func (handler *HttpAdminHandler) UpdateAdmin(c *fiber.Ctx) error {
 	result, err := handler.adminUcase.UpdateAdmin(adminToken, admin, file, c)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminResponse(result))
@@ -150,18 +150,16 @@ func (handler *HttpAdminHandler) DeleteAdmin(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	_, err = handler.adminUcase.DeleteAdmin(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteAdminResponse(id))
+	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteResponse(id))
 }
 
 // LogIn godoc
@@ -188,10 +186,10 @@ func (handler *HttpAdminHandler) LogIn(c *fiber.Ctx) error {
 	result, err := handler.adminUcase.LogIn(admin.Email, admin.Password)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(presentation.AdminLoginResponse(result, err))
+	return c.Status(fiber.StatusOK).JSON(presentation.TokenResponse(result))
 }
 
 // GetAdminByToken godoc
@@ -212,7 +210,7 @@ func (handler *HttpAdminHandler) GetAdminByToken(c *fiber.Ctx) error {
 	result, err := handler.adminUcase.GetAdminByToken(token)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.AdminErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminResponse(result))

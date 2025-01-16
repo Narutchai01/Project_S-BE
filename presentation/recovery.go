@@ -2,24 +2,23 @@ package presentation
 
 import (
 	"github.com/Narutchai01/Project_S-BE/entities"
-	"github.com/gofiber/fiber/v2"
 )
 
-func RecoveryResponse(data entities.Recovery) *fiber.Map {
+func RecoveryResponse(data entities.Recovery) *Responses {
 	recovery := Recovery{
 		ID:     data.ID,
 		UserId: data.UserId,
 		OTP:    data.OTP,
 	}
 
-	return &fiber.Map{
-		"status":   true,
-		"recovery": recovery,
-		"error":    nil,
+	return &Responses{
+		Status: true,
+		Data:   recovery,
+		Error:  nil,
 	}
 }
 
-func RecoveriesResponse(data []entities.Recovery) *fiber.Map {
+func RecoveriesResponse(data []entities.Recovery) *Responses {
 	recoveries := []Recovery{}
 
 	for _, recovery := range data {
@@ -29,25 +28,9 @@ func RecoveriesResponse(data []entities.Recovery) *fiber.Map {
 			OTP:    recovery.OTP,
 		})
 	}
-	return &fiber.Map{
-		"status": true,
-		"data":   recoveries,
-		"error":  nil,
-	}
-}
-
-func RecoveryErrorResponse(err error) *fiber.Map {
-	return &fiber.Map{
-		"status":   false,
-		"recovery": nil,
-		"error":    err.Error(),
-	}
-}
-
-func DeleteRecoveryResponse(id int) *fiber.Map {
-	return &fiber.Map{
-		"status":    true,
-		"delete_id": id,
-		"error":     nil,
+	return &Responses{
+		Status: true,
+		Data:   recoveries,
+		Error:  nil,
 	}
 }

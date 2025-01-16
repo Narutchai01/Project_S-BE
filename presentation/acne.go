@@ -33,19 +33,3 @@ func ToAcnesResponse(data []entities.Acne) *Responses {
 		Error:  nil,
 	}
 }
-
-func AcneErrorResponse(err error) *Responses {
-	return &Responses{
-		Status: false,
-		Data:   nil,
-		Error:  err.Error(),
-	}
-}
-
-func DeleteAcneResponse(id int) *Responses {
-	return &Responses{
-		Status: true,
-		Data:   map[string]string{"delete_id": string(rune(id))},
-		Error:  nil,
-	}
-}
