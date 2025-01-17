@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mime/multipart"
 	"os"
-	"path"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
@@ -97,22 +96,19 @@ func (service *facialService) UpdateFacial(id int, facial entities.Facial, file 
 			return entities.Facial{}, fmt.Errorf("failed to save file: %w", err)
 		}
 
-		if oldValue.Image != "" {
-			imageUrl, err := utils.UploadImage(fileName, "/acne")
-			if err != nil {
-				return facial, fmt.Errorf("failed to upload image: %w", err)
-			}
+		imageUrl, err := utils.UploadImage(fileName, "/facial")
 
-			facial.Image = imageUrl
-		} else {
-			oldImage := path.Base(oldValue.Image)
-			err := utils.UpdateImage(oldImage, fileName, "/acne")
-
-			if err != nil {
-				return entities.Facial{}, fmt.Errorf("failed to update image: %w", err)
-			}
-			facial.Image = oldValue.Image
+		if err != nil {
+			return facial, err
 		}
+
+		err = os.Remove("./uploads/" + fileName)
+
+		if err != nil {
+			return facial, err
+		}
+
+		facial.Image = imageUrl
 	}
 
 	facial.ID = oldValue.ID

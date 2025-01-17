@@ -105,27 +105,18 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 			return entities.Admin{}, err
 		}
 
-		if oldamin.Image == "" {
-			imageUrl, err := utils.UploadImage(fileName, "/admin")
-			if err != nil {
-				return entities.Admin{}, fmt.Errorf("failed to upload new image: %w", err)
-			}
-			admin.Image = imageUrl
-		} else {
-			oldImage := path.Base(oldamin.Image)
-			fmt.Println("Old Image Path:", oldImage)
-			err := utils.UpdateImage(oldImage, fileName, "admin")
-			if err != nil {
-				return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
-			}
+		imageUrl, err := utils.UploadImage(fileName, "/admin")
 
-			admin.Image = oldamin.Image
+		if err != nil {
+			return admin, err
 		}
 
 		err = os.Remove("./uploads/" + fileName)
+
 		if err != nil {
-			return entities.Admin{}, fmt.Errorf("failed to remove temporary file: %w", err)
+			return admin, err
 		}
+		admin.Image = imageUrl
 	}
 
 	admin.ID = oldamin.ID
@@ -140,17 +131,17 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 
 func (service *adminService) DeleteAdmin(id int) (entities.Admin, error) {
 
-      old_admin, err := service.repo.GetAdmin(id)
-      if err != nil {
-            return entities.Admin{}, err
-      }
+	old_admin, err := service.repo.GetAdmin(id)
+	if err != nil {
+		return entities.Admin{}, err
+	}
 
-      oldImage := path.Base(old_admin.Image)
-      if err := utils.DeleteImage(oldImage, "admin"); err != nil {
-            return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
-      }
+	oldImage := path.Base(old_admin.Image)
+	if err := utils.DeleteImage(oldImage, "admin"); err != nil {
+		return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
+	}
 
-      return service.repo.DeleteAdmin(id)
+	return service.repo.DeleteAdmin(id)
 }
 
 func (service *adminService) LogIn(email string, password string) (string, error) {

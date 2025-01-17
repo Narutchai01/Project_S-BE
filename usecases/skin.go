@@ -87,7 +87,6 @@ func (service *skinService) UpdateSkin(id int, skin entities.Skin, file *multipa
 		return entities.Skin{}, fmt.Errorf("failed to get skin: %w", err)
 	}
 
-
 	if file != nil {
 		fileName := uuid.New().String() + ".jpg"
 
@@ -99,21 +98,19 @@ func (service *skinService) UpdateSkin(id int, skin entities.Skin, file *multipa
 			return entities.Skin{}, fmt.Errorf("failed to save file: %w", err)
 		}
 
-		if oldValue.Image == "" {
-			imageUrl, err := utils.UploadImage(fileName, "/skin")
-			if err != nil {
-				return skin, fmt.Errorf("failed to upload image: %w", err)
-			}
+		imageUrl, err := utils.UploadImage(fileName, "/skin")
 
-			skin.Image = imageUrl
-		} else {
-			oldImage := path.Base(oldValue.Image)
-			err := utils.UpdateImage(oldImage, fileName, "skin")
-
-			if err != nil {
-				return entities.Skin{}, fmt.Errorf("failed to update image: %w", err)
-			}
+		if err != nil {
+			return skin, err
 		}
+
+		err = os.Remove("./uploads/" + fileName)
+
+		if err != nil {
+			return skin, err
+		}
+
+		skin.Image = imageUrl
 	}
 
 	skin.ID = oldValue.ID
@@ -123,14 +120,14 @@ func (service *skinService) UpdateSkin(id int, skin entities.Skin, file *multipa
 }
 
 func (service *skinService) DeleteSkin(id int) error {
-      oldSkin, err := service.repo.GetSkin(id)
-      if err != nil {
-            return fmt.Errorf("failed to get this skin type: %w", err)
-      }
+	oldSkin, err := service.repo.GetSkin(id)
+	if err != nil {
+		return fmt.Errorf("failed to get this skin type: %w", err)
+	}
 
-      oldImage := path.Base(oldSkin.Image)
-      if err := utils.DeleteImage(oldImage, "skin"); err != nil {
-            return fmt.Errorf("failed to update existing image: %w", err)
-      }
+	oldImage := path.Base(oldSkin.Image)
+	if err := utils.DeleteImage(oldImage, "skin"); err != nil {
+		return fmt.Errorf("failed to update existing image: %w", err)
+	}
 	return service.repo.DeleteSkin(id)
 }

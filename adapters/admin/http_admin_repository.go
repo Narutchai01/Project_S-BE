@@ -105,7 +105,8 @@ func (handler *HttpAdminHandler) GetAdmin(c *fiber.Ctx) error {
 //	@Tags			admin
 //	@Accept			json
 //	@Produce		json
-//	@Param			admin	body		entities.Admin	true	"Admin Object"
+//	@Param			admin	formData	entities.Admin	true	"Admin Object"
+//	@Param			file	formData	file			false	"Admin Image"
 //	@Param			token	header		string			true	"Admin Token"
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
@@ -164,16 +165,16 @@ func (handler *HttpAdminHandler) DeleteAdmin(c *fiber.Ctx) error {
 
 // LogIn godoc
 
-// @Summary		Log in
-// @Description	Log in
-// @Tags			admin
-// @Accept			json
-// @Produce		json
-// @Param			admin	body		object{email=string,password=string}	true	"Admin Object"
-// @Success		200		{object}	presentation.Responses
-// @Failure		400		{object}	presentation.Responses
-// @Failure		404		{object}	presentation.Responses
-// @Router			/admin/login [post]
+//	@Summary		Log in
+//	@Description	Log in
+//	@Tags			admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			admin	body		object{email=string,password=string}	true	"Admin Object"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/admin/login [post]
 func (handler *HttpAdminHandler) LogIn(c *fiber.Ctx) error {
 	var admin entities.Admin
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mime/multipart"
 	"os"
-	"path"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
@@ -92,29 +91,24 @@ func (service *acneService) UpdateAcne(id int, acne entities.Acne, file *multipa
 		fileName := uuid.New().String() + ".jpg"
 
 		if err := utils.CheckDirectoryExist(); err != nil {
-			return entities.Acne{}, fmt.Errorf("failed to check directory: %w", err)
+			return entities.Acne{}, err
 		}
 
 		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
-			return entities.Acne{}, fmt.Errorf("failed to save file: %w", err)
+			return entities.Acne{}, err
+		}
+		imageUrl, err := utils.UploadImage(fileName, "/acne")
+
+		if err != nil {
+			return entities.Acne{}, err
 		}
 
-		if oldvalue.Image != "" {
-			imageUrl, err := utils.UploadImage(fileName, "/acne")
-			if err != nil {
-				return acne, fmt.Errorf("failed to upload image: %w", err)
-			}
+		err = os.Remove("./uploads/" + fileName)
 
-			acne.Image = imageUrl
-		} else {
-			oldImage := path.Base(oldvalue.Image)
-			err := utils.UpdateImage(oldImage, fileName, "/acne")
-
-			if err != nil {
-				return entities.Acne{}, fmt.Errorf("failed to update image: %w", err)
-			}
-			acne.Image = oldvalue.Image
+		if err != nil {
+			return entities.Acne{}, err
 		}
+		acne.Image = imageUrl
 	}
 
 	acne.ID = oldvalue.ID
