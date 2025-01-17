@@ -2,10 +2,9 @@ package presentation
 
 import (
 	"github.com/Narutchai01/Project_S-BE/entities"
-	"github.com/gofiber/fiber/v2"
 )
 
-func UserResponse(data entities.User) *fiber.Map {
+func UserResponse(data entities.User) *Responses {
 	user := User{
 		ID:            data.ID,
 		FullName:      data.FullName,
@@ -15,48 +14,23 @@ func UserResponse(data entities.User) *fiber.Map {
 		Image:         data.Image,
 	}
 
-	return &fiber.Map{
-		"status": true,
-		"user":   user,
-		"error":  nil,
+	return &Responses{
+		Status: true,
+		Data:   user,
+		Error:  nil,
 	}
 }
 
-func MiniProfileUserResponse(data entities.User) *fiber.Map {
+func MiniProfileUserResponse(data entities.User) *Responses {
 	user := User{
 		ID:       data.ID,
 		FullName: data.FullName,
 		Image:    data.Image,
 	}
 
-	return &fiber.Map{
-		"status": true,
-		"user":   user,
-		"error":  nil,
-	}
-}
-
-func UserErrorResponse(err error) *fiber.Map {
-	return &fiber.Map{
-		"status": false,
-		"user":   nil,
-		"error":  err.Error(),
-	}
-}
-
-func UserLoginResponse(token string, err error) *Responses {
-	if err != nil {
-		return &Responses{
-			Status: false,
-			Data:   nil,
-			Error:  err.Error(),
-		}
-	}
 	return &Responses{
 		Status: true,
-		Data: map[string]string{
-			"token": token,
-		},
-		Error: nil,
+		Data:   user,
+		Error:  nil,
 	}
 }

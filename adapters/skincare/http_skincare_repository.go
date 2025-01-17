@@ -35,25 +35,21 @@ func (handler *HttpSkincareHandler) CreateSkincare(c *fiber.Ctx) error {
 	var skincare entities.Skincare
 
 	if err := c.BodyParser(&skincare); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 	create_by_token := c.Get("token")
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	result, err := handler.skincarenUcase.CreateSkincare(skincare, *file, create_by_token, c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.SkincareErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(result)
+	return c.Status(fiber.StatusCreated).JSON(presentation.SkincareResponse(result))
 }
 
 // GetSkincares godoc
@@ -71,7 +67,7 @@ func (handler *HttpSkincareHandler) GetSkincares(c *fiber.Ctx) error {
 	skincares, err := handler.skincarenUcase.GetSkincares()
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.SkincareErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincaresResponse(skincares))
@@ -93,13 +89,13 @@ func (handler *HttpSkincareHandler) GetSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.SkincareErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	skincare, err := handler.skincarenUcase.GetSkincareById(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(presentation.SkincareErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincareResponse(skincare))
@@ -123,13 +119,13 @@ func (handler *HttpSkincareHandler) UpdateSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.SkincareErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	var skincare entities.Skincare
 
 	if err := c.BodyParser(&skincare); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.SkincareErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	file, err := c.FormFile("file")
@@ -139,7 +135,7 @@ func (handler *HttpSkincareHandler) UpdateSkincareById(c *fiber.Ctx) error {
 
 	result, err := handler.skincarenUcase.UpdateSkincareById(id, skincare, file, c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.SkincareErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincareResponse(result))
@@ -161,16 +157,14 @@ func (handler *HttpSkincareHandler) DeleteSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	_, err = handler.skincarenUcase.DeleteSkincareById(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.SkincareErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteSkincareResponse(id))
+	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteResponse(id))
 }

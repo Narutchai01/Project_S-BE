@@ -36,39 +36,3 @@ func ToAdminsResponse(data []entities.Admin) *Responses {
 		Error:  nil,
 	}
 }
-
-func AdminErrorResponse(err error) *Responses {
-
-	return &Responses{
-		Status: false,
-		Data:   nil,
-		Error:  err.Error(),
-	}
-}
-
-func DeleteAdminResponse(id int) *Responses {
-	return &Responses{
-		Status: true,
-		Data: map[string]string{
-			"delete_id": string(rune(id)),
-		},
-		Error: nil,
-	}
-}
-
-func AdminLoginResponse(token string, err error) *Responses {
-	if err != nil {
-		return &Responses{
-			Status: false,
-			Data:   nil,
-			Error:  err.Error(),
-		}
-	}
-	return &Responses{
-		Status: true,
-		Data: map[string]string{
-			"token": token,
-		},
-		Error: nil,
-	}
-}

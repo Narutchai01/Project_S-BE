@@ -33,19 +33,3 @@ func ToFacialsResponse(data []entities.Facial) *Responses {
 		Error:  nil,
 	}
 }
-
-func FacialErrorResponse(err error) *Responses {
-	return &Responses{
-		Status: false,
-		Data:   nil,
-		Error:  err.Error(),
-	}
-}
-
-func DeleteFacialResponse(id int) *Responses {
-	return &Responses{
-		Status: true,
-		Data:   map[string]string{"delete_id": string(rune(id))},
-		Error:  nil,
-	}
-}
