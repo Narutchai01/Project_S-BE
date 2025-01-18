@@ -504,13 +504,25 @@ const docTemplate = `{
                 "summary": "Update an admin by ID",
                 "parameters": [
                     {
-                        "description": "Admin Object",
-                        "name": "admin",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.Admin"
-                        }
+                        "type": "string",
+                        "name": "email",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "fullname",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "password",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Admin Image",
+                        "name": "file",
+                        "in": "formData"
                     },
                     {
                         "type": "string",
@@ -759,13 +771,6 @@ const docTemplate = `{
                         "description": "Skin Image",
                         "name": "file",
                         "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -1196,20 +1201,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entities.Admin": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "fullname": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
         "presentation.Responses": {
             "type": "object",
             "properties": {

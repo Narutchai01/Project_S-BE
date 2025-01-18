@@ -1,14 +1,5 @@
 basePath: /api
 definitions:
-  entities.Admin:
-    properties:
-      email:
-        type: string
-      fullname:
-        type: string
-      password:
-        type: string
-    type: object
   presentation.Responses:
     properties:
       data: {}
@@ -342,12 +333,19 @@ paths:
       - application/json
       description: Update an admin by ID
       parameters:
-      - description: Admin Object
-        in: body
-        name: admin
-        required: true
-        schema:
-          $ref: '#/definitions/entities.Admin'
+      - in: formData
+        name: email
+        type: string
+      - in: formData
+        name: fullname
+        type: string
+      - in: formData
+        name: password
+        type: string
+      - description: Admin Image
+        in: formData
+        name: file
+        type: file
       - description: Admin Token
         in: header
         name: token
@@ -540,11 +538,6 @@ paths:
         in: formData
         name: file
         type: file
-      - description: Token
-        in: header
-        name: token
-        required: true
-        type: string
       produces:
       - application/json
       responses:

@@ -117,7 +117,6 @@ func (handler *HttpSkinHandler) GetSkin(c *fiber.Ctx) error {
 //	@Param			id		path		string			true	"Skin ID"
 //	@Param			skin	formData	entities.Skin	true	"Skin Object"
 //	@Param			file	formData	file			false	"Skin Image"
-//	@Param			token	header		string			true	"Token"
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		404		{object}	presentation.Responses

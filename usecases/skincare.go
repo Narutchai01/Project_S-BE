@@ -95,28 +95,19 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 			return entities.Skincare{}, err
 		}
 
-		if old_skincare.Image == "" {
-			imageUrl, err := utils.UploadImage(fileName, "/skincare")
-			if err != nil {
-				return entities.Skincare{}, fmt.Errorf("failed to upload new image: %w", err)
-			}
-			skincare.Image = imageUrl
-		} else {
-			oldImage := path.Base(old_skincare.Image)
-			err := utils.UpdateImage(oldImage, fileName, "skincare")
-			if err != nil {
-				return entities.Skincare{}, fmt.Errorf("failed to update existing image: %w", err)
-			}
+		imageUrl, err := utils.UploadImage(fileName, "/skincare")
 
-			skincare.Image = old_skincare.Image
+		if err != nil {
+			return skincare, err
 		}
 
 		err = os.Remove("./uploads/" + fileName)
+
 		if err != nil {
-			return entities.Skincare{}, fmt.Errorf("failed to remove temporary file: %w", err)
+			return skincare, err
 		}
-	} else {
-		skincare.Image = old_skincare.Image
+
+		skincare.Image = imageUrl
 	}
 
 	skincare.ID = old_skincare.ID
