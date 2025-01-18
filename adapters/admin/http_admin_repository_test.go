@@ -34,7 +34,7 @@ func (m *MockAdminService) GetAdmin(id int) (entities.Admin, error) {
 }
 
 func (m *MockAdminService) UpdateAdmin(token string, admin entities.Admin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error) {
-	args := m.Called(token, admin, *file, c)
+	args := m.Called(token, admin, file, c) // Pass `file` directly
 	return args.Get(0).(entities.Admin), args.Error(1)
 }
 
@@ -53,13 +53,17 @@ func (m *MockAdminService) GetAdminByToken(token string) (entities.Admin, error)
 	return args.Get(0).(entities.Admin), args.Error(1)
 }
 
-//Test
+// Test
 func TestCreateAdminHandler(t *testing.T) {
-	mockService := new(MockAdminService)
-	handler := NewHttpAdminHandler(mockService)
-
-	app := fiber.New()
-	app.Post("/admin/manage", handler.CreateAdmin)
+	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+		mockService := new(MockAdminService)
+		handler := NewHttpAdminHandler(mockService)
+    
+		app := fiber.New()
+		app.Post("/admin/manage", handler.CreateAdmin)
+    
+		return mockService, handler, app
+	}
 
 	expectData := entities.Admin{
 		FullName: "aut",
@@ -68,14 +72,18 @@ func TestCreateAdminHandler(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-
-		mockService.On("CreateAdmin", mock.Anything, mock.AnythingOfType("multipart.FileHeader"), mock.Anything).Return(expectData, nil)
+		mockService, _, app := setup()
+		mockService.On("CreateAdmin",
+			mock.Anything,
+			mock.AnythingOfType("multipart.FileHeader"),
+			mock.Anything,
+		).Return(expectData, nil)
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		_ = writer.WriteField("full_name", expectData.FullName)
-		part, _ := writer.CreateFormFile("file", "aut.jpg")
-		part.Write([]byte("aut image"))
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test image"))
 		writer.Close()
 
 		req := httptest.NewRequest("POST", "/admin/manage", body)
@@ -88,6 +96,7 @@ func TestCreateAdminHandler(t *testing.T) {
 	})
 
 	t.Run("failed in body parser", func(t *testing.T) {
+		_, _, app := setup()
 		req := httptest.NewRequest("POST", "/admin/manage", bytes.NewBuffer([]byte("invalid body")))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
@@ -97,6 +106,7 @@ func TestCreateAdminHandler(t *testing.T) {
 	})
 
 	t.Run("failed to get image file", func(t *testing.T) {
+		mockService, _, app := setup()
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		_ = writer.WriteField("full_name", expectData.FullName)
@@ -108,18 +118,20 @@ func TestCreateAdminHandler(t *testing.T) {
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.ErrBadGateway.Code, resp.StatusCode)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("failed to create admin", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
 		mockService.On("CreateAdmin", mock.Anything, mock.AnythingOfType("multipart.FileHeader"), mock.Anything).Return(entities.Admin{}, errors.New("service error"))
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		_ = writer.WriteField("full_name", expectData.FullName)
-		part, _ := writer.CreateFormFile("file", "aut.jpg")
-		part.Write([]byte("aut image"))
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test image"))
 		writer.Close()
 
 		req := httptest.NewRequest("POST", "/admin/manage", body)
@@ -133,11 +145,15 @@ func TestCreateAdminHandler(t *testing.T) {
 }
 
 func TestGetAdminsHandler(t *testing.T) {
-	mockService := new(MockAdminService) // Create a mock service
-	handler := NewHttpAdminHandler(mockService)
-
-	app := fiber.New()
-	app.Get("/admin/manage", handler.GetAdmins) 
+	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+		mockService := new(MockAdminService)
+		handler := NewHttpAdminHandler(mockService)
+    
+		app := fiber.New()
+		app.Get("/admin/manage", handler.GetAdmins)
+    
+		return mockService, handler, app
+	}
 
 	expectData := []entities.Admin{
 		{FullName: "aut", Email: "aut@gmail.com", Image: "autimage"},
@@ -145,6 +161,7 @@ func TestGetAdminsHandler(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.On("GetAdmins").Return(expectData, nil)
 
 		req := httptest.NewRequest("GET", "/admin/manage", nil)
@@ -157,6 +174,7 @@ func TestGetAdminsHandler(t *testing.T) {
 	})
 
 	t.Run("failed to get admins", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
 		mockService.On("GetAdmins").Return([]entities.Admin{}, errors.New("service error"))
 
@@ -171,19 +189,24 @@ func TestGetAdminsHandler(t *testing.T) {
 }
 
 func TestGetAdminHandler(t *testing.T) {
-	mockService := new(MockAdminService) // Create a mock service
-	handler := NewHttpAdminHandler(mockService)
-
-	app := fiber.New()
-	app.Get("/admin/manage/:id", handler.GetAdmin)
+	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+		mockService := new(MockAdminService)
+		handler := NewHttpAdminHandler(mockService)
+    
+		app := fiber.New()
+		app.Get("/admin/manage/:id", handler.GetAdmin)
+    
+		return mockService, handler, app
+	}
 
 	expectData := entities.Admin{
-		FullName: "aut", 
-		Email: "aut@gmail.com", 
-		Image: "autimage",
+		FullName: "aut",
+		Email:    "aut@gmail.com",
+		Image:    "autimage",
 	}
 
 	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.On("GetAdmin", 1).Return(expectData, nil)
 
 		req := httptest.NewRequest("GET", "/admin/manage/1", nil)
@@ -196,6 +219,7 @@ func TestGetAdminHandler(t *testing.T) {
 	})
 
 	t.Run("failed to get id from parameter", func(t *testing.T) {
+		mockService, _, app := setup()
 		req := httptest.NewRequest("GET", "/admin/manage/error", nil)
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
@@ -206,6 +230,7 @@ func TestGetAdminHandler(t *testing.T) {
 	})
 
 	t.Run("failed to get admin", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
 		mockService.On("GetAdmin", 1).Return(entities.Admin{}, errors.New("service error"))
 
@@ -220,11 +245,15 @@ func TestGetAdminHandler(t *testing.T) {
 }
 
 func TestUpdateAdminHandler(t *testing.T) {
-	mockService := new(MockAdminService)
-	handler := NewHttpAdminHandler(mockService)
-
-	app := fiber.New()
-	app.Put("/admin/manage", handler.UpdateAdmin)
+	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+		mockService := new(MockAdminService)
+		handler := NewHttpAdminHandler(mockService)
+    
+		app := fiber.New()
+		app.Put("/admin/manage", handler.UpdateAdmin)
+    
+		return mockService, handler, app
+	}
 
 	expectData := entities.Admin{
 		FullName: "aut",
@@ -233,18 +262,23 @@ func TestUpdateAdminHandler(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		mockService.On("UpdateAdmin", mock.Anything, mock.Anything, mock.AnythingOfType("multipart.FileHeader"), mock.Anything).Return(expectData, nil)
+		mockService, _, app := setup()
+		mockService.On("UpdateAdmin", mock.Anything,
+			mock.Anything,
+			mock.AnythingOfType("*multipart.FileHeader"),
+			mock.Anything,
+		).Return(expectData, nil)
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		_ = writer.WriteField("full_name", expectData.FullName)
-		part, _ := writer.CreateFormFile("file", "aut.jpg")
-		part.Write([]byte("aut image"))
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test image"))
 		writer.Close()
 
 		req := httptest.NewRequest("PUT", "/admin/manage", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "example-token")
+		req.Header.Set("token", "test-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -253,6 +287,7 @@ func TestUpdateAdminHandler(t *testing.T) {
 	})
 
 	t.Run("failed in body parser", func(t *testing.T) {
+		_, _, app := setup()
 		req := httptest.NewRequest("PUT", "/admin/manage", bytes.NewBuffer([]byte("invalid body")))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
@@ -262,36 +297,51 @@ func TestUpdateAdminHandler(t *testing.T) {
 	})
 
 	t.Run("can upload if not provide image", func(t *testing.T) {
-		// mockService.On("UpdateAdmin", mock.Anything, mock.Anything, (*multipart.FileHeader)(), mock.Anything).Return(expectData, nil)
-
-		// body := new(bytes.Buffer)
-		// writer := multipart.NewWriter(body)
-		// _ = writer.WriteField("full_name", expectData.FullName) // Add form data
-		// writer.Close()
-
-		// req := httptest.NewRequest("PUT", "/admin/manage", body)
-		// req.Header.Set("Content-Type", writer.FormDataContentType())
-		// req.Header.Set("token", "example-token")
-		// resp, err := app.Test(req)
-
-		// assert.NoError(t, err)
-		// assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		// mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to update admin", func(t *testing.T) {
-		mockService.On("UpdateAdmin", mock.Anything, mock.Anything, mock.AnythingOfType("multipart.FileHeader"), mock.Anything).Return(entities.Admin{}, errors.New("service error"))
+		mockService, _, app := setup()
+		mockService.On("UpdateAdmin",
+			mock.Anything,
+			mock.Anything,
+			mock.MatchedBy(func(file *multipart.FileHeader) bool {
+				return file == nil
+			}),
+			mock.Anything,
+		).Return(expectData, nil)
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("full_name", expectData.FullName)
-		part, _ := writer.CreateFormFile("file", "aut.jpg")
-		part.Write([]byte("aut image"))
+		_ = writer.WriteField("full_name", expectData.FullName) // Add form data
 		writer.Close()
 
 		req := httptest.NewRequest("PUT", "/admin/manage", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "example-token")
+		req.Header.Set("token", "test-token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed to update admin", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.On("UpdateAdmin",
+			mock.Anything,
+			mock.Anything,
+			mock.AnythingOfType("*multipart.FileHeader"),
+			mock.Anything,
+		).Return(entities.Admin{}, errors.New("service error"))
+
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		_ = writer.WriteField("full_name", expectData.FullName)
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test image"))
+		writer.Close()
+
+		req := httptest.NewRequest("PUT", "/admin/manage", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("token", "test-token")
+
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -301,13 +351,18 @@ func TestUpdateAdminHandler(t *testing.T) {
 }
 
 func TestDeleteAdminHandler(t *testing.T) {
-	mockService := new(MockAdminService) // Create a mock service
-	handler := NewHttpAdminHandler(mockService)
-
-	app := fiber.New()
-	app.Delete("/admin/manage/:id", handler.DeleteAdmin)
+	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+		mockService := new(MockAdminService)
+		handler := NewHttpAdminHandler(mockService)
+    
+		app := fiber.New()
+		app.Delete("/admin/manage/:id", handler.DeleteAdmin)
+    
+		return mockService, handler, app
+	}
 
 	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.On("DeleteAdmin", 1).Return(entities.Admin{}, nil)
 
 		req := httptest.NewRequest("DELETE", "/admin/manage/1", nil)
@@ -320,6 +375,7 @@ func TestDeleteAdminHandler(t *testing.T) {
 	})
 
 	t.Run("failed to get id from parameter", func(t *testing.T) {
+		mockService, _, app := setup()
 		req := httptest.NewRequest("DELETE", "/admin/manage/error", nil)
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
@@ -330,6 +386,7 @@ func TestDeleteAdminHandler(t *testing.T) {
 	})
 
 	t.Run("failed to delete admin", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
 		mockService.On("DeleteAdmin", 1).Return(entities.Admin{}, errors.New("service error"))
 
@@ -344,22 +401,29 @@ func TestDeleteAdminHandler(t *testing.T) {
 }
 
 func TestLoginHandler(t *testing.T) {
-	mockService := new(MockAdminService) // Create a mock service
-	handler := NewHttpAdminHandler(mockService)
-
-	app := fiber.New()
-	app.Post("/admin/login/", handler.LogIn) 
+	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+		mockService := new(MockAdminService)
+		handler := NewHttpAdminHandler(mockService)
+    
+		app := fiber.New()
+		app.Post("/admin/login/", handler.LogIn)
+    
+		return mockService, handler, app
+	}
 
 	expectData := entities.Admin{
-		FullName: "aut", 
-		Email: "aut@gmail.com", 
-		Image: "autimage",
+		FullName: "aut",
+		Email:    "aut@gmail.com",
+		Image:    "autimage",
 		Password: "1234",
 	}
 
 	t.Run("success", func(t *testing.T) {
-		mockService.On("LogIn", mock.Anything, mock.Anything).Return("some token", nil)
-		
+		mockService, _, app := setup()
+		mockService.On("LogIn",
+			mock.Anything, mock.Anything,
+		).Return("some token", nil)
+
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		_ = writer.WriteField("email", expectData.FullName)
@@ -375,8 +439,8 @@ func TestLoginHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-
 	t.Run("failed in body parser", func(t *testing.T) {
+		_, _, app := setup()
 		req := httptest.NewRequest("POST", "/admin/login/", bytes.NewBuffer([]byte("invalid body")))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
@@ -386,8 +450,12 @@ func TestLoginHandler(t *testing.T) {
 	})
 
 	t.Run("failed to login", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
-		mockService.On("LogIn", mock.Anything, mock.Anything).Return("", errors.New("service error"))
+		mockService.On("LogIn",
+			mock.Anything,
+			mock.Anything,
+		).Return("", errors.New("service error"))
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
@@ -406,19 +474,24 @@ func TestLoginHandler(t *testing.T) {
 }
 
 func TestGetAdminByTokenHandler(t *testing.T) {
-	mockService := new(MockAdminService) // Create a mock service
-	handler := NewHttpAdminHandler(mockService)
-
-	app := fiber.New()
-	app.Get("/admin/profile/", handler.GetAdminByToken)
+	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+		mockService := new(MockAdminService)
+		handler := NewHttpAdminHandler(mockService)
+    
+		app := fiber.New()
+		app.Get("/admin/profile/", handler.GetAdminByToken)
+    
+		return mockService, handler, app
+	}
 
 	expectData := entities.Admin{
-		FullName: "aut", 
-		Email: "aut@gmail.com", 
-		Image: "autimage",
+		FullName: "aut",
+		Email:    "aut@gmail.com",
+		Image:    "autimage",
 	}
 
 	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.On("GetAdminByToken", mock.Anything).Return(expectData, nil)
 
 		req := httptest.NewRequest("GET", "/admin/profile/", nil)
@@ -432,6 +505,7 @@ func TestGetAdminByTokenHandler(t *testing.T) {
 	})
 
 	t.Run("failed to get admin", func(t *testing.T) {
+		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
 		mockService.On("GetAdminByToken", mock.Anything).Return(entities.Admin{}, errors.New("service error"))
 
