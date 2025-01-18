@@ -285,7 +285,6 @@ func TestGormGetAdminByEmail(t *testing.T) {
             Image:    "autimage",
       }
 
-      // Adjust the expected SQL to use ? placeholders like GORM
       expectedSQL := `SELECT \* FROM "admins" WHERE email = \$1 AND "admins"\."deleted_at" IS NULL ORDER BY "admins"\."id" LIMIT \$2`
       rows := sqlmock.NewRows([]string{"id", "full_name", "email", "password", "image"}).
             AddRow(expectData.ID, expectData.FullName, expectData.Email, expectData.Password, expectData.Image)
@@ -304,7 +303,7 @@ func TestGormGetAdminByEmail(t *testing.T) {
 
       t.Run("failure", func(t *testing.T) {
             mock.ExpectQuery(expectedSQL).
-                  WithArgs(expectData.Email, 1). // Adjust based on parameterized LIMIT
+                  WithArgs(expectData.Email, 1).
                   WillReturnError(errors.New("database error"))
 
             result, err := repo.GetAdminByEmail(expectData.Email)
