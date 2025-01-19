@@ -151,5 +151,5 @@ func (handler *HttpFacialHandler) DeleteFacial(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteResponse(intID))
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(intID))
 }
