@@ -15,6 +15,18 @@ func NewHttpUserHandler(userUcase usecases.UserUsecases) *HttpUserHandler {
 	return &HttpUserHandler{userUcase}
 }
 
+// Register godoc
+//
+//	@Summary		Register new user
+//	@Description	Register new user
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		entities.User	true	"User information"
+//	@Success		201		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/user/register [post]
 func (handler *HttpUserHandler) Register(c *fiber.Ctx) error {
 	var user entities.User
 
@@ -30,6 +42,19 @@ func (handler *HttpUserHandler) Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(presentation.UserResponse(result))
 }
 
+// LogIn godoc
+//
+//	@Summary		Log in
+//	@Description	Log in
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Param			admin	body		object{email=string,password=string}	true	"Admin Object"
+//
+// @Success		200		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Failure		404		{object}	presentation.Responses
+// @Router			/user/login [post]
 func (handler *HttpUserHandler) LogIn(c *fiber.Ctx) error {
 	var user entities.User
 
