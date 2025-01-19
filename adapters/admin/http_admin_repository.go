@@ -160,21 +160,21 @@ func (handler *HttpAdminHandler) DeleteAdmin(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteResponse(id))
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))
 }
 
 // LogIn godoc
 
-//	@Summary		Log in
-//	@Description	Log in
-//	@Tags			admin
-//	@Accept			json
-//	@Produce		json
-//	@Param			admin	body		object{email=string,password=string}	true	"Admin Object"
-//	@Success		200		{object}	presentation.Responses
-//	@Failure		400		{object}	presentation.Responses
-//	@Failure		404		{object}	presentation.Responses
-//	@Router			/admin/login [post]
+// @Summary		Log in
+// @Description	Log in
+// @Tags			admin
+// @Accept			json
+// @Produce		json
+// @Param			admin	body		object{email=string,password=string}	true	"Admin Object"
+// @Success		200		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Failure		404		{object}	presentation.Responses
+// @Router			/admin/login [post]
 func (handler *HttpAdminHandler) LogIn(c *fiber.Ctx) error {
 	var admin entities.Admin
 
