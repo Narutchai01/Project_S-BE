@@ -1,4 +1,4 @@
-package adapters
+package adapters_test
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	adapters "github.com/Narutchai01/Project_S-BE/adapters/admin"
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
@@ -55,9 +56,9 @@ func (m *MockAdminService) GetAdminByToken(token string) (entities.Admin, error)
 
 // Test
 func TestCreateAdminHandler(t *testing.T) {
-	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+	setup := func() (*MockAdminService, *adapters.HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
-		handler := NewHttpAdminHandler(mockService)
+		handler := adapters.NewHttpAdminHandler(mockService)
 
 		app := fiber.New()
 		app.Post("/admin/manage", handler.CreateAdmin)
@@ -145,9 +146,9 @@ func TestCreateAdminHandler(t *testing.T) {
 }
 
 func TestGetAdminsHandler(t *testing.T) {
-	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+	setup := func() (*MockAdminService, *adapters.HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
-		handler := NewHttpAdminHandler(mockService)
+		handler := adapters.NewHttpAdminHandler(mockService)
 
 		app := fiber.New()
 		app.Get("/admin/manage", handler.GetAdmins)
@@ -189,9 +190,9 @@ func TestGetAdminsHandler(t *testing.T) {
 }
 
 func TestGetAdminHandler(t *testing.T) {
-	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+	setup := func() (*MockAdminService, *adapters.HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
-		handler := NewHttpAdminHandler(mockService)
+		handler := adapters.NewHttpAdminHandler(mockService)
 
 		app := fiber.New()
 		app.Get("/admin/manage/:id", handler.GetAdmin)
@@ -245,9 +246,9 @@ func TestGetAdminHandler(t *testing.T) {
 }
 
 func TestUpdateAdminHandler(t *testing.T) {
-	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+	setup := func() (*MockAdminService, *adapters.HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
-		handler := NewHttpAdminHandler(mockService)
+		handler := adapters.NewHttpAdminHandler(mockService)
 
 		app := fiber.New()
 		app.Put("/admin/manage", handler.UpdateAdmin)
@@ -351,9 +352,9 @@ func TestUpdateAdminHandler(t *testing.T) {
 }
 
 func TestDeleteAdminHandler(t *testing.T) {
-	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+	setup := func() (*MockAdminService, *adapters.HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
-		handler := NewHttpAdminHandler(mockService)
+		handler := adapters.NewHttpAdminHandler(mockService)
 
 		app := fiber.New()
 		app.Delete("/admin/manage/:id", handler.DeleteAdmin)
@@ -401,9 +402,9 @@ func TestDeleteAdminHandler(t *testing.T) {
 }
 
 func TestLoginHandler(t *testing.T) {
-	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+	setup := func() (*MockAdminService, *adapters.HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
-		handler := NewHttpAdminHandler(mockService)
+		handler := adapters.NewHttpAdminHandler(mockService)
 
 		app := fiber.New()
 		app.Post("/admin/login/", handler.LogIn)
@@ -474,9 +475,9 @@ func TestLoginHandler(t *testing.T) {
 }
 
 func TestGetAdminByTokenHandler(t *testing.T) {
-	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
+	setup := func() (*MockAdminService, *adapters.HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
-		handler := NewHttpAdminHandler(mockService)
+		handler := adapters.NewHttpAdminHandler(mockService)
 
 		app := fiber.New()
 		app.Get("/admin/profile/", handler.GetAdminByToken)
