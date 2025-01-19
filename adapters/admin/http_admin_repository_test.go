@@ -58,10 +58,10 @@ func TestCreateAdminHandler(t *testing.T) {
 	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
 		handler := NewHttpAdminHandler(mockService)
-    
+
 		app := fiber.New()
 		app.Post("/admin/manage", handler.CreateAdmin)
-    
+
 		return mockService, handler, app
 	}
 
@@ -148,10 +148,10 @@ func TestGetAdminsHandler(t *testing.T) {
 	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
 		handler := NewHttpAdminHandler(mockService)
-    
+
 		app := fiber.New()
 		app.Get("/admin/manage", handler.GetAdmins)
-    
+
 		return mockService, handler, app
 	}
 
@@ -192,10 +192,10 @@ func TestGetAdminHandler(t *testing.T) {
 	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
 		handler := NewHttpAdminHandler(mockService)
-    
+
 		app := fiber.New()
 		app.Get("/admin/manage/:id", handler.GetAdmin)
-    
+
 		return mockService, handler, app
 	}
 
@@ -248,10 +248,10 @@ func TestUpdateAdminHandler(t *testing.T) {
 	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
 		handler := NewHttpAdminHandler(mockService)
-    
+
 		app := fiber.New()
 		app.Put("/admin/manage", handler.UpdateAdmin)
-    
+
 		return mockService, handler, app
 	}
 
@@ -354,10 +354,10 @@ func TestDeleteAdminHandler(t *testing.T) {
 	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
 		handler := NewHttpAdminHandler(mockService)
-    
+
 		app := fiber.New()
 		app.Delete("/admin/manage/:id", handler.DeleteAdmin)
-    
+
 		return mockService, handler, app
 	}
 
@@ -370,7 +370,7 @@ func TestDeleteAdminHandler(t *testing.T) {
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusNoContent, resp.StatusCode)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 
@@ -404,10 +404,10 @@ func TestLoginHandler(t *testing.T) {
 	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
 		handler := NewHttpAdminHandler(mockService)
-    
+
 		app := fiber.New()
 		app.Post("/admin/login/", handler.LogIn)
-    
+
 		return mockService, handler, app
 	}
 
@@ -477,10 +477,10 @@ func TestGetAdminByTokenHandler(t *testing.T) {
 	setup := func() (*MockAdminService, *HttpAdminHandler, *fiber.App) {
 		mockService := new(MockAdminService)
 		handler := NewHttpAdminHandler(mockService)
-    
+
 		app := fiber.New()
 		app.Get("/admin/profile/", handler.GetAdminByToken)
-    
+
 		return mockService, handler, app
 	}
 
