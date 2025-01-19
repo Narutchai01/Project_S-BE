@@ -1,5 +1,18 @@
 basePath: /api
 definitions:
+  entities.User:
+    properties:
+      birthday:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      password:
+        type: string
+      sensitive_skin:
+        type: boolean
+    type: object
   presentation.Responses:
     properties:
       data: {}
@@ -795,4 +808,69 @@ paths:
       summary: Get a skincare
       tags:
       - skincare
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Log in
+      parameters:
+      - description: Admin Object
+        in: body
+        name: admin
+        required: true
+        schema:
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Log in
+      tags:
+      - user
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Register new user
+      parameters:
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entities.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Register new user
+      tags:
+      - user
 swagger: "2.0"
