@@ -35,7 +35,7 @@ func (m *MockAdminService) GetAdmin(id int) (entities.Admin, error) {
 }
 
 func (m *MockAdminService) UpdateAdmin(token string, admin entities.Admin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error) {
-	args := m.Called(token, admin, file, c) // Pass `file` directly
+	args := m.Called(token, admin, file, c)
 	return args.Get(0).(entities.Admin), args.Error(1)
 }
 
