@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	adapters "github.com/Narutchai01/Project_S-BE/adapters/acne"
+	adapters "github.com/Narutchai01/Project_S-BE/adapters/facial"
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func TestGormCreateAcne(t *testing.T) {
+func TestGormCreateFacial(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
@@ -24,20 +24,20 @@ func TestGormCreateAcne(t *testing.T) {
 		panic("Failed to connect to database")
 	}
 
-	repo := adapters.NewGormAcneRepository(gormDB)
+	repo := adapters.NewGormFacialRepository(gormDB)
 
-	expectData := entities.Acne{
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+	expectData := entities.Facial{
+		Name: "facial_type1",
+		Image: "facial/type1/path",
 		CreateBY: 1,
 	}
 
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectQuery(`INSERT INTO "acnes"`).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+		mock.ExpectQuery(`INSERT INTO "facials"`).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectCommit()
 
-		_, err := repo.CreateAcne(expectData)
+		_, err := repo.CreateFacial(expectData)
 
 		assert.NoError(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
@@ -45,10 +45,10 @@ func TestGormCreateAcne(t *testing.T) {
 
 	t.Run("failure", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectQuery(`INSERT INTO "acnes"`).WillReturnError(errors.New("database error"))
+		mock.ExpectQuery(`INSERT INTO "facials"`).WillReturnError(errors.New("database error"))
 		mock.ExpectRollback()
 
-		_, err := repo.CreateAcne(expectData)
+		_, err := repo.CreateFacial(expectData)
 
 		assert.Error(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
@@ -56,7 +56,7 @@ func TestGormCreateAcne(t *testing.T) {
 
 }
 
-func TestGormGetAcnes(t *testing.T) {
+func TestGormGetfacials(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
@@ -68,25 +68,25 @@ func TestGormGetAcnes(t *testing.T) {
 		panic("Failed to connect to database")
 	}
 
-	repo := adapters.NewGormAcneRepository(gormDB)
+	repo := adapters.NewGormFacialRepository(gormDB)
 
-	expectData := entities.Acne{
+	expectData := entities.Facial{
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name: "facial_type1",
+		Image: "facial/type1/path",
 		CreateBY: 1,
 	}
 
 	columns := sqlmock.NewRows([]string{"id", "name", "image", "create_by"}).
 		AddRow(expectData.ID, expectData.Name, expectData.Image, expectData.CreateBY)
-	expectedSQL := `SELECT (.+) FROM "acnes"`
+	expectedSQL := `SELECT (.+) FROM "facials"`
 
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectQuery(expectedSQL).WillReturnRows(columns)
 
-		_, err := repo.GetAcnes()
+		_, err := repo.GetFacials()
 
 		assert.NoError(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
@@ -95,14 +95,14 @@ func TestGormGetAcnes(t *testing.T) {
 	t.Run("failure", func(t *testing.T) {
 		mock.ExpectQuery(expectedSQL).WillReturnError(errors.New("database error"))
 
-		_, err := repo.GetAcnes()
+		_, err := repo.GetFacials()
 
 		assert.Error(t, err)
 	})
 
 }
 
-func TestGormGetAcne(t *testing.T) {
+func TestGormGetfacial(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
@@ -114,18 +114,18 @@ func TestGormGetAcne(t *testing.T) {
 		panic("Failed to connect to database")
 	}
 
-	repo := adapters.NewGormAcneRepository(gormDB)
+	repo := adapters.NewGormFacialRepository(gormDB)
 
-	expectData := entities.Acne{
+	expectData := entities.Facial{
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name: "facial_type1",
+		Image: "facial/type1/path",
 		CreateBY: 1,
 	}
 
-	expectedSQL := `SELECT \* FROM "acnes" WHERE "acnes"\."id" = \$1 AND "acnes"\."deleted_at" IS NULL ORDER BY "acnes"\."id" LIMIT \$2`
+	expectedSQL := `SELECT \* FROM "facials" WHERE "facials"\."id" = \$1 AND "facials"\."deleted_at" IS NULL ORDER BY "facials"\."id" LIMIT \$2`
 	rows := sqlmock.NewRows([]string{"id", "name", "image", "create_by"}).
 		AddRow(expectData.ID, expectData.Name, expectData.Image, expectData.CreateBY)
 	t.Run("success", func(t *testing.T) {
@@ -133,7 +133,7 @@ func TestGormGetAcne(t *testing.T) {
 			WithArgs(1, 1).
 			WillReturnRows(rows)
 
-		result, err := repo.GetAcne(int(expectData.ID))
+		result, err := repo.GetFacial(int(expectData.ID))
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectData, result)
@@ -145,14 +145,14 @@ func TestGormGetAcne(t *testing.T) {
 			WithArgs(1, 1).
 			WillReturnError(errors.New("database error"))
 
-		_, err := repo.GetAcne(int(expectData.ID))
+		_, err := repo.GetFacial(int(expectData.ID))
 
 		assert.Error(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
 
-func TestGormUpdateUpdateAcne(t *testing.T) {
+func TestGormUpdateUpdatefacial(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
@@ -164,18 +164,18 @@ func TestGormUpdateUpdateAcne(t *testing.T) {
 		panic("Failed to connect to database")
 	}
 
-	repo := adapters.NewGormAcneRepository(gormDB)
+	repo := adapters.NewGormFacialRepository(gormDB)
 
-	expectData := entities.Acne{
+	expectData := entities.Facial{
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name: "facial_type1",
+		Image: "facial/type1/path",
 		CreateBY: 1,
 	}
 
-	expectedSQL := `UPDATE "acnes" SET "id"=\$1,"updated_at"=\$2,"name"=\$3,"image"=\$4,"create_by"=\$5 WHERE id = \$6 AND "acnes"."deleted_at" IS NULL`
+	expectedSQL := `UPDATE "facials" SET "id"=\$1,"updated_at"=\$2,"name"=\$3,"image"=\$4,"create_by"=\$5 WHERE id = \$6 AND "facials"."deleted_at" IS NULL`
 
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectBegin()
@@ -184,7 +184,7 @@ func TestGormUpdateUpdateAcne(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(0, 1))
 		mock.ExpectCommit()
 
-		result, err := repo.UpdateAcne(int(expectData.ID), expectData)
+		result, err := repo.UpdateFacial(int(expectData.ID), expectData)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectData, result)
@@ -198,7 +198,7 @@ func TestGormUpdateUpdateAcne(t *testing.T) {
 			WillReturnError(errors.New("database error"))
 		mock.ExpectRollback()
 
-		_, err := repo.UpdateAcne(int(expectData.ID), expectData)
+		_, err := repo.UpdateFacial(int(expectData.ID), expectData)
 
 		assert.Error(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
@@ -206,7 +206,7 @@ func TestGormUpdateUpdateAcne(t *testing.T) {
 
 }
 
-func TestGormDeleteAcne(t *testing.T) {
+func TestGormDeletefacial(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
@@ -218,18 +218,18 @@ func TestGormDeleteAcne(t *testing.T) {
 		panic("Failed to connect to database")
 	}
 
-	repo := adapters.NewGormAcneRepository(gormDB)
+	repo := adapters.NewGormFacialRepository(gormDB)
 
-	expectData := entities.Acne{
+	expectData := entities.Facial{
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name: "facial_type1",
+		Image: "facial/type1/path",
 		CreateBY: 1,
 	}
 
-	expectedSQL := `UPDATE "acnes" SET "deleted_at"=\$1 WHERE "acnes"."id" = \$2 AND "acnes"."deleted_at" IS NULL`
+	expectedSQL := `UPDATE "facials" SET "deleted_at"=\$1 WHERE "facials"."id" = \$2 AND "facials"."deleted_at" IS NULL`
 
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectBegin()
@@ -238,7 +238,7 @@ func TestGormDeleteAcne(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(0, 1))
 		mock.ExpectCommit()
 
-		err := repo.DeleteAcne(int(expectData.ID))
+		err := repo.DeleteFacial(int(expectData.ID))
 
 		assert.NoError(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
@@ -251,7 +251,7 @@ func TestGormDeleteAcne(t *testing.T) {
 			WillReturnError(errors.New("database error"))
 		mock.ExpectRollback()
 
-		err := repo.DeleteAcne(int(expectData.ID))
+		err := repo.DeleteFacial(int(expectData.ID))
 
 		assert.Error(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
