@@ -1,8 +1,10 @@
 package usecases
 
 import (
+	"fmt"
 	"mime/multipart"
 	"os"
+	"path"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
@@ -16,9 +18,10 @@ type AdminUsecases interface {
 	CreateAdmin(admin entities.Admin, file multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error)
 	GetAdmins() ([]entities.Admin, error)
 	GetAdmin(id int) (entities.Admin, error)
-	UpdateAdmin(id int, admin entities.Admin) (entities.Admin, error)
+	UpdateAdmin(token string, admin entities.Admin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error)
 	DeleteAdmin(id int) (entities.Admin, error)
 	LogIn(email string, password string) (string, error)
+	GetAdminByToken(token string) (entities.Admin, error)
 }
 
 type adminService struct {
@@ -33,11 +36,15 @@ func (service *adminService) CreateAdmin(admin entities.Admin, file multipart.Fi
 
 	fileName := uuid.New().String() + ".jpg"
 
+	if err := utils.CheckDirectoryExist(); err != nil {
+		return entities.Admin{}, err
+	}
+
 	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
 		return entities.Admin{}, err
 	}
 
-	imageUrl, err := utils.UploadImage(fileName, "/")
+	imageUrl, err := utils.UploadImage(fileName, "/admin")
 
 	if err != nil {
 		return admin, c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -75,24 +82,65 @@ func (service *adminService) GetAdmin(id int) (entities.Admin, error) {
 	return service.repo.GetAdmin(id)
 }
 
-func (service *adminService) UpdateAdmin(id int, admin entities.Admin) (entities.Admin, error) {
+func (service *adminService) UpdateAdmin(token string, admin entities.Admin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error) {
 
-	oldamin, err := service.repo.GetAdmin(id)
+	id, err := utils.ExtractToken(token)
+	if err != nil {
+		return admin, fmt.Errorf("failed to extract token: %w", err)
+	}
 
-	admin.ID = oldamin.ID
-
+	oldamin, err := service.repo.GetAdmin(int(id))
 	if err != nil {
 		return entities.Admin{}, err
 	}
 
-	admin.Image = checkVauleUpdateAdmin(admin.Image, oldamin.Image)
-	admin.Password = checkVauleUpdateAdmin(admin.Password, oldamin.Password)
-	admin.FullName = checkVauleUpdateAdmin(admin.FullName, oldamin.FullName)
+	if file != nil {
+		fileName := uuid.New().String() + ".jpg"
 
-	return service.repo.UpdateAdmin(id, admin)
+		if err := utils.CheckDirectoryExist(); err != nil {
+			return entities.Admin{}, err
+		}
+
+		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+			return entities.Admin{}, err
+		}
+
+		imageUrl, err := utils.UploadImage(fileName, "/admin")
+
+		if err != nil {
+			return admin, err
+		}
+
+		err = os.Remove("./uploads/" + fileName)
+
+		if err != nil {
+			return admin, err
+		}
+		admin.Image = imageUrl
+	}
+
+	admin.ID = oldamin.ID
+
+	admin.Image = utils.CheckEmptyValueBeforeUpdate(admin.Image, oldamin.Image)
+	admin.Password = utils.CheckEmptyValueBeforeUpdate(admin.Password, oldamin.Password)
+	admin.FullName = utils.CheckEmptyValueBeforeUpdate(admin.FullName, oldamin.FullName)
+	admin.Email = utils.CheckEmptyValueBeforeUpdate(admin.Email, oldamin.Email)
+
+	return service.repo.UpdateAdmin(int(id), admin)
 }
 
 func (service *adminService) DeleteAdmin(id int) (entities.Admin, error) {
+
+	old_admin, err := service.repo.GetAdmin(id)
+	if err != nil {
+		return entities.Admin{}, err
+	}
+
+	oldImage := path.Base(old_admin.Image)
+	if err := utils.DeleteImage(oldImage, "admin"); err != nil {
+		return entities.Admin{}, fmt.Errorf("failed to update existing image: %w", err)
+	}
+
 	return service.repo.DeleteAdmin(id)
 }
 
@@ -119,9 +167,12 @@ func (service *adminService) LogIn(email string, password string) (string, error
 	return token, nil
 }
 
-func checkVauleUpdateAdmin(newValue string, oldValue string) string {
-	if newValue == "" {
-		return oldValue
+func (service *adminService) GetAdminByToken(token string) (entities.Admin, error) {
+	id, err := utils.ExtractToken(token)
+
+	if err != nil {
+		return entities.Admin{}, err
 	}
-	return newValue
+
+	return service.repo.GetAdmin(int(id))
 }
