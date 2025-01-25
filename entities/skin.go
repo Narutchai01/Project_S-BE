@@ -7,4 +7,5 @@ type Skin struct {
 	Name       string `json:"name" gorm:"not null unique"`
 	Image      string `json:"image" swaggerignore:"true"`
 	CreateBY   uint   `json:"create_by" swaggerignore:"true"`
+	Admin      Admin  `gorm:"foreignKey:CreateBY;references:ID"`
 }
