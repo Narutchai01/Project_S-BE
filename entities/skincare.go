@@ -10,4 +10,5 @@ type Skincare struct {
 	Name        string `json:"name" gorm:"not null unique"`
 	Description string `json:"description"`
 	CreateBY    uint   `reqHeader:"create_by" swaggerignore:"true"`
+	Admin       Admin  `gorm:"foreignKey:CreateBY;references:ID"`
 }
