@@ -96,7 +96,7 @@ func (handler *HttpUserHandler) ForgetPassword(c *fiber.Ctx) error {
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		404		{object}	presentation.Responses
-//	@Router			/user/google-signin [post]
+//	@Router			/user/goolge-signin [post]
 func (handler *HttpUserHandler) GoogleSignIn(c *fiber.Ctx) error {
 	var user entities.User
 
