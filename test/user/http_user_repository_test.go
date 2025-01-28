@@ -44,7 +44,12 @@ func (m *MockUserService) ChangePassword(id int, ewPassword string, c *fiber.Ctx
 	return args.Get(0).(entities.User), args.Error(1)
 }
 
-//Test
+func (m *MockUserService) GoogleSignIn(user entities.User) (string, error) {
+	args := m.Called(user)
+	return args.Get(0).(string), args.Error(1)
+}
+
+// Test
 func TestRegisterHandler(t *testing.T) {
 	setup := func() (*MockUserService, *adapters.HttpUserHandler, *fiber.App) {
 		mockService := new(MockUserService)
@@ -95,7 +100,7 @@ func TestRegisterHandler(t *testing.T) {
 	t.Run("failed to create admin", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
-		mockService.On("Register", 
+		mockService.On("Register",
 			mock.Anything,
 			mock.Anything,
 		).Return(entities.User{}, errors.New("service error"))
@@ -131,7 +136,7 @@ func TestLoginHandler(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.On("LogIn",
-			mock.Anything, 
+			mock.Anything,
 			mock.Anything,
 		).Return("some token", nil)
 
@@ -197,7 +202,7 @@ func TestForgetPasswordHandler(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.On("ChangePassword",
-			mock.Anything, 
+			mock.Anything,
 			mock.Anything,
 			mock.Anything,
 		).Return(expectData, nil)
@@ -235,6 +240,66 @@ func TestForgetPasswordHandler(t *testing.T) {
 		body, _ := json.Marshal(expectData)
 
 		req := httptest.NewRequest("PUT", "/user/forget-password", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+}
+func TestGoogleSignInHandler(t *testing.T) {
+	setup := func() (*MockUserService, *adapters.HttpUserHandler, *fiber.App) {
+		mockService := new(MockUserService)
+		handler := adapters.NewHttpUserHandler(mockService)
+
+		app := fiber.New()
+		app.Post("/user/google-signin", handler.GoogleSignIn)
+
+		return mockService, handler, app
+	}
+
+	expectData := entities.User{
+		Email: "aut@gmail.com",
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.On("GoogleSignIn",
+			mock.Anything,
+		).Return("some token", nil)
+
+		body, _ := json.Marshal(expectData)
+
+		req := httptest.NewRequest("POST", "/user/google-signin", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed in body parser", func(t *testing.T) {
+		_, _, app := setup()
+		req := httptest.NewRequest("POST", "/user/google-signin", bytes.NewBuffer([]byte("invalid body")))
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("failed to sign in with Google", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.ExpectedCalls = nil
+		mockService.On("GoogleSignIn",
+			mock.Anything,
+		).Return("", errors.New("service error"))
+
+		body, _ := json.Marshal(expectData)
+
+		req := httptest.NewRequest("POST", "/user/google-signin", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 

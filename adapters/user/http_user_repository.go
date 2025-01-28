@@ -84,3 +84,31 @@ func (handler *HttpUserHandler) ForgetPassword(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
 }
+
+// GoogleSignIn godoc
+//
+//	@Summary		Google sign in
+//	@Description	Google sign in
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		entities.User	true	"User information"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/user/google-signin [post]
+func (handler *HttpUserHandler) GoogleSignIn(c *fiber.Ctx) error {
+	var user entities.User
+
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	result, err := handler.userUcase.GoogleSignIn(user)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.TokenResponse(result))
+}
