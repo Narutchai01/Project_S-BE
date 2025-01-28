@@ -17,12 +17,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func parseDate(dateStr string) time.Time {
+func parseDate(dateStr string) *time.Time {
+	if dateStr == "" {
+		return nil
+	}
 	parsedDate, err := time.Parse("02-01-2006", dateStr)
 	if err != nil {
 		panic("Failed to parse date")
 	}
-	return parsedDate
+	return &parsedDate
 }
 
 type MockUserService struct {
