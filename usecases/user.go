@@ -14,6 +14,7 @@ type UserUsecases interface {
 	Register(user entities.User, c *fiber.Ctx) (entities.User, error)
 	LogIn(email string, password string) (string, error)
 	ChangePassword(id int, ewPassword string, c *fiber.Ctx) (entities.User, error)
+	GoogleSignIn(user entities.User) (string, error)
 }
 
 type userService struct {
@@ -64,4 +65,19 @@ func (service *userService) ChangePassword(id int, newPassword string, c *fiber.
 	}
 
 	return service.repo.UpdateUserPasswordById(id, string(hashedNewPassword))
+}
+
+func (service *userService) GoogleSignIn(user entities.User) (string, error) {
+	email := user.Email
+	existingUser, err := service.repo.GetUserByEmail(email)
+
+	if err != nil {
+		newUser, err := service.repo.CreateUser(user)
+		if err != nil {
+			return "", err
+		}
+		return utils.GenerateToken(int(newUser.ID))
+	}
+
+	return utils.GenerateToken(int(existingUser.ID))
 }
