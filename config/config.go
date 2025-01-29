@@ -8,19 +8,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func LoadEnv() {
-	if testing.Testing() { 
-		log.Println("Skipping .env loading in tests")
-		return
-	}
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: .env file not found, using system ENV")
-	}
-}
-
 
 func GetEnv(key string) string {
+	err := godotenv.Load()
+	if err != nil {
+		if testing.Testing() { 
+			log.Println("Skipping .env loading in tests")
+			return ""
+		}
+		log.Fatalf("Error loading .env file")
+	}
 	return os.Getenv(key)
 }
