@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Narutchai01/Project_S-BE/config"
@@ -158,7 +159,7 @@ func SendEmailVerification(email string, otp string) error {
 func ExtractToken(token string) (uint, error) {
 	secretKey := []byte(config.GetEnv("JWT_SECRET_KEY"))
 
-	extractToken, err := jwt.Parse(token, func(extractToken *jwt.Token) (interface{}, error) {
+	extractToken, err := jwt.Parse(strings.TrimPrefix(token, "Bearer "), func(extractToken *jwt.Token) (interface{}, error) {
 		if _, ok := extractToken.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected sign method")
 		}
