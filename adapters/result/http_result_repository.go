@@ -42,3 +42,19 @@ func (handler *HttpResultHandler) GetResults(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ResultsResponse(results))
 }
+
+func (handler *HttpResultHandler) GetResultById(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	result, err := handler.resultUcase.GetResultById(id)
+
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
+}

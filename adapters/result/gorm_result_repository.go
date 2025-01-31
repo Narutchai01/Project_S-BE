@@ -27,3 +27,9 @@ func (repo *GormResultRepository) GetResults() ([]entities.Result, error) {
 	}
 	return results, nil
 }
+
+func (repo *GormResultRepository) GetResultById(id int) (entities.Result, error) {
+	var result entities.Result
+	err := repo.db.First(&result, id).Error
+	return result, err
+}

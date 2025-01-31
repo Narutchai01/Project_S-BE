@@ -8,6 +8,7 @@ import (
 type ResultUsecases interface {
 	CreateResult(result entities.Result) (entities.Result, error)
 	GetResults() ([]entities.Result, error)
+	GetResultById(id int) (entities.Result, error)
 }
 type resultService struct {
 	repo repositories.ResultRepository
@@ -23,4 +24,8 @@ func (service *resultService) CreateResult(result entities.Result) (entities.Res
 
 func (service *resultService) GetResults() ([]entities.Result, error) {
 	return service.repo.GetResults()
+}
+
+func (service *resultService) GetResultById(id int) (entities.Result, error) {
+	return service.repo.GetResultById(id)
 }

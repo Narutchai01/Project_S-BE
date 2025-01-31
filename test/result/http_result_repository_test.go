@@ -30,6 +30,10 @@ func (m *MockResultService) GetResults() ([]entities.Result, error) {
 	return args.Get(0).([]entities.Result), args.Error(1)
 }
 
+func (m *MockResultService) GetResultById(id int) (entities.Result, error) {
+	args := m.Called(id)
+	return args.Get(0).(entities.Result), args.Error(1)
+}
 func TestCreateResultHandler(t *testing.T) {
 	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
 		mockService := new(MockResultService)
