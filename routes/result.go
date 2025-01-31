@@ -7,15 +7,19 @@ import (
 	"gorm.io/gorm"
 )
 
-func ResultRoutes(app fiber.Router, db *gorm.DB) {
+func ResultRoutes(app fiber.Router, user fiber.Router, db *gorm.DB) {
 
 	resultRepo := adapters.NewGormResultRepository(db)
 	resultService := usecases.NewResultUsecase(resultRepo)
 	resultHandler := adapters.NewHttpResultHandler(resultService)
 
-	app.Post("/", resultHandler.CreateResult)
-	app.Get("/", resultHandler.GetResults)
-	app.Get("/:id", resultHandler.GetResultById)
-	app.Put("/:id", resultHandler.UpdateResultById)
-	app.Delete("/:id", resultHandler.DeleteResultById)
+	result := app.Group("/result")
+	result.Post("/", resultHandler.CreateResult)
+	result.Get("/", resultHandler.GetResults)
+	result.Get("/:id", resultHandler.GetResultById)
+	result.Put("/:id", resultHandler.UpdateResultById)
+	result.Delete("/:id", resultHandler.DeleteResultById)
+	
+	resultUser := user.Group("/result")
+	resultUser.Get("/", resultHandler.GetResultsByUserIdFromToken)
 }
