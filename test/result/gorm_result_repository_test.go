@@ -188,3 +188,84 @@ func TestGormGetResult(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+
+func TestGormUpdateResultById(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormResultRepository(gormDB)
+
+	expectData := entities.Result{
+		Model: gorm.Model{ID: 1},
+		Image: "image_url_test",
+		UserId: 1,
+		AcneType: []entities.Acne_Facial_Result{
+			{ID: 1, Count: 10},
+		},
+		FacialType: []entities.Acne_Facial_Result{
+			{ID: 1, Count: 10},
+		},
+		SkinType: 1,
+		Skincare: []uint{1, 2, 3},
+	}
+
+	acneTypeJSON, _ := json.Marshal(expectData.AcneType)
+	facialTypeJSON, _ := json.Marshal(expectData.FacialType)
+	skincareJSON, _ := json.Marshal(expectData.Skincare)
+
+	expectedSQL := `UPDATE "results" SET "id"=\$1,"updated_at"=\$2,"image"=\$3,"user_id"=\$4,"acne_type"=\$5,"facial_type"=\$6,"skin_type"=\$7,"skincare"=\$8 WHERE id = \$9 AND "results"."deleted_at" IS NULL`
+
+	t.Run("success", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectExec(expectedSQL).
+			WithArgs(
+				expectData.ID, 
+				sqlmock.AnyArg(), 
+				expectData.Image, 
+				expectData.UserId, 
+				string(acneTypeJSON), 
+				string(facialTypeJSON), 
+				expectData.SkinType,
+				string(skincareJSON),
+				expectData.ID,
+		).WillReturnResult(sqlmock.NewResult(0, 1))
+		mock.ExpectCommit()
+
+		result, err := repo.UpdateResultById(int(expectData.ID), expectData)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectData, result)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("failure", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectExec(expectedSQL).
+			WithArgs(
+				expectData.ID, 
+				sqlmock.AnyArg(), 
+				expectData.Image, 
+				expectData.UserId, 
+				string(acneTypeJSON), 
+				string(facialTypeJSON), 
+				expectData.SkinType,
+				string(skincareJSON),
+				expectData.ID,
+		).WillReturnError(errors.New("database error"))
+		mock.ExpectRollback()
+
+		_, err := repo.UpdateResultById(int(expectData.ID), expectData)
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+}
