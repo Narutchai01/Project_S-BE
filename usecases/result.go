@@ -13,6 +13,7 @@ type ResultUsecases interface {
 	GetResults() ([]entities.Result, error)
 	GetResultById(id int) (entities.Result, error)
 	UpdateResultById(id int, result entities.Result) (entities.Result, error)
+	DeleteResultById(id int) error
 }
 type resultService struct {
 	repo repositories.ResultRepository
@@ -59,4 +60,8 @@ func (service *resultService) UpdateResultById(id int, result entities.Result) (
 	}
 
 	return service.repo.UpdateResultById(id, old_result)
+}
+
+func (service *resultService) DeleteResultById(id int) error {
+	return service.repo.DeleteResultById(id)
 }

@@ -7,4 +7,5 @@ type ResultRepository interface {
 	GetResults() ([]entities.Result, error)
 	GetResultById(id int) (entities.Result, error)
 	UpdateResultById(id int, result entities.Result) (entities.Result, error)
+	DeleteResultById(id int) error
 }

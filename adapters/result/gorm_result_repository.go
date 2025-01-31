@@ -38,3 +38,8 @@ func (repo *GormResultRepository) UpdateResultById(id int, result entities.Resul
 	err := repo.db.Model(&entities.Result{}).Where("id = ?", id).Updates(&result).Error
 	return result, err
 }
+
+func (repo *GormResultRepository) DeleteResultById(id int) error {
+	err := repo.db.Where("id = ?", id).Delete(&entities.Result{}).Error
+	return err
+}

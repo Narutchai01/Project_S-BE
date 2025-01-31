@@ -79,3 +79,20 @@ func (handler *HttpResultHandler) UpdateResultById(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
 }
+
+func (handler *HttpResultHandler) DeleteResultById(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	err = handler.resultUcase.DeleteResultById(id)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))
+}
+
