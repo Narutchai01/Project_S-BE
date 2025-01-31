@@ -125,3 +125,14 @@ func (handler *HttpResultHandler) GetResultsByUserId(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ResultsResponse(results))
 }
 
+func (handler *HttpResultHandler) GetLatestResultByUserIdFromToken(c *fiber.Ctx) error {
+	token := c.Get("token")
+
+	result, err := handler.resultUcase.GetLatestResultByUserIdFromToken(token)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
+}

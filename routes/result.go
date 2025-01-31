@@ -23,4 +23,5 @@ func ResultRoutes(app fiber.Router, user fiber.Router, db *gorm.DB) {
 	
 	resultUser := user.Group("/result")
 	resultUser.Get("/", resultHandler.GetResultsByUserIdFromToken)
+	resultUser.Get("/latest", resultHandler.GetLatestResultByUserIdFromToken)
 }

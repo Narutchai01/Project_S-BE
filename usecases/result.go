@@ -16,6 +16,7 @@ type ResultUsecases interface {
 	DeleteResultById(id int) error
 	GetResultsByUserIdFromToken(token string) ([]entities.Result, error)
 	GetResultsByUserId(id int) ([]entities.Result, error)
+	GetLatestResultByUserIdFromToken(token string) (entities.Result, error)
 }
 type resultService struct {
 	repo repositories.ResultRepository
@@ -79,4 +80,13 @@ func (service *resultService) GetResultsByUserIdFromToken(token string) ([]entit
 
 func (service *resultService) GetResultsByUserId(user_id int) ([]entities.Result, error) {
 	return service.repo.GetResultsByUserId(user_id)
+}
+
+func (service *resultService) GetLatestResultByUserIdFromToken(token string) (entities.Result, error) {
+	user_id, err := utils.ExtractToken(token)
+
+	if err != nil {
+		return entities.Result{}, err
+	}
+	return service.repo.GetLatestResultByUserIdFromToken(int(user_id))
 }

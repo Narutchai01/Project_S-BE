@@ -52,3 +52,9 @@ func (repo *GormResultRepository) GetResultsByUserId(user_id int) ([]entities.Re
 	}
 	return results, nil
 }
+
+func (repo *GormResultRepository) GetLatestResultByUserIdFromToken(user_id int) (entities.Result, error) {
+	var result entities.Result
+	err := repo.db.Where("user_id = ?", user_id).Last(&result).Error
+	return result, err
+}
