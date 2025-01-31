@@ -43,3 +43,12 @@ func (repo *GormResultRepository) DeleteResultById(id int) error {
 	err := repo.db.Delete(&entities.Result{}, id).Error
 	return err
 }
+
+func (repo *GormResultRepository) GetResultsByUserId(user_id int) ([]entities.Result, error) {
+	var results []entities.Result
+	err := repo.db.Where("user_id = ?", user_id).Find(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}

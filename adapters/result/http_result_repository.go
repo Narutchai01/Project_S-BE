@@ -96,3 +96,15 @@ func (handler *HttpResultHandler) DeleteResultById(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))
 }
 
+func (handler *HttpResultHandler) GetResultsByUserIdFromToken(c *fiber.Ctx) error {
+	token := c.Get("token")
+
+	results, err := handler.resultUcase.GetResultsByUserIdFromToken(token)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ResultsResponse(results))
+}
+

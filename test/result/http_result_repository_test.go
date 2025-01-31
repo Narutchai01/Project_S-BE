@@ -44,6 +44,11 @@ func (m *MockResultService) DeleteResultById(id int) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
+
+func (m *MockResultService) GetResultsByUserIdFromToken(token string) ([]entities.Result, error) {
+	args := m.Called(token)
+	return args.Get(0).([]entities.Result), args.Error(1)
+}
 func TestCreateResultHandler(t *testing.T) {
 	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
 		mockService := new(MockResultService)

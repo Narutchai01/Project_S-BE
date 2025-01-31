@@ -8,4 +8,5 @@ type ResultRepository interface {
 	GetResultById(id int) (entities.Result, error)
 	UpdateResultById(id int, result entities.Result) (entities.Result, error)
 	DeleteResultById(id int) error
+	GetResultsByUserId(user_id int) ([]entities.Result, error)
 }
