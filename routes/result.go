@@ -10,7 +10,7 @@ import (
 func ResultRoutes(app fiber.Router, db *gorm.DB) {
 
 	resultRepo := adapters.NewGormResultRepository(db)
-	resultService := usecases.NewResultUseCase(resultRepo)
+	resultService := usecases.NewResultUsecase(resultRepo)
 	resultHandler := adapters.NewHttpResultHandler(resultService)
 
 	app.Post("/", resultHandler.CreateResult)

@@ -13,7 +13,7 @@ type resultService struct {
 	repo repositories.ResultRepository
 }
 
-func NewResultUseCase(repo repositories.ResultRepository) ResultUsecases {
+func NewResultUsecase(repo repositories.ResultRepository) ResultUsecases {
 	return &resultService{repo}
 }
 
