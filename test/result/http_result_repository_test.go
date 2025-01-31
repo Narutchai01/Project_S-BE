@@ -39,6 +39,11 @@ func (m *MockResultService) UpdateResultById(id int, result entities.Result) (en
 	args := m.Called(id, result)
 	return args.Get(0).(entities.Result), args.Error(1)
 }
+
+func (m *MockResultService) DeleteResultById(id int) error {
+	args := m.Called(id)
+	return args.Error(0)
+}
 func TestCreateResultHandler(t *testing.T) {
 	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
 		mockService := new(MockResultService)
@@ -338,6 +343,63 @@ func TestUpdateResultByIdHandler(t *testing.T) {
 		req := httptest.NewRequest("PUT", "/result/1", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+}
+
+func TestDeleteResultByIdHandler(t *testing.T) {
+	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
+		mockService := new(MockResultService)
+		handler := adapters.NewHttpResultHandler(mockService)
+
+		app := fiber.New()
+		app.Delete("/result/:id", handler.DeleteResultById)
+
+		return mockService, handler, app
+	}
+
+
+	expectData := entities.Acne{
+		Model: gorm.Model{
+			ID: 1,
+		},
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.On("DeleteResultById", int(expectData.ID)).Return(nil)
+
+		req := httptest.NewRequest("DELETE", "/result/1", nil)
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed to convert id to int", func(t *testing.T) {
+		mockService, _, app := setup()
+		req := httptest.NewRequest("DELETE", "/result/error-id", nil)
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed to delete result", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.ExpectedCalls = nil
+		mockService.On("DeleteResultById", int(expectData.ID)).Return(errors.New("service error"))
+
+		req := httptest.NewRequest("DELETE", "/result/1", nil)
+		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
