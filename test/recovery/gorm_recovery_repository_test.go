@@ -229,7 +229,7 @@ func TestGormGetRecoveryByUserId(t *testing.T) {
 	AddRow(expectData.ID, expectData.OTP, expectData.UserId)
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectQuery(expectedSQL).
-			WithArgs(int(expectData.ID), 1).
+			WithArgs(int(expectData.UserId), 1).
 			WillReturnRows(rows)
 
 		result, err := repo.GetRecoveryByUserId(int(expectData.ID))
@@ -241,7 +241,7 @@ func TestGormGetRecoveryByUserId(t *testing.T) {
 
 	t.Run("failure", func(t *testing.T) {
 		mock.ExpectQuery(expectedSQL).
-			WithArgs(int(expectData.ID), 1).
+			WithArgs(int(expectData.UserId), 1).
 			WillReturnError(errors.New("database error"))
 
 		_, err := repo.GetRecoveryByUserId(int(expectData.ID))

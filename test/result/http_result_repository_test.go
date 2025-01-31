@@ -412,3 +412,64 @@ func TestDeleteResultByIdHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 }
+
+func TestGetResultsByUserIdFromTokenHandler(t *testing.T) {
+	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
+		mockService := new(MockResultService)
+		handler := adapters.NewHttpResultHandler(mockService)
+
+		app := fiber.New()
+		app.Get("/user/result", handler.GetResultsByUserIdFromToken)
+
+		return mockService, handler, app
+	}
+
+	expectData := []entities.Result{
+		{
+			Model: gorm.Model{
+				ID: 1,
+			},
+			Image: "image_url_test",
+			UserId: 1,
+			AcneType: []entities.Acne_Facial_Result{
+				{ID: 1, Count: 10},
+				{ID: 2, Count: 5},
+			},
+			FacialType: []entities.Acne_Facial_Result{
+				{ID: 1, Count: 10},
+				{ID: 2, Count: 5},
+			},
+			SkinType: 1,
+			Skincare: []uint{1, 2, 3},
+		},
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.On("GetResultsByUserIdFromToken", "Bearer example-token").Return(expectData, nil)
+
+		req := httptest.NewRequest("GET", "/user/result", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "Bearer example-token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed to get results", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.ExpectedCalls = nil
+		mockService.On("GetResultsByUserIdFromToken", "Bearer example-token").Return([]entities.Result{}, errors.New("service error"))
+
+		req := httptest.NewRequest("GET", "/user/result", nil)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "Bearer example-token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+}
