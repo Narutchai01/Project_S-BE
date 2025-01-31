@@ -33,3 +33,8 @@ func (repo *GormResultRepository) GetResultById(id int) (entities.Result, error)
 	err := repo.db.First(&result, id).Error
 	return result, err
 }
+
+func (repo *GormResultRepository) UpdateResultById(id int, result entities.Result) (entities.Result, error) {
+	err := repo.db.Model(&entities.Result{}).Where("id = ?", id).Updates(&result).Error
+	return result, err
+}

@@ -16,4 +16,5 @@ func ResultRoutes(app fiber.Router, db *gorm.DB) {
 	app.Post("/", resultHandler.CreateResult)
 	app.Get("/", resultHandler.GetResults)
 	app.Get("/:id", resultHandler.GetResultById)
+	app.Put("/:id", resultHandler.UpdateResultById)
 }

@@ -58,3 +58,24 @@ func (handler *HttpResultHandler) GetResultById(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
 }
+
+func (handler *HttpResultHandler) UpdateResultById(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	var new_result entities.Result
+
+	if err := c.BodyParser(&new_result); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	result, err := handler.resultUcase.UpdateResultById(id, new_result)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
+}
