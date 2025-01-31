@@ -380,3 +380,62 @@ func TestGormGetResultsByUserId(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+
+func TestGormGetLatestResultsByUserIdFromToken(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormResultRepository(gormDB)
+
+	expectData := entities.Result{
+		Model: gorm.Model{ID: 1},
+		Image: "image_url_test",
+		UserId: 1,
+		AcneType: []entities.Acne_Facial_Result{
+			{ID: 1, Count: 10},
+			{ID: 2, Count: 5},
+		},
+		FacialType: []entities.Acne_Facial_Result{
+			{ID: 1, Count: 10},
+			{ID: 2, Count: 5},
+		},
+		SkinType: 1,
+		Skincare: []uint{1, 2, 3},
+	}
+
+	acneTypeJSON, _ := json.Marshal(expectData.AcneType)
+	facialTypeJSON, _ := json.Marshal(expectData.FacialType)
+	skincareJSON, _ := json.Marshal(expectData.Skincare)
+
+	expectedSQL := `SELECT \* FROM "results" WHERE user_id = \$1 AND "results"\."deleted_at" IS NULL ORDER BY "results"\."id" DESC LIMIT \$2`
+	rows := sqlmock.NewRows([]string{"id", "image", "user_id", "acne_type", "facial_type", "skin_type", "skincare"}).
+		AddRow(expectData.ID, expectData.Image, expectData.UserId, string(acneTypeJSON), string(facialTypeJSON), expectData.SkinType, string(skincareJSON))
+
+	t.Run("success", func(t *testing.T) {
+		mock.ExpectQuery(expectedSQL).WithArgs(expectData.UserId, 1).WillReturnRows(rows)
+
+		result, err := repo.GetLatestResultByUserIdFromToken(int(expectData.UserId))
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectData, result)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("failure", func(t *testing.T) {
+		mock.ExpectQuery(expectedSQL).WithArgs(1, 1).WillReturnError(errors.New("database error"))
+
+		_, err := repo.GetLatestResultByUserIdFromToken(1)
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}
+
