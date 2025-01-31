@@ -15,6 +15,7 @@ type ResultUsecases interface {
 	UpdateResultById(id int, result entities.Result) (entities.Result, error)
 	DeleteResultById(id int) error
 	GetResultsByUserIdFromToken(token string) ([]entities.Result, error)
+	GetResultsByUserId(id int) ([]entities.Result, error)
 }
 type resultService struct {
 	repo repositories.ResultRepository
@@ -74,4 +75,8 @@ func (service *resultService) GetResultsByUserIdFromToken(token string) ([]entit
 		return []entities.Result{}, err
 	}
 	return service.repo.GetResultsByUserId(int(user_id))
+}
+
+func (service *resultService) GetResultsByUserId(user_id int) ([]entities.Result, error) {
+	return service.repo.GetResultsByUserId(user_id)
 }

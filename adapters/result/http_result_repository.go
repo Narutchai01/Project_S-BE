@@ -108,3 +108,20 @@ func (handler *HttpResultHandler) GetResultsByUserIdFromToken(c *fiber.Ctx) erro
 	return c.Status(fiber.StatusOK).JSON(presentation.ResultsResponse(results))
 }
 
+func (handler *HttpResultHandler) GetResultsByUserId(c *fiber.Ctx) error {
+
+	user_id, err := c.ParamsInt("userId")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	results, err := handler.resultUcase.GetResultsByUserId(user_id)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ResultsResponse(results))
+}
+

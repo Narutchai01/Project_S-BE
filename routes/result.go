@@ -19,6 +19,7 @@ func ResultRoutes(app fiber.Router, user fiber.Router, db *gorm.DB) {
 	result.Get("/:id", resultHandler.GetResultById)
 	result.Put("/:id", resultHandler.UpdateResultById)
 	result.Delete("/:id", resultHandler.DeleteResultById)
+	result.Get("/user/:userId", resultHandler.GetResultsByUserId)
 	
 	resultUser := user.Group("/result")
 	resultUser.Get("/", resultHandler.GetResultsByUserIdFromToken)
