@@ -49,6 +49,11 @@ func (m *MockResultService) GetResultsByUserIdFromToken(token string) ([]entitie
 	args := m.Called(token)
 	return args.Get(0).([]entities.Result), args.Error(1)
 }
+
+func (m *MockResultService) GetResultsByUserId(user_id int) ([]entities.Result, error) {
+	args := m.Called(user_id)
+	return args.Get(0).([]entities.Result), args.Error(1)
+}
 func TestCreateResultHandler(t *testing.T) {
 	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
 		mockService := new(MockResultService)
@@ -466,6 +471,76 @@ func TestGetResultsByUserIdFromTokenHandler(t *testing.T) {
 		req := httptest.NewRequest("GET", "/user/result", nil)
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("token", "Bearer example-token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+}
+
+func TestGetResultsByUserIdHandler(t *testing.T) {
+	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
+		mockService := new(MockResultService)
+		handler := adapters.NewHttpResultHandler(mockService)
+
+		app := fiber.New()
+		app.Get("/result/user/:userId", handler.GetResultsByUserId)
+
+		return mockService, handler, app
+	}
+
+	expectData := []entities.Result{
+		{
+			Model: gorm.Model{
+				ID: 1,
+			},
+			Image: "image_url_test",
+			UserId: 1,
+			AcneType: []entities.Acne_Facial_Result{
+				{ID: 1, Count: 10},
+				{ID: 2, Count: 5},
+			},
+			FacialType: []entities.Acne_Facial_Result{
+				{ID: 1, Count: 10},
+				{ID: 2, Count: 5},
+			},
+			SkinType: 1,
+			Skincare: []uint{1, 2, 3},
+		},
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.On("GetResultsByUserId", int(expectData[0].UserId)).Return(expectData, nil)
+
+		req := httptest.NewRequest("GET", "/result/user/1", nil)
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed to convert userId to int", func(t *testing.T) {
+		mockService, _, app := setup()
+		req := httptest.NewRequest("GET", "/result/user/error-id", nil)
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed to get results", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.ExpectedCalls = nil
+		mockService.On("GetResultsByUserId", int(expectData[0].UserId)).Return([]entities.Result{}, errors.New("service error"))
+
+		req := httptest.NewRequest("GET", "/result/user/1", nil)
+		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
