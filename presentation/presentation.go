@@ -1,6 +1,7 @@
 package presentation
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
@@ -70,7 +71,7 @@ func DeleteResponse(id int) *Responses {
 	return &Responses{
 		Status: true,
 		Data: map[string]string{
-			"delete_id": string(rune(id)),
+			"delete_id": strconv.Itoa(id),
 		},
 		Error: nil,
 	}
