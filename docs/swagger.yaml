@@ -1,5 +1,35 @@
 basePath: /api
 definitions:
+  entities.Result:
+    properties: 
+      image: 
+        type: string
+      user_id:
+        type: integer
+      acne_type:
+        type: array
+        items: 
+          type: object
+          properties: 
+            id: 
+              type: integer
+            count: 
+              type: integer
+      facial_type:
+        type: array
+        items: 
+          type: object
+          properties: 
+            id: 
+              type: integer
+            count: 
+              type: integer
+      skin_type:
+        type: integer
+      skincare:
+        type: array
+        items: 
+          type: integer
   entities.Admin:
     properties:
       email:
@@ -36,6 +66,236 @@ info:
   title: Project S API
   version: "1.0"
 paths:
+  /result:
+    post:
+      consumes:
+      - application/json
+      description: Create new result
+      parameters:
+      - description: Result information
+        in: body
+        name: result
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Result'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create new result
+      tags:
+      - result
+    get:
+      consumes:
+      - application/json
+      description: Get results
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get results
+      tags:
+      - result
+  /result/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get result by ID
+      parameters:
+      - description: Result ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get acne
+      tags:
+      - acne
+    put:
+      consumes:
+      - application/json
+      description: Update a result by ID
+      parameters:
+      - description: Result ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Result information
+        in: body
+        name: result
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Result'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Update an acne by ID
+      tags:
+      - acne
+    delete:
+      consumes:
+      - application/json
+      description: Delete a result by ID
+      parameters:
+      - description: Result ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Delete a result by ID
+      tags:
+      - result
+  /result/user/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Get results
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get results
+      tags:
+      - result
+  /user/result/:
+    get:
+      consumes:
+      - application/json
+      description: Get results by UserId from Token
+      parameters:
+      - description: User Bearer Token
+        in: header
+        name: token
+        required: true
+        type: string
+        schema: 
+          example: bearer token_from_user_login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create an acne
+      tags:
+      - acne
+  /user/result/latest:
+    get:
+      consumes:
+      - application/json
+      description: Get latest result by UserId from Token
+      parameters:
+      - description: User Bearer Token
+        in: header
+        name: token
+        required: true
+        type: string
+        schema: 
+          example: bearer token_from_user_login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create an acne
+      tags:
+      - acne
   /acne:
     get:
       consumes:
@@ -210,7 +470,19 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
       summary: Create facial
       tags:
       - facial
@@ -227,7 +499,19 @@ paths:
         type: integer
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
       summary: Delete facial by ID
       tags:
       - facial
@@ -250,7 +534,19 @@ paths:
         type: file
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses' 
       summary: Update facial by ID
       tags:
       - facial
@@ -692,7 +988,19 @@ paths:
       description: Get all facials
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
       summary: Get all facials
       tags:
       - facial
@@ -709,7 +1017,19 @@ paths:
         type: integer
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
       summary: Get facial by ID
       tags:
       - facial
