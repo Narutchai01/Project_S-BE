@@ -1,8 +1,6 @@
 package middlewares
 
 import (
-	// "fmt"
-
 	"github.com/Narutchai01/Project_S-BE/config"
 	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/gofiber/fiber/v2"
@@ -16,8 +14,7 @@ func AuthorizationRequired() fiber.Handler {
 		ErrorHandler:   AuthError,
 		SigningKey:     []byte(secretKey),
 		SigningMethod:  "HS256",
-		TokenLookup:    "header:token", 
-		AuthScheme:     "",         
+		TokenLookup:    "header:token",
 	})
 }
 
