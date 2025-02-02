@@ -393,7 +393,7 @@ func TestDeleteResultByIdHandler(t *testing.T) {
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		assert.Equal(t, fiber.StatusNoContent, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 
@@ -549,7 +549,7 @@ func TestGetResultsByUserIdHandler(t *testing.T) {
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 }
