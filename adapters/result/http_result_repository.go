@@ -157,17 +157,17 @@ func (handler *HttpResultHandler) DeleteResultById(c *fiber.Ctx) error {
 
 // GetResultsByUserIdFromToken godoc
 //
-//	@Summary		Get results by user_id from token
-//	@Description	Get results by user_id from token
-//	@Tags			result
-//	@Accept			json
-//	@Produce		json
-//	@Param			token	header		string	true	"User Bearer Token"
-//	@Param			result	body		entities.Result	true	"Result information"
-//	@Success		200		{object}	presentation.Responses
-//	@Failure		500		{object}	presentation.Responses
-//    @Failure		401		{object}	presentation.Responses
-//	@Router			/user/result [get]
+//		@Summary		Get results by user_id from token
+//		@Description	Get results by user_id from token
+//		@Tags			result
+//		@Accept			json
+//		@Produce		json
+//		@Param			token	header		string	true	"User Bearer Token"
+//		@Param			result	body		entities.Result	true	"Result information"
+//		@Success		200		{object}	presentation.Responses
+//		@Failure		500		{object}	presentation.Responses
+//	   @Failure		401		{object}	presentation.Responses
+//		@Router			/user/result [get]
 func (handler *HttpResultHandler) GetResultsByUserIdFromToken(c *fiber.Ctx) error {
 	token := c.Get("token")
 
@@ -211,16 +211,16 @@ func (handler *HttpResultHandler) GetResultsByUserId(c *fiber.Ctx) error {
 
 // GetLatestResultByUserIdFromToken godoc
 //
-//	@Summary		Get latest result by user_id from token
-//	@Description	Get latest result by user_id from token
-//	@Tags			result
-//	@Accept			json
-//	@Produce		json
-//	@Param			token	header		string	true	"User Bearer Token"
-//	@Success		200		{object}	presentation.Responses
-//	@Failure		500		{object}	presentation.Responses
-//    @Failure		401		{object}	presentation.Responses
-//	@Router			/user/result [get]
+//		@Summary		Get latest result by user_id from token
+//		@Description	Get latest result by user_id from token
+//		@Tags			result
+//		@Accept			json
+//		@Produce		json
+//		@Param			token	header		string	true	"User Bearer Token"
+//		@Success		200		{object}	presentation.Responses
+//		@Failure		500		{object}	presentation.Responses
+//	   @Failure		401		{object}	presentation.Responses
+//		@Router			/user/result [get]
 func (handler *HttpResultHandler) GetLatestResultByUserIdFromToken(c *fiber.Ctx) error {
 	token := c.Get("token")
 
