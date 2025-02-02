@@ -2,6 +2,7 @@ package routes
 
 import (
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/result"
+	"github.com/Narutchai01/Project_S-BE/middlewares"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -22,6 +23,7 @@ func ResultRoutes(app fiber.Router, user fiber.Router, db *gorm.DB) {
 	result.Get("/user/:userId", resultHandler.GetResultsByUserId)
 	
 	resultUser := user.Group("/result")
+	resultUser.Use(middlewares.AuthorizationRequired())
 	resultUser.Get("/", resultHandler.GetResultsByUserIdFromToken)
 	resultUser.Get("/latest", resultHandler.GetLatestResultByUserIdFromToken)
 }
