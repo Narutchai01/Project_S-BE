@@ -59,7 +59,7 @@ definitions:
       status:
         type: boolean
     type: object
-host: localhost:8080
+host: localhost:3380
 info:
   contact: {}
   description: This is a sample server for Project S.
@@ -72,12 +72,14 @@ paths:
       - application/json
       description: Create new result
       parameters:
-      - description: Result information
-        in: body
-        name: result
+      - in: formData
+        name: name
+        type: string
+      - description: Token
+        in: header
+        name: token
         required: true
-        schema:
-          $ref: '#/definitions/entities.Result'
+        type: string
       produces:
       - application/json
       responses:

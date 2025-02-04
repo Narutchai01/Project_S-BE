@@ -15,9 +15,16 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
+	github.com/gofiber/fiber/v3 v3.0.0-beta.4 // indirect
+	github.com/gofiber/schema v1.2.0 // indirect
+	github.com/gofiber/utils/v2 v2.0.0-beta.7 // indirect
 	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
+	github.com/philhofer/fwd v1.1.3-0.20240916144458-20a13a1f6b7c // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
+	github.com/tinylib/msgp v1.2.5 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 )
 
 require (

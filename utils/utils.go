@@ -2,6 +2,7 @@ package utils
 
 import (
 	"crypto/rand"
+	// "encoding/json"
 	"fmt"
 	"log"
 	"math/big"
@@ -11,10 +12,19 @@ import (
 	"time"
 
 	"github.com/Narutchai01/Project_S-BE/config"
+	"github.com/Narutchai01/Project_S-BE/entities"
+	"gorm.io/gorm"
+
+	// "github.com/gofiber/fiber/v3/client"
 	"github.com/golang-jwt/jwt"
 	storage_go "github.com/supabase-community/storage-go"
 	"gopkg.in/gomail.v2"
+	// "gorm.io/gorm"
 )
+
+// type RoboflowResponse struct {
+// 	Predictions []map[string]interface{} `json:"predictions"`
+// }
 
 func CheckDirectoryExist() error  {
 	dir := "./uploads"
@@ -186,4 +196,40 @@ func CheckEmptyValueBeforeUpdate(newValue string, oldValue string) string {
 		return oldValue
 	}
 	return newValue
+}
+
+func FacialAcneSkinAnalysis(apiKey string, modelID string, imageURL string) (entities.Result, error) {
+	var result entities.Result
+	// fullURL := fmt.Sprintf("https://detect.roboflow.com/%s", modelID)
+
+	// client := client.New()
+	// client.SetParams(map[string]string{
+	// 	"api_key": apiKey,
+	// 	"image": imageURL,
+	// })
+	// resp, err := client.Post(fullURL)
+	// if err != nil {
+	// 	return entities.Result{}, err
+	// }
+
+	// err = json.Unmarshal(resp.Body(), &result)
+	// if err != nil {
+	// 	return entities.Result{}, err
+	// }
+
+	result.AcneType = []entities.Acne_Facial_Result{
+		{ID: 1, Count: 10},
+		{ID: 2, Count: 5},
+	}
+	result.FacialType = []entities.Acne_Facial_Result{
+		{ID: 1, Count: 10},
+		{ID: 2, Count: 5},
+	}
+	result.SkinType = 1
+	result.Skincare = []entities.Skincare{
+		{Model: gorm.Model{ID: 2}},
+	}
+	// result.Skincare = []uint{2}
+	
+	return result, nil
 }

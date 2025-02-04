@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"mime/multipart"
 	"net/http/httptest"
 
 	"testing"
@@ -20,8 +21,8 @@ type MockResultService struct {
 	mock.Mock
 }
 
-func (m *MockResultService) CreateResult(result entities.Result) (entities.Result, error) {
-	args := m.Called(result)
+func (m *MockResultService) CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Result, error) {
+	args := m.Called(token, file, c)
 	return args.Get(0).(entities.Result), args.Error(1)
 }
 
@@ -85,7 +86,11 @@ func TestCreateResultHandler(t *testing.T) {
 			{ID: 2, Count: 5},
 		},
 		SkinType: 1,
-		Skincare: []uint{1, 2, 3},
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1},},
+			{Model: gorm.Model{ID: 2},},
+		},
+		// Skincare: []uint{2},
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -160,7 +165,11 @@ func TestGetResultsHandler(t *testing.T) {
 				{ID: 2, Count: 5},
 			},
 			SkinType: 1,
-			Skincare: []uint{1, 2, 3},
+			Skincare: []entities.Skincare{
+				{Model: gorm.Model{ID: 1},},
+				{Model: gorm.Model{ID: 2},},
+			},
+			// Skincare: []uint{2},
 		},
 		{
 			Model: gorm.Model{
@@ -177,7 +186,11 @@ func TestGetResultsHandler(t *testing.T) {
 				{ID: 2, Count: 5},
 			},
 			SkinType: 1,
-			Skincare: []uint{1, 2, 3},
+			Skincare: []entities.Skincare{
+				{Model: gorm.Model{ID: 1},},
+				{Model: gorm.Model{ID: 2},},
+			},
+			// Skincare: []uint{2},
 		},
 	}
 
@@ -235,7 +248,11 @@ func TestGetResultByIdHandler(t *testing.T) {
 			{ID: 2, Count: 5},
 		},
 		SkinType: 1,
-		Skincare: []uint{1, 2, 3},
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1},},
+			{Model: gorm.Model{ID: 2},},
+		},
+		// Skincare: []uint{2},
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -303,7 +320,11 @@ func TestUpdateResultByIdHandler(t *testing.T) {
 			{ID: 2, Count: 5},
 		},
 		SkinType: 1,
-		Skincare: []uint{1, 2, 3},
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1},},
+			{Model: gorm.Model{ID: 2},},
+		},
+		// Skincare: []uint{2},
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -450,7 +471,11 @@ func TestGetResultsByUserIdFromTokenHandler(t *testing.T) {
 				{ID: 2, Count: 5},
 			},
 			SkinType: 1,
-			Skincare: []uint{1, 2, 3},
+			Skincare: []entities.Skincare{
+				{Model: gorm.Model{ID: 1},},
+				{Model: gorm.Model{ID: 2},},
+			},
+			// Skincare: []uint{2},
 		},
 	}
 
@@ -511,7 +536,11 @@ func TestGetResultsByUserIdHandler(t *testing.T) {
 				{ID: 2, Count: 5},
 			},
 			SkinType: 1,
-			Skincare: []uint{1, 2, 3},
+			Skincare: []entities.Skincare{
+				{Model: gorm.Model{ID: 1},},
+				{Model: gorm.Model{ID: 2},},
+			},
+			// Skincare: []uint{2},
 		},
 	}
 
@@ -580,7 +609,11 @@ func TestGetLatestResultByUserIdFromTokenHandler(t *testing.T) {
 				{ID: 2, Count: 5},
 			},
 			SkinType: 1,
-			Skincare: []uint{1, 2, 3},
+			Skincare: []entities.Skincare{
+				{Model: gorm.Model{ID: 1},},
+				{Model: gorm.Model{ID: 2},},
+			},
+			// Skincare: []uint{2},
 	}
 
 	t.Run("success", func(t *testing.T) {

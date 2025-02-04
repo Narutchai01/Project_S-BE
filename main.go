@@ -15,7 +15,7 @@ import (
 // @title			Project S API
 // @version		1.0
 // @description	This is a sample server for Project S.
-// @host			localhost:8080
+// @host			localhost:3380
 // @BasePath		/api
 
 func main() {

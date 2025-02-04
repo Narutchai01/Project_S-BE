@@ -22,27 +22,25 @@ func NewHttpResultHandler(resultUcase usecases.ResultUsecases) *HttpResultHandle
 //	@Tags			result
 //	@Accept			json
 //	@Produce		json
-//	@Param			result	body		entities.Result	true	"Result information"
+//	@Param			file	formData	file			false	"Admin Image"
 //	@Success		201		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		500		{object}	presentation.Responses
 //	@Router			/result [post]
 func (handler *HttpResultHandler) CreateResult(c *fiber.Ctx) error {
 
-	var result entities.Result
-
-	if err := c.BodyParser(&result); err != nil {
+	file, err := c.FormFile("file")
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	createdResult, err := handler.resultUcase.CreateResult(result)
+	token := c.Get("token")
+	createdResult, err := handler.resultUcase.CreateResult(token, *file, c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	response := presentation.ToResultResponse(createdResult)
-
-	return c.Status(fiber.StatusCreated).JSON(response)
+	return c.Status(fiber.StatusCreated).JSON(presentation.ToResultResponse(createdResult))
 }
 
 // GetResults godoc

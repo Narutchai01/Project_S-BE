@@ -43,7 +43,11 @@ func TestGormCreateResult(t *testing.T) {
 			{ID: 2, Count: 5},
 		},
 		SkinType: 1,
-		Skincare: []uint{1, 2, 3},
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1},},
+			{Model: gorm.Model{ID: 2},},
+		},
+		// Skincare: []uint{2},
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -97,7 +101,11 @@ func TestGormGetResults(t *testing.T) {
 			{ID: 2, Count: 5},
 		},
 		SkinType: 1,
-		Skincare: []uint{1, 2, 3},
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1},},
+			{Model: gorm.Model{ID: 2},},
+		},
+		// Skincare: []uint{2},
 	}
 
 	// Convert slices to JSON
@@ -155,7 +163,11 @@ func TestGormGetResult(t *testing.T) {
 			{ID: 2, Count: 5},
 		},
 		SkinType: 1,
-		Skincare: []uint{1, 2, 3},
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1},},
+			{Model: gorm.Model{ID: 2},},
+		},
+		// Skincare: []uint{2},
 	}
 
 	// Convert slices to JSON
@@ -215,7 +227,11 @@ func TestGormUpdateResultById(t *testing.T) {
 			{ID: 1, Count: 10},
 		},
 		SkinType: 1,
-		Skincare: []uint{1, 2, 3},
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1},},
+			{Model: gorm.Model{ID: 2},},
+		},
+		// Skincare: []uint{2},
 	}
 
 	acneTypeJSON, _ := json.Marshal(expectData.AcneType)
@@ -347,7 +363,11 @@ func TestGormGetResultsByUserId(t *testing.T) {
 			{ID: 2, Count: 5},
 		},
 		SkinType: 1,
-		Skincare: []uint{1, 2, 3},
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1},},
+			{Model: gorm.Model{ID: 2},},
+		},
+		// Skincare: []uint{2},
 	},}
 
 	// Convert slices to JSON
@@ -408,7 +428,11 @@ func TestGormGetLatestResultsByUserIdFromToken(t *testing.T) {
 			{ID: 2, Count: 5},
 		},
 		SkinType: 1,
-		Skincare: []uint{1, 2, 3},
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1},},
+			{Model: gorm.Model{ID: 2},},
+		},
+		// Skincare: []uint{2},
 	}
 
 	acneTypeJSON, _ := json.Marshal(expectData.AcneType)

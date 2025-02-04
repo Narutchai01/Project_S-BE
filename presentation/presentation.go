@@ -64,7 +64,7 @@ type Result struct {
 	AcneType   []entities.Acne_Facial_Result `json:"acne_type"`
 	FacialType []entities.Acne_Facial_Result `json:"facial_type"`
 	SkinType   uint                          `json:"skin_type"`
-	Skincare   []uint                        `json:"skincare"`
+	Skincare   []entities.Skincare                        `json:"skincare"`
 }
 
 func DeleteResponse(id int) *Responses {

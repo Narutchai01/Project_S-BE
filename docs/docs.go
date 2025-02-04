@@ -30,13 +30,18 @@ const docTemplate = `{
                 "summary": "Create new result",
                 "parameters": [
                     {
-                        "description": "Result information",
-                        "name": "result",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.Result"
-                        }
+                        "type": "file",
+                        "description": "Skin Image",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1787,7 +1792,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:3380",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Project S API",

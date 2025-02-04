@@ -21,17 +21,31 @@ func (repo *GormResultRepository) CreateResult(result entities.Result) (entities
 
 func (repo *GormResultRepository) GetResults() ([]entities.Result, error) {
 	var results []entities.Result
-	err := repo.db.Find(&results).Error
+	err := repo.db.Preload("Skincare").Find(&results).Error
 	if err != nil {
 		return nil, err
 	}
 	return results, nil
 }
 
+// func (repo *GormResultRepository) GetResults() ([]presentation.Result, error) {
+// 	var results []presentation.Result
+// 	err := repo.db.Raw(`
+//         SELECT r.*, json_agg(s.*) AS skincare
+//         FROM results r
+//         LEFT JOIN skincare s ON s.id = ANY(r.skincare)
+//         GROUP BY r.id
+//     `).Scan(&results).Error
+
+// 	return results, err
+// }
+
 func (repo *GormResultRepository) GetResultById(id int) (entities.Result, error) {
 	var result entities.Result
 	err := repo.db.First(&result, id).Error
 	return result, err
+	// var result presentation.Result
+	// err := repo.db.Raw(`SELECT r.*, s.* FROM results r JOIN skincare s ON s.id = ANY(r.skincare) WHERE r.id = `)
 }
 
 func (repo *GormResultRepository) UpdateResultById(id int, result entities.Result) (entities.Result, error) {
