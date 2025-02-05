@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mime/multipart"
 	"os"
-	"reflect"
 	"strconv"
 	
 
@@ -36,9 +35,6 @@ func NewResultUsecase(repo repositories.ResultRepository) ResultUsecases {
 
 func (service *resultService) CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Result, error) {
 	var result entities.Result
-	// type ModelResponse struct {
-	// 	Predictions []map[string]interface{} `json:"predictions"`
-	// }
 
 	user_id, err := utils.ExtractToken(token)
 	if err != nil {
@@ -70,6 +66,7 @@ func (service *resultService) CreateResult(token string, file multipart.FileHead
 		return result, c.Status(fiber.StatusInternalServerError).JSON(err)
 	}
 
+	result.Image = imageUrl
 	result.AcneType = analyzeResult.AcneType
 	result.FacialType = analyzeResult.FacialType
 	result.SkinType = analyzeResult.SkinType
@@ -95,23 +92,24 @@ func (service *resultService) UpdateResultById(id int, result entities.Result) (
 	}
 
 	old_result.Image = utils.CheckEmptyValueBeforeUpdate(result.Image, old_result.Image)
-	if result.UserId != old_result.UserId && result.UserId != 0 {
-		old_result.UserId = result.UserId
+	if result.UserId == 0 {
+		result.UserId = old_result.UserId
 	}
-	if len(result.AcneType) > 0 && !reflect.DeepEqual(result.AcneType, old_result.AcneType) {
-		old_result.AcneType = result.AcneType
+	if len(result.AcneType) <= 0 {
+		result.AcneType = old_result.AcneType
 	}
-	if len(result.FacialType) > 0 && !reflect.DeepEqual(result.FacialType, old_result.FacialType) {
-		old_result.FacialType = result.FacialType
+	if len(result.FacialType) <= 0 {
+		result.FacialType = old_result.FacialType
 	}
-	if result.SkinType != old_result.SkinType {
-		old_result.SkinType = result.SkinType
+	if result.SkinType == 0 {
+		result.SkinType = old_result.SkinType
 	}
-	if len(result.Skincare) > 0 && !reflect.DeepEqual(result.Skincare, old_result.Skincare) {
-		old_result.Skincare = result.Skincare
+	if len(result.Skincare) <= 0 {
+		result.Skincare = old_result.Skincare
+		// !reflect.DeepEqual(result.Skincare, old_result.Skincare)
 	}
 
-	return service.repo.UpdateResultById(id, old_result)
+	return service.repo.UpdateResultById(id, result)
 }
 
 func (service *resultService) DeleteResultById(id int) error {

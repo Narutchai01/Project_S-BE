@@ -29,7 +29,10 @@ definitions:
       skincare:
         type: array
         items: 
-          type: integer
+          type: object
+          properties:
+            id:
+              type: integer
   entities.Admin:
     properties:
       email:
@@ -59,7 +62,7 @@ definitions:
       status:
         type: boolean
     type: object
-host: localhost:3380
+host: localhost:8080
 info:
   contact: {}
   description: This is a sample server for Project S.

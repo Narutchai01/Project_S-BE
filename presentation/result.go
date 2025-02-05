@@ -5,6 +5,16 @@ import (
 )
 
 func ToResultResponse(data entities.Result) *Responses {
+	skincares := make([]Skincare, len(data.Skincare))
+	for i, s := range data.Skincare {
+		skincares[i] = Skincare{
+			ID: s.ID,
+			Image:       s.Image,
+			Name:        s.Name,
+			Description: s.Description,
+		}
+	}
+
 	result := Result{
 		ID:         data.ID,
 		Image:      data.Image,
@@ -12,7 +22,7 @@ func ToResultResponse(data entities.Result) *Responses {
 		AcneType:   data.AcneType,
 		FacialType: data.FacialType,
 		SkinType:   data.SkinType,
-		Skincare:   data.Skincare,
+		Skincare:   skincares,
 	}
 
 	return &Responses{
@@ -26,6 +36,16 @@ func ResultsResponse(data []entities.Result) *Responses {
 	results := []Result{}
 
 	for _, result := range data {
+		skincares := make([]Skincare, len(result.Skincare))
+		for i, s := range result.Skincare {
+			skincares[i] = Skincare{
+				ID: s.ID,
+				Image:       s.Image,
+				Name:        s.Name,
+				Description: s.Description,
+			}
+		}
+
 		results = append(results, Result{
 			ID:         result.ID,
 			Image:      result.Image,
@@ -33,7 +53,7 @@ func ResultsResponse(data []entities.Result) *Responses {
 			AcneType:   result.AcneType,
 			FacialType: result.FacialType,
 			SkinType:   result.SkinType,
-			Skincare:   result.Skincare,
+			Skincare:   skincares,
 		})
 	}
 

@@ -75,7 +75,7 @@ func TestCreateResultHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Image: "image_url_test",
+		Image:  "image_url_test",
 		UserId: 1,
 		AcneType: []entities.Acne_Facial_Result{
 			{ID: 1, Count: 10},
@@ -87,8 +87,8 @@ func TestCreateResultHandler(t *testing.T) {
 		},
 		SkinType: 1,
 		Skincare: []entities.Skincare{
-			{Model: gorm.Model{ID: 1},},
-			{Model: gorm.Model{ID: 2},},
+			{Model: gorm.Model{ID: 1}},
+			{Model: gorm.Model{ID: 2}},
 		},
 		// Skincare: []uint{2},
 	}
@@ -97,12 +97,19 @@ func TestCreateResultHandler(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.On("CreateResult",
 			mock.Anything,
+			mock.AnythingOfType("multipart.FileHeader"),
+			mock.Anything,
 		).Return(expectData, nil)
 
-		body, _ := json.Marshal(expectData)
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test image"))
+		writer.Close()
 
-		req := httptest.NewRequest("POST", "/result", bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
+		req := httptest.NewRequest("POST", "/result", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("token", "bearer example-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -110,26 +117,39 @@ func TestCreateResultHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed in body parser", func(t *testing.T) {
-		_, _, app := setup()
-		req := httptest.NewRequest("POST", "/result", bytes.NewBuffer([]byte("invalid body")))
-		req.Header.Set("Content-Type", "application/json")
+	t.Run("failed to get image file", func(t *testing.T) {
+		mockService, _, app := setup()
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		writer.Close()
+
+		req := httptest.NewRequest("POST", "/result", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("failed to create result", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.On("CreateResult",
 			mock.Anything,
+			mock.AnythingOfType("multipart.FileHeader"),
+			mock.Anything,
 		).Return(entities.Result{}, errors.New("service error"))
 
-		body, _ := json.Marshal(expectData)
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test image"))
+		writer.Close()
 
-		req := httptest.NewRequest("POST", "/result", bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
+		req := httptest.NewRequest("POST", "/result", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("token", "bearer example-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -154,7 +174,7 @@ func TestGetResultsHandler(t *testing.T) {
 			Model: gorm.Model{
 				ID: 1,
 			},
-			Image: "image_url_test",
+			Image:  "image_url_test",
 			UserId: 1,
 			AcneType: []entities.Acne_Facial_Result{
 				{ID: 1, Count: 10},
@@ -166,8 +186,8 @@ func TestGetResultsHandler(t *testing.T) {
 			},
 			SkinType: 1,
 			Skincare: []entities.Skincare{
-				{Model: gorm.Model{ID: 1},},
-				{Model: gorm.Model{ID: 2},},
+				{Model: gorm.Model{ID: 1}},
+				{Model: gorm.Model{ID: 2}},
 			},
 			// Skincare: []uint{2},
 		},
@@ -175,7 +195,7 @@ func TestGetResultsHandler(t *testing.T) {
 			Model: gorm.Model{
 				ID: 2,
 			},
-			Image: "image_url_test",
+			Image:  "image_url_test",
 			UserId: 1,
 			AcneType: []entities.Acne_Facial_Result{
 				{ID: 1, Count: 10},
@@ -187,8 +207,8 @@ func TestGetResultsHandler(t *testing.T) {
 			},
 			SkinType: 1,
 			Skincare: []entities.Skincare{
-				{Model: gorm.Model{ID: 1},},
-				{Model: gorm.Model{ID: 2},},
+				{Model: gorm.Model{ID: 1}},
+				{Model: gorm.Model{ID: 2}},
 			},
 			// Skincare: []uint{2},
 		},
@@ -237,7 +257,7 @@ func TestGetResultByIdHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Image: "image_url_test",
+		Image:  "image_url_test",
 		UserId: 1,
 		AcneType: []entities.Acne_Facial_Result{
 			{ID: 1, Count: 10},
@@ -249,8 +269,8 @@ func TestGetResultByIdHandler(t *testing.T) {
 		},
 		SkinType: 1,
 		Skincare: []entities.Skincare{
-			{Model: gorm.Model{ID: 1},},
-			{Model: gorm.Model{ID: 2},},
+			{Model: gorm.Model{ID: 1}},
+			{Model: gorm.Model{ID: 2}},
 		},
 		// Skincare: []uint{2},
 	}
@@ -309,7 +329,7 @@ func TestUpdateResultByIdHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Image: "image_url_test",
+		Image:  "image_url_test",
 		UserId: 1,
 		AcneType: []entities.Acne_Facial_Result{
 			{ID: 1, Count: 10},
@@ -321,8 +341,8 @@ func TestUpdateResultByIdHandler(t *testing.T) {
 		},
 		SkinType: 1,
 		Skincare: []entities.Skincare{
-			{Model: gorm.Model{ID: 1},},
-			{Model: gorm.Model{ID: 2},},
+			{Model: gorm.Model{ID: 1}},
+			{Model: gorm.Model{ID: 2}},
 		},
 		// Skincare: []uint{2},
 	}
@@ -398,7 +418,6 @@ func TestDeleteResultByIdHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-
 	expectData := entities.Acne{
 		Model: gorm.Model{
 			ID: 1,
@@ -460,7 +479,7 @@ func TestGetResultsByUserIdFromTokenHandler(t *testing.T) {
 			Model: gorm.Model{
 				ID: 1,
 			},
-			Image: "image_url_test",
+			Image:  "image_url_test",
 			UserId: 1,
 			AcneType: []entities.Acne_Facial_Result{
 				{ID: 1, Count: 10},
@@ -472,8 +491,8 @@ func TestGetResultsByUserIdFromTokenHandler(t *testing.T) {
 			},
 			SkinType: 1,
 			Skincare: []entities.Skincare{
-				{Model: gorm.Model{ID: 1},},
-				{Model: gorm.Model{ID: 2},},
+				{Model: gorm.Model{ID: 1}},
+				{Model: gorm.Model{ID: 2}},
 			},
 			// Skincare: []uint{2},
 		},
@@ -525,7 +544,7 @@ func TestGetResultsByUserIdHandler(t *testing.T) {
 			Model: gorm.Model{
 				ID: 1,
 			},
-			Image: "image_url_test",
+			Image:  "image_url_test",
 			UserId: 1,
 			AcneType: []entities.Acne_Facial_Result{
 				{ID: 1, Count: 10},
@@ -537,8 +556,8 @@ func TestGetResultsByUserIdHandler(t *testing.T) {
 			},
 			SkinType: 1,
 			Skincare: []entities.Skincare{
-				{Model: gorm.Model{ID: 1},},
-				{Model: gorm.Model{ID: 2},},
+				{Model: gorm.Model{ID: 1}},
+				{Model: gorm.Model{ID: 2}},
 			},
 			// Skincare: []uint{2},
 		},
@@ -595,25 +614,25 @@ func TestGetLatestResultByUserIdFromTokenHandler(t *testing.T) {
 	}
 
 	expectData := entities.Result{
-			Model: gorm.Model{
-				ID: 1,
-			},
-			Image: "image_url_test",
-			UserId: 1,
-			AcneType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			FacialType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			SkinType: 1,
-			Skincare: []entities.Skincare{
-				{Model: gorm.Model{ID: 1},},
-				{Model: gorm.Model{ID: 2},},
-			},
-			// Skincare: []uint{2},
+		Model: gorm.Model{
+			ID: 1,
+		},
+		Image:  "image_url_test",
+		UserId: 1,
+		AcneType: []entities.Acne_Facial_Result{
+			{ID: 1, Count: 10},
+			{ID: 2, Count: 5},
+		},
+		FacialType: []entities.Acne_Facial_Result{
+			{ID: 1, Count: 10},
+			{ID: 2, Count: 5},
+		},
+		SkinType: 1,
+		Skincare: []entities.Skincare{
+			{Model: gorm.Model{ID: 1}},
+			{Model: gorm.Model{ID: 2}},
+		},
+		// Skincare: []uint{2},
 	}
 
 	t.Run("success", func(t *testing.T) {

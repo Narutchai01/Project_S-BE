@@ -1,6 +1,8 @@
 package repositories
 
-import "github.com/Narutchai01/Project_S-BE/entities"
+import (
+	"github.com/Narutchai01/Project_S-BE/entities"
+)
 
 type ResultRepository interface {
 	CreateResult(result entities.Result) (entities.Result, error)

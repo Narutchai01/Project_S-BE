@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:3380",
+    "host": "localhost:8080",
     "basePath": "/api",
     "paths": {
         "/result": {
@@ -1765,7 +1765,12 @@
                 "skincare" : {
                     "type" : "array",
                     "items": {
-                        "type" : "integer"
+                        "type" : "object",
+                        "properties": {
+                            "id" : {
+                                "type" : "integer"
+                            }
+                        }
                     }
                 }
             }
