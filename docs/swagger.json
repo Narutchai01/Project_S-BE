@@ -6,59 +6,10 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "localhost:3380",
     "basePath": "/api",
     "paths": {
         "/result": {
-            "post": {
-                "description": "Create new result",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Create new result",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Skin Image",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            },
             "get": {
                 "description": "Get results",
                 "consumes": [
@@ -203,8 +154,8 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/presentation.Responses"
                         }
@@ -269,6 +220,55 @@
             }
         },
         "/user/result": {
+            "post": {
+                "description": "Create new result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "result"
+                ],
+                "summary": "Create new result",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Skin Image",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            },
             "get": {
                 "description": "Get results by UserId from Token",
                 "consumes": [
@@ -1765,12 +1765,7 @@
                 "skincare" : {
                     "type" : "array",
                     "items": {
-                        "type" : "object",
-                        "properties": {
-                            "id" : {
-                                "type" : "integer"
-                            }
-                        }
+                        "type": "integer"
                     }
                 }
             }

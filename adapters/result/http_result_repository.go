@@ -1,6 +1,9 @@
 package adapters
 
 import (
+	// "github.com/Narutchai01/Project_S-BE/entities"
+	"fmt"
+
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/usecases"
@@ -26,7 +29,7 @@ func NewHttpResultHandler(resultUcase usecases.ResultUsecases) *HttpResultHandle
 //	@Success		201		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		500		{object}	presentation.Responses
-//	@Router			/result [post]
+//	@Router			/user/result [post]
 func (handler *HttpResultHandler) CreateResult(c *fiber.Ctx) error {
 
 	file, err := c.FormFile("file")
@@ -103,7 +106,7 @@ func (handler *HttpResultHandler) GetResultById(c *fiber.Ctx) error {
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		500		{object}	presentation.Responses
-//	@Router			/admin/result/ [put]
+//	@Router			/result/{id} [put]
 func (handler *HttpResultHandler) UpdateResultById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
@@ -116,8 +119,9 @@ func (handler *HttpResultHandler) UpdateResultById(c *fiber.Ctx) error {
 	if err := c.BodyParser(&new_result); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
+	fmt.Println("hello")
 
-	result, err := handler.resultUcase.UpdateResultById(id, new_result)
+	result, err := handler.resultUcase.UpdateResultById(id, (new_result))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
@@ -150,7 +154,7 @@ func (handler *HttpResultHandler) DeleteResultById(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(presentation.DeleteResponse(id))
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))
 }
 
 // GetResultsByUserIdFromToken godoc

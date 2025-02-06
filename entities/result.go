@@ -11,7 +11,18 @@ type Result struct {
 	AcneType   []Acne_Facial_Result `json:"acne_type" gorm:"type:jsonb;serializer:json"`
 	FacialType []Acne_Facial_Result `json:"facial_type" gorm:"type:jsonb;serializer:json"`
 	SkinType   uint                 `json:"skin_type" gorm:"not null"`
-	Skincare []Skincare `json:"skincare" gorm:"many2many:result_skincare;"`
+	Skincare []uint `json:"skincare" gorm:"serializer:json"`
+	User       User  `gorm:"foreignKey:UserId;references:ID"`
+}
+
+type ResultWithSkincare struct {
+	gorm.Model `swaggerignore:"true"`
+	Image      string               `json:"image" gorm:"not null"`
+	UserId     uint                 `json:"user_id" gorm:"not null"`
+	AcneType   []Acne_Facial_Result `json:"acne_type" gorm:"type:jsonb;serializer:json"`
+	FacialType []Acne_Facial_Result `json:"facial_type" gorm:"type:jsonb;serializer:json"`
+	SkinType   uint                 `json:"skin_type" gorm:"not null"`
+	Skincare []Skincare `json:"skincare" gorm:"type:jsonb;serializer:json"`
 	User       User  `gorm:"foreignKey:UserId;references:ID"`
 }
 

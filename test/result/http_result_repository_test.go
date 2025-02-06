@@ -21,24 +21,24 @@ type MockResultService struct {
 	mock.Mock
 }
 
-func (m *MockResultService) CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Result, error) {
+func (m *MockResultService) CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.ResultWithSkincare, error) {
 	args := m.Called(token, file, c)
-	return args.Get(0).(entities.Result), args.Error(1)
+	return args.Get(0).(entities.ResultWithSkincare), args.Error(1)
 }
 
-func (m *MockResultService) GetResults() ([]entities.Result, error) {
+func (m *MockResultService) GetResults() ([]entities.ResultWithSkincare, error) {
 	args := m.Called()
-	return args.Get(0).([]entities.Result), args.Error(1)
+	return args.Get(0).([]entities.ResultWithSkincare), args.Error(1)
 }
 
-func (m *MockResultService) GetResultById(id int) (entities.Result, error) {
+func (m *MockResultService) GetResultById(id int) (entities.ResultWithSkincare, error) {
 	args := m.Called(id)
-	return args.Get(0).(entities.Result), args.Error(1)
+	return args.Get(0).(entities.ResultWithSkincare), args.Error(1)
 }
 
-func (m *MockResultService) UpdateResultById(id int, result entities.Result) (entities.Result, error) {
+func (m *MockResultService) UpdateResultById(id int, result entities.Result) (entities.ResultWithSkincare, error) {
 	args := m.Called(id, result)
-	return args.Get(0).(entities.Result), args.Error(1)
+	return args.Get(0).(entities.ResultWithSkincare), args.Error(1)
 }
 
 func (m *MockResultService) DeleteResultById(id int) error {
@@ -46,19 +46,19 @@ func (m *MockResultService) DeleteResultById(id int) error {
 	return args.Error(0)
 }
 
-func (m *MockResultService) GetResultsByUserIdFromToken(token string) ([]entities.Result, error) {
+func (m *MockResultService) GetResultsByUserIdFromToken(token string) ([]entities.ResultWithSkincare, error) {
 	args := m.Called(token)
-	return args.Get(0).([]entities.Result), args.Error(1)
+	return args.Get(0).([]entities.ResultWithSkincare), args.Error(1)
 }
 
-func (m *MockResultService) GetResultsByUserId(user_id int) ([]entities.Result, error) {
+func (m *MockResultService) GetResultsByUserId(user_id int) ([]entities.ResultWithSkincare, error) {
 	args := m.Called(user_id)
-	return args.Get(0).([]entities.Result), args.Error(1)
+	return args.Get(0).([]entities.ResultWithSkincare), args.Error(1)
 }
 
-func (m *MockResultService) GetLatestResultByUserIdFromToken(token string) (entities.Result, error) {
+func (m *MockResultService) GetLatestResultByUserIdFromToken(token string) (entities.ResultWithSkincare, error) {
 	args := m.Called(token)
-	return args.Get(0).(entities.Result), args.Error(1)
+	return args.Get(0).(entities.ResultWithSkincare), args.Error(1)
 }
 func TestCreateResultHandler(t *testing.T) {
 	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
@@ -71,7 +71,7 @@ func TestCreateResultHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Result{
+	expectData := entities.ResultWithSkincare{
 		Model: gorm.Model{
 			ID: 1,
 		},
@@ -90,7 +90,6 @@ func TestCreateResultHandler(t *testing.T) {
 			{Model: gorm.Model{ID: 1}},
 			{Model: gorm.Model{ID: 2}},
 		},
-		// Skincare: []uint{2},
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -139,7 +138,7 @@ func TestCreateResultHandler(t *testing.T) {
 			mock.Anything,
 			mock.AnythingOfType("multipart.FileHeader"),
 			mock.Anything,
-		).Return(entities.Result{}, errors.New("service error"))
+		).Return(entities.ResultWithSkincare{}, errors.New("service error"))
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
@@ -169,7 +168,7 @@ func TestGetResultsHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := []entities.Result{
+	expectData := []entities.ResultWithSkincare{
 		{
 			Model: gorm.Model{
 				ID: 1,
@@ -230,7 +229,7 @@ func TestGetResultsHandler(t *testing.T) {
 	t.Run("failed to get results", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
-		mockService.On("GetResults").Return([]entities.Result{}, errors.New("service error"))
+		mockService.On("GetResults").Return([]entities.ResultWithSkincare{}, errors.New("service error"))
 
 		req := httptest.NewRequest("GET", "/result", nil)
 		req.Header.Set("Content-Type", "application/json")
@@ -253,7 +252,7 @@ func TestGetResultByIdHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Result{
+	expectData := entities.ResultWithSkincare{
 		Model: gorm.Model{
 			ID: 1,
 		},
@@ -302,7 +301,7 @@ func TestGetResultByIdHandler(t *testing.T) {
 	t.Run("failed to get skin", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
-		mockService.On("GetResultById", int(expectData.ID)).Return(entities.Result{}, errors.New("service error"))
+		mockService.On("GetResultById", int(expectData.ID)).Return(entities.ResultWithSkincare{}, errors.New("service error"))
 
 		req := httptest.NewRequest("GET", "/result/1", nil)
 		req.Header.Set("Content-Type", "application/json")
@@ -325,7 +324,7 @@ func TestUpdateResultByIdHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Result{
+	expectData := entities.ResultWithSkincare{
 		Model: gorm.Model{
 			ID: 1,
 		},
@@ -344,7 +343,24 @@ func TestUpdateResultByIdHandler(t *testing.T) {
 			{Model: gorm.Model{ID: 1}},
 			{Model: gorm.Model{ID: 2}},
 		},
-		// Skincare: []uint{2},
+	}
+
+	inputData := entities.Result{
+		Model: gorm.Model{
+			ID: 1,
+		},
+		Image:  "image_url_test",
+		UserId: 1,
+		AcneType: []entities.Acne_Facial_Result{
+			{ID: 1, Count: 10},
+			{ID: 2, Count: 5},
+		},
+		FacialType: []entities.Acne_Facial_Result{
+			{ID: 1, Count: 10},
+			{ID: 2, Count: 5},
+		},
+		SkinType: 1,
+		Skincare: []uint{1,2},
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -354,7 +370,7 @@ func TestUpdateResultByIdHandler(t *testing.T) {
 			mock.Anything,
 		).Return(expectData, nil)
 
-		body, _ := json.Marshal(expectData)
+		body, _ := json.Marshal(inputData)
 
 		req := httptest.NewRequest("PUT", "/result/1", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -392,9 +408,9 @@ func TestUpdateResultByIdHandler(t *testing.T) {
 		mockService.On("UpdateResultById",
 			mock.Anything,
 			mock.Anything,
-		).Return(entities.Result{}, errors.New("service error"))
+		).Return(entities.ResultWithSkincare{}, errors.New("service error"))
 
-		body, _ := json.Marshal(expectData)
+		body, _ := json.Marshal(inputData)
 
 		req := httptest.NewRequest("PUT", "/result/1", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -418,7 +434,7 @@ func TestDeleteResultByIdHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Acne{
+	expectData := entities.Result{
 		Model: gorm.Model{
 			ID: 1,
 		},
@@ -433,7 +449,7 @@ func TestDeleteResultByIdHandler(t *testing.T) {
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusNoContent, resp.StatusCode)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 
@@ -474,7 +490,7 @@ func TestGetResultsByUserIdFromTokenHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := []entities.Result{
+	expectData := []entities.ResultWithSkincare{
 		{
 			Model: gorm.Model{
 				ID: 1,
@@ -515,7 +531,7 @@ func TestGetResultsByUserIdFromTokenHandler(t *testing.T) {
 	t.Run("failed to get results", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
-		mockService.On("GetResultsByUserIdFromToken", "Bearer example-token").Return([]entities.Result{}, errors.New("service error"))
+		mockService.On("GetResultsByUserIdFromToken", "Bearer example-token").Return([]entities.ResultWithSkincare{}, errors.New("service error"))
 
 		req := httptest.NewRequest("GET", "/user/result", nil)
 		req.Header.Set("Content-Type", "application/json")
@@ -539,7 +555,7 @@ func TestGetResultsByUserIdHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := []entities.Result{
+	expectData := []entities.ResultWithSkincare{
 		{
 			Model: gorm.Model{
 				ID: 1,
@@ -590,7 +606,7 @@ func TestGetResultsByUserIdHandler(t *testing.T) {
 	t.Run("failed to get results", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
-		mockService.On("GetResultsByUserId", int(expectData[0].UserId)).Return([]entities.Result{}, errors.New("service error"))
+		mockService.On("GetResultsByUserId", int(expectData[0].UserId)).Return([]entities.ResultWithSkincare{}, errors.New("service error"))
 
 		req := httptest.NewRequest("GET", "/result/user/1", nil)
 		req.Header.Set("Content-Type", "application/json")
@@ -613,7 +629,7 @@ func TestGetLatestResultByUserIdFromTokenHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Result{
+	expectData := entities.ResultWithSkincare{
 		Model: gorm.Model{
 			ID: 1,
 		},
@@ -652,7 +668,7 @@ func TestGetLatestResultByUserIdFromTokenHandler(t *testing.T) {
 	t.Run("failed to get results", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
-		mockService.On("GetLatestResultByUserIdFromToken", "Bearer example-token").Return(entities.Result{}, errors.New("service error"))
+		mockService.On("GetLatestResultByUserIdFromToken", "Bearer example-token").Return(entities.ResultWithSkincare{}, errors.New("service error"))
 
 		req := httptest.NewRequest("GET", "/user/result/latest", nil)
 		req.Header.Set("Content-Type", "application/json")

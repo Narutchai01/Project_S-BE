@@ -29,10 +29,7 @@ definitions:
       skincare:
         type: array
         items: 
-          type: object
-          properties:
-            id:
-              type: integer
+          type: integer
   entities.Admin:
     properties:
       email:
@@ -62,7 +59,7 @@ definitions:
       status:
         type: boolean
     type: object
-host: localhost:8080
+host: localhost:3380
 info:
   contact: {}
   description: This is a sample server for Project S.
@@ -70,37 +67,6 @@ info:
   version: "1.0"
 paths:
   /result:
-    post:
-      consumes:
-      - application/json
-      description: Create new result
-      parameters:
-      - in: formData
-        name: name
-        type: string
-      - description: Token
-        in: header
-        name: token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-      summary: Create new result
-      tags:
-      - result
     get:
       consumes:
       - application/json
@@ -195,8 +161,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/presentation.Responses'
         "400":
@@ -240,6 +206,37 @@ paths:
       tags:
       - result
   /user/result/:
+    post:
+      consumes:
+      - application/json
+      description: Create new result
+      parameters:
+      - in: formData
+        name: name
+        type: string
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create new result
+      tags:
+      - result
     get:
       consumes:
       - application/json

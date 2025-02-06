@@ -15,7 +15,6 @@ func ResultRoutes(app fiber.Router, user fiber.Router, db *gorm.DB) {
 	resultHandler := adapters.NewHttpResultHandler(resultService)
 
 	result := app.Group("/result")
-	result.Post("/", resultHandler.CreateResult)
 	result.Get("/", resultHandler.GetResults)
 	result.Get("/:id", resultHandler.GetResultById)
 	result.Put("/:id", resultHandler.UpdateResultById)
@@ -24,6 +23,7 @@ func ResultRoutes(app fiber.Router, user fiber.Router, db *gorm.DB) {
 	
 	resultUser := user.Group("/result")
 	resultUser.Use(middlewares.AuthorizationRequired())
+	resultUser.Post("/", resultHandler.CreateResult)
 	resultUser.Get("/", resultHandler.GetResultsByUserIdFromToken)
 	resultUser.Get("/latest", resultHandler.GetLatestResultByUserIdFromToken)
 }

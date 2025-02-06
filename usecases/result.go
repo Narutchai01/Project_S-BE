@@ -16,14 +16,14 @@ import (
 )
 
 type ResultUsecases interface {
-	CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Result, error)
-	GetResults() ([]entities.Result, error)
-	GetResultById(id int) (entities.Result, error)
-	UpdateResultById(id int, result entities.Result) (entities.Result, error)
+	CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.ResultWithSkincare, error)
+	GetResults() ([]entities.ResultWithSkincare, error)
+	GetResultById(id int) (entities.ResultWithSkincare, error)
+	UpdateResultById(id int, result entities.Result) (entities.ResultWithSkincare, error)
 	DeleteResultById(id int) error
-	GetResultsByUserIdFromToken(token string) ([]entities.Result, error)
-	GetResultsByUserId(id int) ([]entities.Result, error)
-	GetLatestResultByUserIdFromToken(token string) (entities.Result, error)
+	GetResultsByUserIdFromToken(token string) ([]entities.ResultWithSkincare, error)
+	GetResultsByUserId(id int) ([]entities.ResultWithSkincare, error)
+	GetLatestResultByUserIdFromToken(token string) (entities.ResultWithSkincare, error)
 }
 type resultService struct {
 	repo repositories.ResultRepository
@@ -33,62 +33,82 @@ func NewResultUsecase(repo repositories.ResultRepository) ResultUsecases {
 	return &resultService{repo}
 }
 
-func (service *resultService) CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Result, error) {
+func (service *resultService) CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.ResultWithSkincare, error) {
 	var result entities.Result
 
 	user_id, err := utils.ExtractToken(token)
 	if err != nil {
-		return entities.Result{}, err
+		return entities.ResultWithSkincare{}, err
 	}
 
 	fileName := uuid.New().String() + ".jpg"
 
 	if err := utils.CheckDirectoryExist(); err != nil {
-		return entities.Result{}, err
+		return entities.ResultWithSkincare{}, err
 	}
 
 	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
-		return entities.Result{}, err
+		return entities.ResultWithSkincare{}, err
 	}
 
 	imageUrl, err := utils.UploadImage(fileName, fmt.Sprintf("/result/%s", strconv.Itoa(int(user_id))))
 	if err != nil {
-		return result, c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		return entities.ResultWithSkincare{}, c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	err = os.Remove("./uploads/" + fileName)
 	if err != nil {
-		return result, c.Status(fiber.StatusInternalServerError).JSON(err)
+		return entities.ResultWithSkincare{}, c.Status(fiber.StatusInternalServerError).JSON(err)
 	}
 
-	analyzeResult, err := utils.FacialAcneSkinAnalysis("g3jhJHAwYUYatCbvFFLK", "ucare/1", imageUrl)
-	if err != nil {
-		return result, c.Status(fiber.StatusInternalServerError).JSON(err)
+	// fullURL := fmt.Sprintf("https://detect.roboflow.com/%s", "ucare/1")
+
+	// client := client.New()
+	// client.SetParams(map[string]string{
+	// 	"api_key": "g3jhJHAwYUYatCbvFFLK",
+	// 	"image": imageUrl,
+	// })
+	// resp, err := client.Post(fullURL)
+	// if err != nil {
+	// 	return entities.Result{}, err
+	// }
+
+	// err = json.Unmarshal(resp.Body(), &result)
+	// if err != nil {
+	// 	return entities.Result{}, err
+	// }
+
+	//mock ไว้ก่อน
+	result.AcneType = []entities.Acne_Facial_Result{
+		{ID: 1, Count: 10},
+		{ID: 2, Count: 5},
 	}
+	result.FacialType = []entities.Acne_Facial_Result{
+		{ID: 1, Count: 10},
+		{ID: 2, Count: 5},
+	}
+	result.SkinType = 1
+	result.Skincare = []uint{1,2}
 
 	result.Image = imageUrl
-	result.AcneType = analyzeResult.AcneType
-	result.FacialType = analyzeResult.FacialType
-	result.SkinType = analyzeResult.SkinType
-	result.Skincare = analyzeResult.Skincare
 	result.UserId = uint(user_id)
 
 	return service.repo.CreateResult(result)
 }
 
-func (service *resultService) GetResults() ([]entities.Result, error) {
+func (service *resultService) GetResults() ([]entities.ResultWithSkincare, error) {
 	return service.repo.GetResults()
 }
 
-func (service *resultService) GetResultById(id int) (entities.Result, error) {
+func (service *resultService) GetResultById(id int) (entities.ResultWithSkincare, error) {
 	return service.repo.GetResultById(id)
 }
 
-func (service *resultService) UpdateResultById(id int, result entities.Result) (entities.Result, error) {
+func (service *resultService) UpdateResultById(id int, result entities.Result) (entities.ResultWithSkincare, error) {
 
-	old_result, err := service.repo.GetResultById(id)
+	old_result, err := service.repo.GetResultByIdWithoutSkincare(id)
 	if err != nil {
-		return entities.Result{}, err
+		return entities.ResultWithSkincare{}, err
 	}
 
 	old_result.Image = utils.CheckEmptyValueBeforeUpdate(result.Image, old_result.Image)
@@ -106,7 +126,6 @@ func (service *resultService) UpdateResultById(id int, result entities.Result) (
 	}
 	if len(result.Skincare) <= 0 {
 		result.Skincare = old_result.Skincare
-		// !reflect.DeepEqual(result.Skincare, old_result.Skincare)
 	}
 
 	return service.repo.UpdateResultById(id, result)
@@ -116,24 +135,24 @@ func (service *resultService) DeleteResultById(id int) error {
 	return service.repo.DeleteResultById(id)
 }
 
-func (service *resultService) GetResultsByUserIdFromToken(token string) ([]entities.Result, error) {
+func (service *resultService) GetResultsByUserIdFromToken(token string) ([]entities.ResultWithSkincare, error) {
 	user_id, err := utils.ExtractToken(token)
 
 	if err != nil {
-		return []entities.Result{}, err
+		return []entities.ResultWithSkincare{}, err
 	}
 	return service.repo.GetResultsByUserId(int(user_id))
 }
 
-func (service *resultService) GetResultsByUserId(user_id int) ([]entities.Result, error) {
+func (service *resultService) GetResultsByUserId(user_id int) ([]entities.ResultWithSkincare, error) {
 	return service.repo.GetResultsByUserId(user_id)
 }
 
-func (service *resultService) GetLatestResultByUserIdFromToken(token string) (entities.Result, error) {
+func (service *resultService) GetLatestResultByUserIdFromToken(token string) (entities.ResultWithSkincare, error) {
 	user_id, err := utils.ExtractToken(token)
 
 	if err != nil {
-		return entities.Result{}, err
+		return entities.ResultWithSkincare{}, err
 	}
 	return service.repo.GetLatestResultByUserIdFromToken(int(user_id))
 }

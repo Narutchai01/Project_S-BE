@@ -16,55 +16,6 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/result": {
-            "post": {
-                "description": "Create new result",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Create new result",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Skin Image",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            },
             "get": {
                 "description": "Get results",
                 "consumes": [
@@ -209,8 +160,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/presentation.Responses"
                         }
@@ -275,6 +226,55 @@ const docTemplate = `{
             }
         },
         "/user/result": {
+            "post": {
+                "description": "Create new result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "result"
+                ],
+                "summary": "Create new result",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Skin Image",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            },
             "get": {
                 "description": "Get results by UserId from Token",
                 "consumes": [
@@ -1771,12 +1771,7 @@ const docTemplate = `{
                 "skincare" : {
                     "type" : "array",
                     "items": {
-                        "type" : "object",
-                        "properties": {
-                            "id" : {
-                                "type" : "integer"
-                            }
-                        }
+                        "type": "integer"
                     }
                 }
             }
@@ -1797,7 +1792,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:3380",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Project S API",

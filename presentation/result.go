@@ -4,7 +4,7 @@ import (
 	"github.com/Narutchai01/Project_S-BE/entities"
 )
 
-func ToResultResponse(data entities.Result) *Responses {
+func ToResultResponse(data entities.ResultWithSkincare) *Responses {
 	skincares := make([]Skincare, len(data.Skincare))
 	for i, s := range data.Skincare {
 		skincares[i] = Skincare{
@@ -32,7 +32,7 @@ func ToResultResponse(data entities.Result) *Responses {
 	}
 }
 
-func ResultsResponse(data []entities.Result) *Responses {
+func ResultsResponse(data []entities.ResultWithSkincare) *Responses {
 	results := []Result{}
 
 	for _, result := range data {
