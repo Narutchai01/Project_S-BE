@@ -1,6 +1,8 @@
 package adapters
 
 import (
+	"strconv"
+
 	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
@@ -41,4 +43,22 @@ func (handler *HttpResultHandler) GetResults(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(results)
+}
+
+func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	// Convert id from string to uint
+	uintID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	result, err := handler.resultUsecase.GetResult(uint(uintID))
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
 }
