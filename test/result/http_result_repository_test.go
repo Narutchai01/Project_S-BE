@@ -1,682 +1,90 @@
-package result_test
+package adapters
 
 import (
 	"bytes"
-	"encoding/json"
-	"errors"
 	"mime/multipart"
+	"net/http"
 	"net/http/httptest"
-
 	"testing"
 
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/result"
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/gofiber/fiber/v2"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
+	"github.com/stretchr/testify/require"
 )
 
-type MockResultService struct {
+type MockResultsUsecase struct {
 	mock.Mock
 }
 
-func (m *MockResultService) CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.ResultWithSkincare, error) {
-	args := m.Called(token, file, c)
-	return args.Get(0).(entities.ResultWithSkincare), args.Error(1)
+func (m *MockResultsUsecase) CreateResult(file multipart.FileHeader, createByToken string, c *fiber.Ctx) (entities.Result, error) {
+	args := m.Called(file, createByToken, c)
+	return args.Get(0).(entities.Result), args.Error(1)
 }
 
-func (m *MockResultService) GetResults() ([]entities.ResultWithSkincare, error) {
-	args := m.Called()
-	return args.Get(0).([]entities.ResultWithSkincare), args.Error(1)
-}
-
-func (m *MockResultService) GetResultById(id int) (entities.ResultWithSkincare, error) {
-	args := m.Called(id)
-	return args.Get(0).(entities.ResultWithSkincare), args.Error(1)
-}
-
-func (m *MockResultService) UpdateResultById(id int, result entities.Result) (entities.ResultWithSkincare, error) {
-	args := m.Called(id, result)
-	return args.Get(0).(entities.ResultWithSkincare), args.Error(1)
-}
-
-func (m *MockResultService) DeleteResultById(id int) error {
-	args := m.Called(id)
-	return args.Error(0)
-}
-
-func (m *MockResultService) GetResultsByUserIdFromToken(token string) ([]entities.ResultWithSkincare, error) {
-	args := m.Called(token)
-	return args.Get(0).([]entities.ResultWithSkincare), args.Error(1)
-}
-
-func (m *MockResultService) GetResultsByUserId(user_id int) ([]entities.ResultWithSkincare, error) {
-	args := m.Called(user_id)
-	return args.Get(0).([]entities.ResultWithSkincare), args.Error(1)
-}
-
-func (m *MockResultService) GetLatestResultByUserIdFromToken(token string) (entities.ResultWithSkincare, error) {
-	args := m.Called(token)
-	return args.Get(0).(entities.ResultWithSkincare), args.Error(1)
-}
-func TestCreateResultHandler(t *testing.T) {
-	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
-		mockService := new(MockResultService)
-		handler := adapters.NewHttpResultHandler(mockService)
-
+func TestCreateResult(t *testing.T) {
+	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
+		m := new(MockResultsUsecase)
+		handler := adapters.NewHttpResultHandler(m)
 		app := fiber.New()
 		app.Post("/result", handler.CreateResult)
-
-		return mockService, handler, app
+		return m, handler, app
 	}
 
-	expectData := entities.ResultWithSkincare{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Image:  "image_url_test",
-		UserId: 1,
-		AcneType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		FacialType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		SkinType: 1,
-		Skincare: []entities.Skincare{
-			{Model: gorm.Model{ID: 1}},
-			{Model: gorm.Model{ID: 2}},
-		},
-	}
+	t.Run("successful creation", func(t *testing.T) {
+		m, _, app := setup()
 
-	t.Run("success", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("CreateResult",
-			mock.Anything,
-			mock.AnythingOfType("multipart.FileHeader"),
-			mock.Anything,
-		).Return(expectData, nil)
+		// Mock the usecase response
+		expectedResult := entities.Result{}
+		m.On("CreateResult", mock.Anything, "token123", mock.Anything).Return(expectedResult, nil)
 
+		// Create a new file upload request
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		part, _ := writer.CreateFormFile("file", "test.jpg")
-		part.Write([]byte("test image"))
+		part, _ := writer.CreateFormFile("file", "test.txt")
+		part.Write([]byte("test content"))
 		writer.Close()
 
-		req := httptest.NewRequest("POST", "/result", body)
+		req := httptest.NewRequest(http.MethodPost, "/result", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "bearer example-token")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to get image file", func(t *testing.T) {
-		mockService, _, app := setup()
-		body := new(bytes.Buffer)
-		writer := multipart.NewWriter(body)
-		writer.Close()
-
-		req := httptest.NewRequest("POST", "/result", body)
-		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("token", "token123")
 
 		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusCreated, resp.StatusCode)
 	})
 
-	t.Run("failed to create result", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("CreateResult",
-			mock.Anything,
-			mock.AnythingOfType("multipart.FileHeader"),
-			mock.Anything,
-		).Return(entities.ResultWithSkincare{}, errors.New("service error"))
-
-		body := new(bytes.Buffer)
-		writer := multipart.NewWriter(body)
-		part, _ := writer.CreateFormFile("file", "test.jpg")
-		part.Write([]byte("test image"))
-		writer.Close()
-
-		req := httptest.NewRequest("POST", "/result", body)
-		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "bearer example-token")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-}
-
-func TestGetResultsHandler(t *testing.T) {
-	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
-		mockService := new(MockResultService)
-		handler := adapters.NewHttpResultHandler(mockService)
-
-		app := fiber.New()
-		app.Get("/result", handler.GetResults)
-
-		return mockService, handler, app
-	}
-
-	expectData := []entities.ResultWithSkincare{
-		{
-			Model: gorm.Model{
-				ID: 1,
-			},
-			Image:  "image_url_test",
-			UserId: 1,
-			AcneType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			FacialType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			SkinType: 1,
-			Skincare: []entities.Skincare{
-				{Model: gorm.Model{ID: 1}},
-				{Model: gorm.Model{ID: 2}},
-			},
-			// Skincare: []uint{2},
-		},
-		{
-			Model: gorm.Model{
-				ID: 2,
-			},
-			Image:  "image_url_test",
-			UserId: 1,
-			AcneType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			FacialType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			SkinType: 1,
-			Skincare: []entities.Skincare{
-				{Model: gorm.Model{ID: 1}},
-				{Model: gorm.Model{ID: 2}},
-			},
-			// Skincare: []uint{2},
-		},
-	}
-
-	t.Run("success", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("GetResults").Return(expectData, nil)
-
-		req := httptest.NewRequest("GET", "/result", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to get results", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("GetResults").Return([]entities.ResultWithSkincare{}, errors.New("service error"))
-
-		req := httptest.NewRequest("GET", "/result", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-}
-
-func TestGetResultByIdHandler(t *testing.T) {
-	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
-		mockService := new(MockResultService)
-		handler := adapters.NewHttpResultHandler(mockService)
-
-		app := fiber.New()
-		app.Get("/result/:id", handler.GetResultById)
-
-		return mockService, handler, app
-	}
-
-	expectData := entities.ResultWithSkincare{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Image:  "image_url_test",
-		UserId: 1,
-		AcneType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		FacialType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		SkinType: 1,
-		Skincare: []entities.Skincare{
-			{Model: gorm.Model{ID: 1}},
-			{Model: gorm.Model{ID: 2}},
-		},
-		// Skincare: []uint{2},
-	}
-
-	t.Run("success", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("GetResultById", int(expectData.ID)).Return(expectData, nil)
-
-		req := httptest.NewRequest("GET", "/result/1", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to convert id to int", func(t *testing.T) {
-		mockService, _, app := setup()
-		req := httptest.NewRequest("GET", "/result/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to get skin", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("GetResultById", int(expectData.ID)).Return(entities.ResultWithSkincare{}, errors.New("service error"))
-
-		req := httptest.NewRequest("GET", "/result/1", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-}
-
-func TestUpdateResultByIdHandler(t *testing.T) {
-	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
-		mockService := new(MockResultService)
-		handler := adapters.NewHttpResultHandler(mockService)
-
-		app := fiber.New()
-		app.Put("/result/:id", handler.UpdateResultById)
-
-		return mockService, handler, app
-	}
-
-	expectData := entities.ResultWithSkincare{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Image:  "image_url_test",
-		UserId: 1,
-		AcneType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		FacialType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		SkinType: 1,
-		Skincare: []entities.Skincare{
-			{Model: gorm.Model{ID: 1}},
-			{Model: gorm.Model{ID: 2}},
-		},
-	}
-
-	inputData := entities.Result{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Image:  "image_url_test",
-		UserId: 1,
-		AcneType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		FacialType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		SkinType: 1,
-		Skincare: []uint{1,2},
-	}
-
-	t.Run("success", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("UpdateResultById",
-			mock.Anything,
-			mock.Anything,
-		).Return(expectData, nil)
-
-		body, _ := json.Marshal(inputData)
-
-		req := httptest.NewRequest("PUT", "/result/1", bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
-
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to convert id to int", func(t *testing.T) {
-		mockService, _, app := setup()
-		req := httptest.NewRequest("PUT", "/result/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed in body parser", func(t *testing.T) {
+	t.Run("bad request on missing file", func(t *testing.T) {
 		_, _, app := setup()
-		req := httptest.NewRequest("PUT", "/result/1", bytes.NewBuffer([]byte("invalid body")))
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
 
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+		req := httptest.NewRequest(http.MethodPost, "/result", nil)
+		req.Header.Set("token", "token123")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 
-	t.Run("failed to update result", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("UpdateResultById",
-			mock.Anything,
-			mock.Anything,
-		).Return(entities.ResultWithSkincare{}, errors.New("service error"))
+	t.Run("internal server error on usecase failure", func(t *testing.T) {
+		m, _, app := setup()
 
-		body, _ := json.Marshal(inputData)
+		// Mock the usecase response
+		m.On("CreateResult", mock.Anything, "token123", mock.Anything).Return(entities.Result{}, fiber.ErrInternalServerError)
 
-		req := httptest.NewRequest("PUT", "/result/1", bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
+		// Create a new file upload request
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		part, _ := writer.CreateFormFile("file", "test.txt")
+		part.Write([]byte("test content"))
+		writer.Close()
+
+		req := httptest.NewRequest(http.MethodPost, "/result", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("token", "token123")
 
 		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-}
-
-func TestDeleteResultByIdHandler(t *testing.T) {
-	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
-		mockService := new(MockResultService)
-		handler := adapters.NewHttpResultHandler(mockService)
-
-		app := fiber.New()
-		app.Delete("/result/:id", handler.DeleteResultById)
-
-		return mockService, handler, app
-	}
-
-	expectData := entities.Result{
-		Model: gorm.Model{
-			ID: 1,
-		},
-	}
-
-	t.Run("success", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("DeleteResultById", int(expectData.ID)).Return(nil)
-
-		req := httptest.NewRequest("DELETE", "/result/1", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to convert id to int", func(t *testing.T) {
-		mockService, _, app := setup()
-		req := httptest.NewRequest("DELETE", "/result/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to delete result", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("DeleteResultById", int(expectData.ID)).Return(errors.New("service error"))
-
-		req := httptest.NewRequest("DELETE", "/result/1", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-}
-
-func TestGetResultsByUserIdFromTokenHandler(t *testing.T) {
-	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
-		mockService := new(MockResultService)
-		handler := adapters.NewHttpResultHandler(mockService)
-
-		app := fiber.New()
-		app.Get("/user/result", handler.GetResultsByUserIdFromToken)
-
-		return mockService, handler, app
-	}
-
-	expectData := []entities.ResultWithSkincare{
-		{
-			Model: gorm.Model{
-				ID: 1,
-			},
-			Image:  "image_url_test",
-			UserId: 1,
-			AcneType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			FacialType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			SkinType: 1,
-			Skincare: []entities.Skincare{
-				{Model: gorm.Model{ID: 1}},
-				{Model: gorm.Model{ID: 2}},
-			},
-			// Skincare: []uint{2},
-		},
-	}
-
-	t.Run("success", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("GetResultsByUserIdFromToken", "Bearer example-token").Return(expectData, nil)
-
-		req := httptest.NewRequest("GET", "/user/result", nil)
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("token", "Bearer example-token")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to get results", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("GetResultsByUserIdFromToken", "Bearer example-token").Return([]entities.ResultWithSkincare{}, errors.New("service error"))
-
-		req := httptest.NewRequest("GET", "/user/result", nil)
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("token", "Bearer example-token")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-}
-
-func TestGetResultsByUserIdHandler(t *testing.T) {
-	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
-		mockService := new(MockResultService)
-		handler := adapters.NewHttpResultHandler(mockService)
-
-		app := fiber.New()
-		app.Get("/result/user/:userId", handler.GetResultsByUserId)
-
-		return mockService, handler, app
-	}
-
-	expectData := []entities.ResultWithSkincare{
-		{
-			Model: gorm.Model{
-				ID: 1,
-			},
-			Image:  "image_url_test",
-			UserId: 1,
-			AcneType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			FacialType: []entities.Acne_Facial_Result{
-				{ID: 1, Count: 10},
-				{ID: 2, Count: 5},
-			},
-			SkinType: 1,
-			Skincare: []entities.Skincare{
-				{Model: gorm.Model{ID: 1}},
-				{Model: gorm.Model{ID: 2}},
-			},
-			// Skincare: []uint{2},
-		},
-	}
-
-	t.Run("success", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("GetResultsByUserId", int(expectData[0].UserId)).Return(expectData, nil)
-
-		req := httptest.NewRequest("GET", "/result/user/1", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to convert userId to int", func(t *testing.T) {
-		mockService, _, app := setup()
-		req := httptest.NewRequest("GET", "/result/user/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to get results", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("GetResultsByUserId", int(expectData[0].UserId)).Return([]entities.ResultWithSkincare{}, errors.New("service error"))
-
-		req := httptest.NewRequest("GET", "/result/user/1", nil)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-}
-
-func TestGetLatestResultByUserIdFromTokenHandler(t *testing.T) {
-	setup := func() (*MockResultService, *adapters.HttpResultHandler, *fiber.App) {
-		mockService := new(MockResultService)
-		handler := adapters.NewHttpResultHandler(mockService)
-
-		app := fiber.New()
-		app.Get("/user/result/latest", handler.GetLatestResultByUserIdFromToken)
-
-		return mockService, handler, app
-	}
-
-	expectData := entities.ResultWithSkincare{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Image:  "image_url_test",
-		UserId: 1,
-		AcneType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		FacialType: []entities.Acne_Facial_Result{
-			{ID: 1, Count: 10},
-			{ID: 2, Count: 5},
-		},
-		SkinType: 1,
-		Skincare: []entities.Skincare{
-			{Model: gorm.Model{ID: 1}},
-			{Model: gorm.Model{ID: 2}},
-		},
-		// Skincare: []uint{2},
-	}
-
-	t.Run("success", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("GetLatestResultByUserIdFromToken", "Bearer example-token").Return(expectData, nil)
-
-		req := httptest.NewRequest("GET", "/user/result/latest", nil)
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("token", "Bearer example-token")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
-
-	t.Run("failed to get results", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("GetLatestResultByUserIdFromToken", "Bearer example-token").Return(entities.ResultWithSkincare{}, errors.New("service error"))
-
-		req := httptest.NewRequest("GET", "/user/result/latest", nil)
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("token", "Bearer example-token")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
 	})
 }

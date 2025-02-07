@@ -26,13 +26,13 @@ func ConnectDB() (*gorm.DB, error) {
 	}
 
 	db.AutoMigrate(
-		&entities.Admin{}, 
-		&entities.Skincare{}, 
-		&entities.User{}, 
-		&entities.Recovery{}, 
+		&entities.Admin{},
+		&entities.Skincare{},
+		&entities.User{},
+		&entities.Recovery{},
 		&entities.Facial{},
-		&entities.Acne{}, 
-		&entities.Skin{}, 
+		&entities.Acne{},
+		&entities.Skin{},
 		&entities.Result{},
 	)
 

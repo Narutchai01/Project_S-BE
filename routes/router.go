@@ -21,10 +21,10 @@ func Router(app *fiber.App, db *gorm.DB) {
 	recovery := api.Group("/recovery")
 	RecoveryRoutes(recovery, db)
 
-	ResultRoutes(api, user, db)
 	SkincareRoutes(api, admin, db)
 	FacialRouters(api, admin, db)
 	AcneRouters(api, admin, db)
 	SkinRouters(api, admin, db)
+	resultRoutes(api, db)
 
 }

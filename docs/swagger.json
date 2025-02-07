@@ -6,356 +6,9 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:3380",
+    "host": "localhost:8080",
     "basePath": "/api",
     "paths": {
-        "/result": {
-            "get": {
-                "description": "Get results",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Get results",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            }
-        },
-        "/result/{id}": {
-            "get": {
-                "description": "Get result by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Get result by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Result ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a result by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Update a result by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Result ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Result information",
-                        "name": "result",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.Result"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a result by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Delete a result by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Result ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            }
-        },
-        "/result/user/{userId}": {
-            "get": {
-                "description": "Get result by user ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Get result by user ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "userId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/result": {
-            "post": {
-                "description": "Create new result",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Create new result",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Skin Image",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            },
-            "get": {
-                "description": "Get results by UserId from Token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Get results by UserId from Token",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User Bearer Token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/result/latest": {
-            "get": {
-                "description": "Get latest result by UserId from Token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "result"
-                ],
-                "summary": "Get latest result by UserId from Token",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User Bearer Token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            }
-        },
         "/acne": {
             "get": {
                 "description": "Get acnes",
@@ -1685,6 +1338,57 @@
                     }
                 }
             }
+        },
+        "/user/results/": {
+            "post": {
+                "description": "Create a result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Create a result",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Result Image",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1719,54 +1423,6 @@
                 },
                 "sensitive_skin": {
                     "type": "boolean"
-                }
-            }
-        },
-        "entities.Result": {
-            "type": "object",
-            "properties": {
-                "image": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "acne_type": {
-                    "type": "array",
-                    "items" : {
-                        "type" : "object",
-                        "properties" : {
-                            "id" : {
-                                "type" : "integer"
-                            },
-                            "count" : {
-                                "type" : "integer"
-                            }
-                        }
-                    }
-                },
-                "facial_type": {
-                    "type": "array",
-                    "items" : {
-                        "type" : "object",
-                        "properties" : {
-                            "id" : {
-                                "type" : "integer"
-                            },
-                            "count" : {
-                                "type" : "integer"
-                            }
-                        }
-                    }
-                },
-                "skin_type" : {
-                    "type": "integer"
-                },
-                "skincare" : {
-                    "type" : "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 }
             }
         },

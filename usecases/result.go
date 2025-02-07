@@ -1,158 +1,97 @@
 package usecases
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"mime/multipart"
+	"net/http"
 	"os"
-	"strconv"
-	
 
 	"github.com/Narutchai01/Project_S-BE/entities"
-	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/repositories"
 	"github.com/Narutchai01/Project_S-BE/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
-type ResultUsecases interface {
-	CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.ResultWithSkincare, error)
-	GetResults() ([]entities.ResultWithSkincare, error)
-	GetResultById(id int) (entities.ResultWithSkincare, error)
-	UpdateResultById(id int, result entities.Result) (entities.ResultWithSkincare, error)
-	DeleteResultById(id int) error
-	GetResultsByUserIdFromToken(token string) ([]entities.ResultWithSkincare, error)
-	GetResultsByUserId(id int) ([]entities.ResultWithSkincare, error)
-	GetLatestResultByUserIdFromToken(token string) (entities.ResultWithSkincare, error)
-}
-type resultService struct {
-	repo repositories.ResultRepository
+type ResultsUsecase interface {
+	CreateResult(file multipart.FileHeader, token string, c *fiber.Ctx) (entities.Result, error)
 }
 
-func NewResultUsecase(repo repositories.ResultRepository) ResultUsecases {
+type resultService struct {
+	repo repositories.ResultsRepository
+}
+
+func NewResultsUsecase(repo repositories.ResultsRepository) ResultsUsecase {
 	return &resultService{repo}
 }
+func CallAPI(url string, image string, id uint) (entities.Result, error) {
 
-func (service *resultService) CreateResult(token string, file multipart.FileHeader, c *fiber.Ctx) (entities.ResultWithSkincare, error) {
-	var result entities.Result
+	client := http.Client{}
 
-	user_id, err := utils.ExtractToken(token)
-	if err != nil {
-		return entities.ResultWithSkincare{}, err
+	body := map[string]interface{}{
+		"image": image,
+		"id":    id,
 	}
 
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return entities.Result{}, err
+	}
+
+	resq, err := client.Post(url, "application/json", bytes.NewBuffer(jsonBody))
+
+	if err != nil {
+		if resq.StatusCode != http.StatusOK {
+			return entities.Result{}, fmt.Errorf("API request failed with status: %s", resq.Status)
+		}
+
+		defer resq.Body.Close()
+	}
+
+	defer resq.Body.Close()
+
+	var data entities.Result
+
+	if err := json.NewDecoder(resq.Body).Decode(&data); err != nil {
+		return entities.Result{}, err
+	}
+
+	return data, nil
+}
+
+func (service *resultService) CreateResult(file multipart.FileHeader, token string, c *fiber.Ctx) (entities.Result, error) {
 	fileName := uuid.New().String() + ".jpg"
 
 	if err := utils.CheckDirectoryExist(); err != nil {
-		return entities.ResultWithSkincare{}, err
+		return entities.Result{}, err
 	}
 
 	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
-		return entities.ResultWithSkincare{}, err
+		return entities.Result{}, err
 	}
 
-	imageUrl, err := utils.UploadImage(fileName, fmt.Sprintf("/result/%s", strconv.Itoa(int(user_id))))
+	imageUrl, err := utils.UploadImage(fileName, "/results")
 	if err != nil {
-		return entities.ResultWithSkincare{}, c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		return entities.Result{}, err
 	}
 
-	err = os.Remove("./uploads/" + fileName)
+	if err := os.Remove("./uploads/" + fileName); err != nil {
+		return entities.Result{}, err
+	}
+
+	createBy, err := utils.ExtractToken(token)
 	if err != nil {
-		return entities.ResultWithSkincare{}, c.Status(fiber.StatusInternalServerError).JSON(err)
+		return entities.Result{}, err
 	}
 
-	// fullURL := fmt.Sprintf("https://detect.roboflow.com/%s", "ucare/1")
+	api_model := os.Getenv("API_MODEL")
 
-	// client := client.New()
-	// client.SetParams(map[string]string{
-	// 	"api_key": "g3jhJHAwYUYatCbvFFLK",
-	// 	"image": imageUrl,
-	// })
-	// resp, err := client.Post(fullURL)
-	// if err != nil {
-	// 	return entities.Result{}, err
-	// }
-
-	// err = json.Unmarshal(resp.Body(), &result)
-	// if err != nil {
-	// 	return entities.Result{}, err
-	// }
-
-	//mock ไว้ก่อน
-	result.AcneType = []entities.Acne_Facial_Result{
-		{ID: 1, Count: 10},
-		{ID: 2, Count: 5},
-	}
-	result.FacialType = []entities.Acne_Facial_Result{
-		{ID: 1, Count: 10},
-		{ID: 2, Count: 5},
-	}
-	result.SkinType = 1
-	result.Skincare = []uint{1,2}
-
-	result.Image = imageUrl
-	result.UserId = uint(user_id)
-
-	return service.repo.CreateResult(result)
-}
-
-func (service *resultService) GetResults() ([]entities.ResultWithSkincare, error) {
-	return service.repo.GetResults()
-}
-
-func (service *resultService) GetResultById(id int) (entities.ResultWithSkincare, error) {
-	return service.repo.GetResultById(id)
-}
-
-func (service *resultService) UpdateResultById(id int, result entities.Result) (entities.ResultWithSkincare, error) {
-
-	old_result, err := service.repo.GetResultByIdWithoutSkincare(id)
+	data, err := CallAPI(api_model+"/predict", imageUrl, createBy)
 	if err != nil {
-		return entities.ResultWithSkincare{}, err
+		return entities.Result{}, err
 	}
 
-	old_result.Image = utils.CheckEmptyValueBeforeUpdate(result.Image, old_result.Image)
-	if result.UserId == 0 {
-		result.UserId = old_result.UserId
-	}
-	if len(result.AcneType) <= 0 {
-		result.AcneType = old_result.AcneType
-	}
-	if len(result.FacialType) <= 0 {
-		result.FacialType = old_result.FacialType
-	}
-	if result.SkinType == 0 {
-		result.SkinType = old_result.SkinType
-	}
-	if len(result.Skincare) <= 0 {
-		result.Skincare = old_result.Skincare
-	}
-
-	return service.repo.UpdateResultById(id, result)
-}
-
-func (service *resultService) DeleteResultById(id int) error {
-	return service.repo.DeleteResultById(id)
-}
-
-func (service *resultService) GetResultsByUserIdFromToken(token string) ([]entities.ResultWithSkincare, error) {
-	user_id, err := utils.ExtractToken(token)
-
-	if err != nil {
-		return []entities.ResultWithSkincare{}, err
-	}
-	return service.repo.GetResultsByUserId(int(user_id))
-}
-
-func (service *resultService) GetResultsByUserId(user_id int) ([]entities.ResultWithSkincare, error) {
-	return service.repo.GetResultsByUserId(user_id)
-}
-
-func (service *resultService) GetLatestResultByUserIdFromToken(token string) (entities.ResultWithSkincare, error) {
-	user_id, err := utils.ExtractToken(token)
-
-	if err != nil {
-		return entities.ResultWithSkincare{}, err
-	}
-	return service.repo.GetLatestResultByUserIdFromToken(int(user_id))
+	return service.repo.CreateResult(data)
 }

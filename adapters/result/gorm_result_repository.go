@@ -10,91 +10,28 @@ type GormResultRepository struct {
 	db *gorm.DB
 }
 
-func NewGormResultRepository(db *gorm.DB) repositories.ResultRepository {
+func NewGormResultRepository(db *gorm.DB) repositories.ResultsRepository {
 	return &GormResultRepository{db: db}
 }
 
-var query = `SELECT
-	results.id,
-	results.image,
-	results.user_id,
-	results.acne_type,
-	results.facial_type,
-	results.skin_type,
-	jsonb_agg(
-      	jsonb_build_object(
-			'id', skincares.id,
-			'image', skincares.image,
-			'name', skincares.name,
-			'description', skincares.description,
-			'create_by', skincares.create_by
-      	)
-	) AS skincare
-	FROM results
-		JOIN LATERAL jsonb_array_elements_text(results.skincare :: jsonb) AS skincare_id ON TRUE
-		JOIN skincares ON skincares.id = skincare_id :: INT
-	WHERE (results.id = ? OR ? = 0) AND (results.user_id = ? OR ? = 0) AND results.deleted_at IS NULL
-	GROUP BY
-		results.id,
-		results.image,
-		results.user_id,
-		results.acne_type,
-		results.facial_type,
-		results.skin_type
-	ORDER BY results.id DESC
-`
-
-func (repo *GormResultRepository) CreateResult(result entities.Result) (entities.ResultWithSkincare, error) {
-	if err := repo.db.Create(&result).Error; err != nil {
-		return entities.ResultWithSkincare{}, err
+func (repo *GormResultRepository) CreateResult(result entities.Result) (entities.Result, error) {
+	err := repo.db.Create(&result).Error
+	if err != nil {
+		return result, err
 	}
-	var resultWithSkincare entities.ResultWithSkincare
-
-	err := repo.db.Raw(query, 0, 0, 0, 0).First(&resultWithSkincare).Error
-	return resultWithSkincare, err
-}
-
-func (repo *GormResultRepository) GetResults() ([]entities.ResultWithSkincare, error) {
-	var results []entities.ResultWithSkincare
-	err := repo.db.Raw(query, 0, 0, 0, 0).Scan(&results).Error
-	return results, err
-}
-
-func (repo *GormResultRepository) GetResultById(id int) (entities.ResultWithSkincare, error) {
-	var result entities.ResultWithSkincare
-	err := repo.db.Raw(query, id, id, 0, 0).First(&result).Error
-	return result, err
-}
-
-func (repo *GormResultRepository) GetResultByIdWithoutSkincare(id int) (entities.Result, error) {
-	var result entities.Result
-	err := repo.db.First(&result, id, 0, 0).Error
-	return result, err
-}
-
-func (repo *GormResultRepository) UpdateResultById(id int, result entities.Result) (entities.ResultWithSkincare, error) {
-	if err := repo.db.Model(&entities.Result{}).Where("id = ?", id).Updates(&result).Error; err != nil {
-		return entities.ResultWithSkincare{}, err
+	skincares, err2 := repo.FindSkincare(result.SkincareID)
+	if err2 != nil {
+		return result, err2
 	}
-
-	var updateResult entities.ResultWithSkincare
-	err := repo.db.Raw(query, id, id, 0, 0).First(&updateResult).Error
-	return updateResult, err
+	result.Skincare = skincares
+	return result, nil
 }
 
-func (repo *GormResultRepository) DeleteResultById(id int) error {
-	err := repo.db.Where("id = ?", id).Delete(&entities.Result{}).Error
-	return err
-}
-
-func (repo *GormResultRepository) GetResultsByUserId(user_id int) ([]entities.ResultWithSkincare, error) {
-	var results []entities.ResultWithSkincare
-	err := repo.db.Raw(query, 0, 0, user_id, user_id).Scan(&results).Error
-	return results, err
-}
-
-func (repo *GormResultRepository) GetLatestResultByUserIdFromToken(user_id int) (entities.ResultWithSkincare, error) {
-	var result entities.ResultWithSkincare
-	err := repo.db.Raw(query, 0, 0, user_id, user_id).Last(&result).Error
-	return result, err
+func (repo *GormResultRepository) FindSkincare(ids []uint) ([]entities.Skincare, error) {
+	var skincares []entities.Skincare
+	err := repo.db.Select("ID, image, name, description").Find(&skincares, ids).Error
+	if err != nil {
+		return nil, err
+	}
+	return skincares, nil
 }
