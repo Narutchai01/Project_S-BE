@@ -35,3 +35,12 @@ func (repo *GormResultRepository) FindSkincare(ids []uint) ([]entities.Skincare,
 	}
 	return skincares, nil
 }
+
+func (repo *GormResultRepository) GetResults() ([]entities.Result, error) {
+	var results []entities.Result
+	err := repo.db.Find(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}

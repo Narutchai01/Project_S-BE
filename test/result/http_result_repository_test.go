@@ -22,6 +22,10 @@ func (m *MockResultsUsecase) CreateResult(file multipart.FileHeader, createByTok
 	args := m.Called(file, createByToken, c)
 	return args.Get(0).(entities.Result), args.Error(1)
 }
+func (m *MockResultsUsecase) GetResults() ([]entities.Result, error) {
+	args := m.Called()
+	return args.Get(0).([]entities.Result), args.Error(1)
+}
 
 func TestCreateResult(t *testing.T) {
 	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
@@ -82,6 +86,43 @@ func TestCreateResult(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/result", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		req.Header.Set("token", "token123")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+	})
+}
+
+func TestGetResults(t *testing.T) {
+	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
+		m := new(MockResultsUsecase)
+		handler := adapters.NewHttpResultHandler(m)
+		app := fiber.New()
+		app.Get("/results", handler.GetResults)
+		return m, handler, app
+	}
+
+	t.Run("successful retrieval", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		expectedResults := []entities.Result{}
+		m.On("GetResults").Return(expectedResults, nil)
+
+		req := httptest.NewRequest(http.MethodGet, "/results", nil)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("internal server error on usecase failure", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		m.On("GetResults").Return(nil, fiber.ErrInternalServerError)
+
+		req := httptest.NewRequest(http.MethodGet, "/results", nil)
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)

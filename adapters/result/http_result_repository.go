@@ -32,3 +32,13 @@ func (handler *HttpResultHandler) CreateResult(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(result)
 }
+
+func (handler *HttpResultHandler) GetResults(c *fiber.Ctx) error {
+	results, err := handler.resultUsecase.GetResults()
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(results)
+}

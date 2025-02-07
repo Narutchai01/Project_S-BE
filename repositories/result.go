@@ -6,4 +6,5 @@ import (
 
 type ResultsRepository interface {
 	CreateResult(entities.Result) (entities.Result, error)
+	GetResults() ([]entities.Result, error)
 }
