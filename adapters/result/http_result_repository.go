@@ -32,17 +32,24 @@ func (handler *HttpResultHandler) CreateResult(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(result)
+	return c.Status(fiber.StatusCreated).JSON(presentation.ToResultResponse(result))
 }
 
 func (handler *HttpResultHandler) GetResults(c *fiber.Ctx) error {
-	results, err := handler.resultUsecase.GetResults()
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
+	results, err := handler.resultUsecase.GetResults(token)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(results)
+	return c.Status(fiber.StatusOK).JSON(presentation.ToResultsResponse(results))
 }
 
 func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
@@ -60,5 +67,5 @@ func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(result)
+	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
 }

@@ -22,8 +22,8 @@ func (m *MockResultsUsecase) CreateResult(file multipart.FileHeader, createByTok
 	args := m.Called(file, createByToken, c)
 	return args.Get(0).(entities.Result), args.Error(1)
 }
-func (m *MockResultsUsecase) GetResults() ([]entities.Result, error) {
-	args := m.Called()
+func (m *MockResultsUsecase) GetResults(token string) ([]entities.Result, error) {
+	args := m.Called(token)
 	return args.Get(0).([]entities.Result), args.Error(1)
 }
 
