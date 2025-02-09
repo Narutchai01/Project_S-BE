@@ -51,10 +51,10 @@ func (handler *HttpUserHandler) Register(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			admin	body		object{email=string,password=string}	true	"Admin Object"
 //
-// @Success		200		{object}	presentation.Responses
-// @Failure		400		{object}	presentation.Responses
-// @Failure		404		{object}	presentation.Responses
-// @Router			/user/login [post]
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/user/login [post]
 func (handler *HttpUserHandler) LogIn(c *fiber.Ctx) error {
 	var user entities.User
 
@@ -92,7 +92,7 @@ func (handler *HttpUserHandler) ForgetPassword(c *fiber.Ctx) error {
 //	@Tags			user
 //	@Accept			json
 //	@Produce		json
-//	@Param			user	body		entities.User	true	"User information"
+//	@Param			admin	body		object{email=string,fullname=string,image=string,sensitive_skin=boolean}	true	"Admin Object"
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		404		{object}	presentation.Responses

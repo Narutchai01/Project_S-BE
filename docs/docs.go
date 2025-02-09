@@ -1395,12 +1395,26 @@ const docTemplate = `{
                 "summary": "Google sign in",
                 "parameters": [
                     {
-                        "description": "User information",
-                        "name": "user",
+                        "description": "Admin Object",
+                        "name": "admin",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entities.User"
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string"
+                                },
+                                "fullname": {
+                                    "type": "string"
+                                },
+                                "image": {
+                                    "type": "string"
+                                },
+                                "sensitive_skin": {
+                                    "type": "boolean"
+                                }
+                            }
                         }
                     }
                 ],

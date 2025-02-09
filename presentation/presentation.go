@@ -87,7 +87,7 @@ func TokenResponse(token string) *Responses {
 	return &Responses{
 		Status: true,
 		Data: map[string]string{
-			"token": token,
+			"token": "Bearer " + token,
 		},
 		Error: nil,
 	}

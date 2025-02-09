@@ -943,12 +943,21 @@ paths:
       - application/json
       description: Google sign in
       parameters:
-      - description: User information
+      - description: Admin Object
         in: body
-        name: user
+        name: admin
         required: true
         schema:
-          $ref: '#/definitions/entities.User'
+          properties:
+            email:
+              type: string
+            fullname:
+              type: string
+            image:
+              type: string
+            sensitive_skin:
+              type: boolean
+          type: object
       produces:
       - application/json
       responses:
