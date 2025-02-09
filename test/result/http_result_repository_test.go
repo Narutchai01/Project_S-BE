@@ -23,6 +23,11 @@ func (m *MockResultsUsecase) CreateResult(file multipart.FileHeader, token strin
 	return args.Get(0).(entities.Result), args.Error(1)
 }
 
+func (m *MockResultsUsecase) GetResults(token string) ([]entities.Result, error) {
+	args := m.Called(token)
+	return args.Get(0).([]entities.Result), args.Error(1)
+}
+
 func TestCreateResult(t *testing.T) {
 	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
 		m := new(MockResultsUsecase)
@@ -37,6 +42,7 @@ func TestCreateResult(t *testing.T) {
 
 		// Mock the usecase response
 		expectedResult := entities.Result{}
+
 		m.On("CreateResult", mock.Anything, "token123", mock.Anything).Return(expectedResult, nil)
 
 		// Create a new file upload request

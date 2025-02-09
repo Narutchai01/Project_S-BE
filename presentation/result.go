@@ -32,3 +32,22 @@ func ToResultResponse(data entities.Result) *Responses {
 		Error:  nil,
 	}
 }
+
+func ToResultsResponse(data []entities.Result) *Responses {
+	results := make([]Result, len(data))
+	for i, result := range data {
+		results[i] = Result{
+			ID:         result.ID,
+			UserID:     result.UserID,
+			Image:      result.Image,
+			AcneTpye:   result.AcneType,
+			FacialType: result.FacialType,
+			Skincare:   MapSkinCare(result.Skincare),
+		}
+	}
+	return &Responses{
+		Status: true,
+		Data:   results,
+		Error:  nil,
+	}
+}
