@@ -4,6 +4,7 @@ import (
 	// "fmt"
 
 	"github.com/Narutchai01/Project_S-BE/config"
+	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"
 )
@@ -15,19 +16,17 @@ func AuthorizationRequired() fiber.Handler {
 		ErrorHandler:   AuthError,
 		SigningKey:     []byte(secretKey),
 		SigningMethod:  "HS256",
-		TokenLookup:    "header:token", 
-		AuthScheme:     "",         
+		TokenLookup:    "header:token",
+		AuthScheme:     "",
 	})
 }
 
-  func AuthError(c *fiber.Ctx, e error) error {
-	c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	    "message":   e.Error(),
-	})
+func AuthError(c *fiber.Ctx, e error) error {
+	c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(e))
 	return nil
-  }
-  
-  func AuthSuccess(c *fiber.Ctx) error {
+}
+
+func AuthSuccess(c *fiber.Ctx) error {
 	c.Next()
 	return nil
-  }
+}
