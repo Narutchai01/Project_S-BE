@@ -1002,6 +1002,35 @@ paths:
       summary: Log in
       tags:
       - user
+  /user/me:
+    get:
+      consumes:
+      - application/json
+      description: Get user by id
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get user by id
+      tags:
+      - user
   /user/register:
     post:
       consumes:

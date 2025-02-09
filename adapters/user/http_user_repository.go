@@ -112,3 +112,27 @@ func (handler *HttpUserHandler) GoogleSignIn(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.TokenResponse(result))
 }
+
+// GetUser godoc
+//
+//	@Summary		Get user by id
+//	@Description	Get user by id
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	header	string	true	"Token"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/user/me [get]
+func (handler *HttpUserHandler) GetUser(c *fiber.Ctx) error {
+
+	token := c.Get("token")
+
+	result, err := handler.userUcase.GetUser(token)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
+}
