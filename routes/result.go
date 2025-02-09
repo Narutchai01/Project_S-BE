@@ -3,6 +3,7 @@ package routes
 import (
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/result"
 	"github.com/Narutchai01/Project_S-BE/usecases"
+	"github.com/Narutchai01/Project_S-BE/middlewares"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
