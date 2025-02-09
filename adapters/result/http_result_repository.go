@@ -17,6 +17,19 @@ func NewHttpResultHandler(resultUcase usecases.ResultsUsecase) *HttpResultHandle
 	return &HttpResultHandler{resultUcase}
 }
 
+// CreateResult godoc
+//
+//	@Summary		Create a result
+//	@Description	Create a result
+//	@Tags			results
+//	@Accept			json
+//	@Produce		json
+//	@Param			file	formData	file	true	"File"
+//	@Param			token	header		string	true	"Token"
+//	@Success		201		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		500		{object}	presentation.Responses
+//	@Router			/results/ [post]
 func (handler *HttpResultHandler) CreateResult(c *fiber.Ctx) error {
 
 	file, err := c.FormFile("file")
@@ -36,6 +49,18 @@ func (handler *HttpResultHandler) CreateResult(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToResultResponse(result))
 }
 
+// GetResults godoc
+//
+//	@Summary		Get results
+//	@Description	Get results
+//	@Tags			results
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	header		string	true	"Token"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		500		{object}	presentation.Responses
+//	@Router			/results/ [get]
 func (handler *HttpResultHandler) GetResults(c *fiber.Ctx) error {
 
 	token := c.Get("token")
@@ -53,6 +78,18 @@ func (handler *HttpResultHandler) GetResults(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToResultsResponse(results))
 }
 
+// GetResult godoc
+//
+//	@Summary		Get a result
+//	@Description	Get a result
+//	@Tags			results
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	string	true	"Result ID"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		500		{object}	presentation.Responses
+//	@Router			/results/{id} [get]
 func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -71,6 +108,18 @@ func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
 }
 
+// GetResultLatest godoc
+//
+//	@Summary		Get the latest result
+//	@Description	Get the latest result
+//	@Tags			results
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	header	string	true	"Token"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		500		{object}	presentation.Responses
+//	@Router			/results/latest [get]
 func (handler *HttpResultHandler) GetResultLatest(c *fiber.Ctx) error {
 	token := c.Get("token")
 
