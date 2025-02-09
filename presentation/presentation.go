@@ -1,6 +1,10 @@
 package presentation
 
-import "time"
+import (
+	"time"
+
+	"github.com/Narutchai01/Project_S-BE/entities"
+)
 
 type Responses struct {
 	Status bool        `json:"status"`
@@ -50,6 +54,15 @@ type Facial struct {
 	Name     string `json:"name"`
 	Image    string `json:"image"`
 	CreateBY uint   `json:"create_by"`
+}
+type Result struct {
+	ID         uint                  `json:"id"`
+	UserID     uint                  `json:"user_id"`
+	SkincareID uint                  `json:"skincare_id"`
+	Image      string                `json:"image"`
+	Skincare   []Skincare            `json:"skincare"`
+	AcneTpye   []entities.AcneFacial `json:"acne_type"`
+	FacialType []entities.AcneFacial `json:"facial_type"`
 }
 
 func DeleteResponse(id int) *Responses {

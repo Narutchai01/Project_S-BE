@@ -35,3 +35,9 @@ services:
       POSTGRES_DB: ucare
     volumes:
       - ./databasepg:/var/lib/postgresql/data
+
+  model:
+    image: narutchai001/ucare-model:v2
+    container_name: project-s-model
+    ports:
+      - "5000:8000"

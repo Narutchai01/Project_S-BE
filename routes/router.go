@@ -26,5 +26,6 @@ func Router(app *fiber.App, db *gorm.DB) {
 	FacialRouters(api, admin, db)
 	AcneRouters(api, admin, db)
 	SkinRouters(api, admin, db)
+	ResultRoutes(api, db)
 
 }
