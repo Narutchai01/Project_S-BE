@@ -28,7 +28,7 @@ func ToResultResponse(data entities.Result) *Responses {
 	}
 	return &Responses{
 		Status: true,
-		Data:   []Result{result},
+		Data:   result,
 		Error:  nil,
 	}
 }

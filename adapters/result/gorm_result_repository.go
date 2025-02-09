@@ -58,3 +58,34 @@ func (repo *GormResultRepository) GetResult(id uint) (entities.Result, error) {
 	result.Skincare = skincares
 	return result, nil
 }
+
+func (repo *GormResultRepository) GetResultLatest(id uint) (entities.Result, error) {
+	var result entities.Result
+	err := repo.db.Where("user_id = ?", id).Order("created_at desc").First(&result).Error
+	if err != nil {
+		return result, err
+	}
+	skincares, err2 := repo.FindSkincare(result.SkincareID)
+	if err2 != nil {
+		return result, err2
+	}
+	result.Skincare = skincares
+	return result, nil
+}
+
+func (repo *GormResultRepository) UpdateResult(result entities.Result, id uint) (entities.Result, error) {
+	err := repo.db.Where("id = ?", id).Updates(&result).Error
+	if err != nil {
+		return result, err
+	}
+	skincares, err2 := repo.FindSkincare(result.SkincareID)
+	if err2 != nil {
+		return result, err2
+	}
+	result.Skincare = skincares
+	return result, nil
+}
+
+func (repo *GormResultRepository) DeleteResult(id uint) error {
+	return repo.db.Delete(&entities.Result{}, id).Error
+}

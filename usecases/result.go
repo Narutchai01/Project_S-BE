@@ -19,6 +19,9 @@ type ResultsUsecase interface {
 	CreateResult(file multipart.FileHeader, token string, c *fiber.Ctx) (entities.Result, error)
 	GetResults(token string) ([]entities.Result, error)
 	GetResult(id uint) (entities.Result, error)
+	GetResultLatest(token string) (entities.Result, error)
+	UpdateResult(result entities.Result, id uint) (entities.Result, error)
+	DeleteResult(id uint) error
 }
 
 type resultService struct {
@@ -108,4 +111,21 @@ func (service *resultService) GetResults(token string) ([]entities.Result, error
 
 func (service *resultService) GetResult(id uint) (entities.Result, error) {
 	return service.repo.GetResult(id)
+}
+
+func (service *resultService) GetResultLatest(token string) (entities.Result, error) {
+	id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.Result{}, err
+	}
+
+	return service.repo.GetResultLatest(id)
+}
+
+func (service *resultService) UpdateResult(result entities.Result, id uint) (entities.Result, error) {
+	return service.repo.UpdateResult(result, id)
+}
+
+func (service *resultService) DeleteResult(id uint) error {
+	return service.repo.DeleteResult(id)
 }

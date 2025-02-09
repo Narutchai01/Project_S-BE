@@ -32,6 +32,11 @@ func (m *MockResultsUsecase) GetResult(id uint) (entities.Result, error) {
 	return args.Get(0).(entities.Result), args.Error(1)
 }
 
+func (m *MockResultsUsecase) GetResultLatest(token string) (entities.Result, error) {
+	args := m.Called(token)
+	return args.Get(0).(entities.Result), args.Error(1)
+}
+
 func TestCreateResult(t *testing.T) {
 	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
 		m := new(MockResultsUsecase)
@@ -175,6 +180,175 @@ func TestGetResult(t *testing.T) {
 		m.On("GetResult", uint(1)).Return(entities.Result{}, fiber.ErrInternalServerError)
 
 		req := httptest.NewRequest(http.MethodGet, "/result/1", nil)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+	})
+}
+
+func TestGetResultLatest(t *testing.T) {
+	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
+		m := new(MockResultsUsecase)
+		handler := adapters.NewHttpResultHandler(m)
+		app := fiber.New()
+		app.Get("/result/latest", handler.GetResultLatest)
+		return m, handler, app
+	}
+
+	t.Run("successful retrieval", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		expectedResult := entities.Result{}
+		m.On("GetResultLatest", "token123").Return(expectedResult, nil)
+
+		req := httptest.NewRequest(http.MethodGet, "/result/latest", nil)
+		req.Header.Set("token", "token123")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("bad request on missing token", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest(http.MethodGet, "/result/latest", nil)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("internal server error on usecase failure", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		m.On("GetResultLatest", "token123").Return(entities.Result{}, fiber.ErrInternalServerError)
+
+		req := httptest.NewRequest(http.MethodGet, "/result/latest", nil)
+		req.Header.Set("token", "token123")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+	})
+}
+func (m *MockResultsUsecase) UpdateResult(result entities.Result, id uint) (entities.Result, error) {
+	args := m.Called(result, id)
+	return args.Get(0).(entities.Result), args.Error(1)
+}
+
+func TestUpdateResult(t *testing.T) {
+	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
+		m := new(MockResultsUsecase)
+		handler := adapters.NewHttpResultHandler(m)
+		app := fiber.New()
+		app.Put("/result/:id", handler.UpdateResult)
+		return m, handler, app
+	}
+
+	t.Run("successful update", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		expectedResult := entities.Result{}
+		m.On("UpdateResult", mock.Anything, uint(1)).Return(expectedResult, nil)
+
+		// Create a new update request
+		body := bytes.NewBufferString(`{"field": "value"}`)
+		req := httptest.NewRequest(http.MethodPut, "/result/1", body)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("bad request on invalid id", func(t *testing.T) {
+		_, _, app := setup()
+
+		body := bytes.NewBufferString(`{"field": "value"}`)
+		req := httptest.NewRequest(http.MethodPut, "/result/invalid", body)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("bad request on invalid body", func(t *testing.T) {
+		_, _, app := setup()
+
+		body := bytes.NewBufferString(`invalid body`)
+		req := httptest.NewRequest(http.MethodPut, "/result/1", body)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("internal server error on usecase failure", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		m.On("UpdateResult", mock.Anything, uint(1)).Return(entities.Result{}, fiber.ErrInternalServerError)
+
+		body := bytes.NewBufferString(`{"field": "value"}`)
+		req := httptest.NewRequest(http.MethodPut, "/result/1", body)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+	})
+}
+func (m *MockResultsUsecase) DeleteResult(id uint) error {
+	args := m.Called(id)
+	return args.Error(0)
+}
+
+func TestDeleteResult(t *testing.T) {
+	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
+		m := new(MockResultsUsecase)
+		handler := adapters.NewHttpResultHandler(m)
+		app := fiber.New()
+		app.Delete("/result/:id", handler.DeleteResult)
+		return m, handler, app
+	}
+
+	t.Run("successful deletion", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		m.On("DeleteResult", uint(1)).Return(nil)
+
+		req := httptest.NewRequest(http.MethodDelete, "/result/1", nil)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("bad request on invalid id", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest(http.MethodDelete, "/result/invalid", nil)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("internal server error on usecase failure", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		m.On("DeleteResult", uint(1)).Return(fiber.ErrInternalServerError)
+
+		req := httptest.NewRequest(http.MethodDelete, "/result/1", nil)
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
