@@ -84,7 +84,7 @@ func (handler *HttpResultHandler) GetResults(c *fiber.Ctx) error {
 //	@Tags			results
 //	@Accept			json
 //	@Produce		json
-//	@Param			token	header	string	true	"Token"
+//	@Param			token	header		string	true	"Token"
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		500		{object}	presentation.Responses
@@ -112,10 +112,10 @@ func (handler *HttpResultHandler) GetResultLatest(c *fiber.Ctx) error {
 //	@Tags			results
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	string	true	"Result ID"
-//	@Success		200		{object}	presentation.Responses
-//	@Failure		400		{object}	presentation.Responses
-//	@Failure		500		{object}	presentation.Responses
+//	@Param			id	path		string	true	"Result ID"
+//	@Success		200	{object}	presentation.Responses
+//	@Failure		400	{object}	presentation.Responses
+//	@Failure		500	{object}	presentation.Responses
 //	@Router			/results/{id} [get]
 func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
 	id := c.Params("id")
