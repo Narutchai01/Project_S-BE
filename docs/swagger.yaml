@@ -713,6 +713,40 @@ paths:
       summary: Get facial by ID
       tags:
       - facial
+  /results/:
+    post:
+      consumes:
+      - application/json
+      description: Create a result
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create a result
+      tags:
+      - results
   /skin:
     get:
       consumes:
