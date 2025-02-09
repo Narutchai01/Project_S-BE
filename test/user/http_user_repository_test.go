@@ -311,3 +311,57 @@ func TestGoogleSignInHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 }
+func (m *MockUserService) GetUser(token string) (entities.User, error) {
+	args := m.Called(token)
+	return args.Get(0).(entities.User), args.Error(1)
+}
+
+func TestGetUserHandler(t *testing.T) {
+	setup := func() (*MockUserService, *adapters.HttpUserHandler, *fiber.App) {
+		mockService := new(MockUserService)
+		handler := adapters.NewHttpUserHandler(mockService)
+
+		app := fiber.New()
+		app.Get("/user/me", handler.GetUser)
+
+		return mockService, handler, app
+	}
+
+	expectData := entities.User{
+		FullName:      "aut",
+		Email:         "aut@gmail.com",
+		Birthday:      parseDate("12-09-2003"),
+		SensitiveSkin: true,
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.On("GetUser",
+			mock.Anything,
+		).Return(expectData, nil)
+
+		req := httptest.NewRequest("GET", "/user/me", nil)
+		req.Header.Set("token", "some token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed to get user", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.ExpectedCalls = nil
+		mockService.On("GetUser",
+			mock.Anything,
+		).Return(entities.User{}, errors.New("service error"))
+
+		req := httptest.NewRequest("GET", "/user/me", nil)
+		req.Header.Set("token", "some token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+}
