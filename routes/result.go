@@ -13,6 +13,7 @@ func ResultRoutes(app fiber.Router, db *gorm.DB) {
 	resultHandler := adapters.NewHttpResultHandler(resultService)
 
 	resultGroup := app.Group("/results")
+	resultGroup.Use(middlewares.AuthorizationRequired())
 	resultGroup.Post("/", resultHandler.CreateResult)
 	resultGroup.Get("/", resultHandler.GetResults)
 	resultGroup.Get("/latest", resultHandler.GetResultLatest)
