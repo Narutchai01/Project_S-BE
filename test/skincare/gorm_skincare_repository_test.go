@@ -27,10 +27,10 @@ func TestGormCreateSkincare(t *testing.T) {
 	repo := adapters.NewGormSkincareRepository(gormDB)
 
 	expectData := entities.Skincare{
-		Image: "innisfree/image/path",
-		Name: "innisfree",
+		Image:       "innisfree/image/path",
+		Name:        "innisfree",
 		Description: "green tea seed serum",
-		CreateBY: 1,
+		CreateBY:    1,
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -75,10 +75,10 @@ func TestGormGetSkincares(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Image: "innisfree/image/path",
-		Name: "innisfree",
+		Image:       "innisfree/image/path",
+		Name:        "innisfree",
 		Description: "green tea seed serum",
-		CreateBY: 1,
+		CreateBY:    1,
 	}
 
 	columns := sqlmock.NewRows([]string{"id", "image", "name", "description", "create_by"}).
@@ -122,15 +122,15 @@ func TestGormGetskin(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Image: "innisfree/image/path",
-		Name: "innisfree",
+		Image:       "innisfree/image/path",
+		Name:        "innisfree",
 		Description: "green tea seed serum",
-		CreateBY: 1,
+		CreateBY:    1,
 	}
 
 	expectedSQL := `SELECT \* FROM "skincares" WHERE "skincares"\."id" = \$1 AND "skincares"\."deleted_at" IS NULL ORDER BY "skincares"\."id" LIMIT \$2`
 	rows := sqlmock.NewRows([]string{"id", "image", "name", "description", "create_by"}).
-	AddRow(expectData.ID, expectData.Image, expectData.Name, expectData.Description, expectData.CreateBY)
+		AddRow(expectData.ID, expectData.Image, expectData.Name, expectData.Description, expectData.CreateBY)
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectQuery(expectedSQL).
 			WithArgs(1, 1).
@@ -173,10 +173,10 @@ func TestGormUpdateUpdateskin(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Image: "innisfree/image/path",
-		Name: "innisfree",
+		Image:       "innisfree/image/path",
+		Name:        "innisfree",
 		Description: "green tea seed serum",
-		CreateBY: 1,
+		CreateBY:    1,
 	}
 
 	expectedSQL := `UPDATE "skincares" SET "id"=\$1,"updated_at"=\$2,"image"=\$3,"name"=\$4,"description"=\$5,"create_by"=\$6 WHERE id = \$7 AND "skincares"."deleted_at" IS NULL`
@@ -185,14 +185,14 @@ func TestGormUpdateUpdateskin(t *testing.T) {
 		mock.ExpectBegin()
 		mock.ExpectExec(expectedSQL).
 			WithArgs(
-				expectData.ID, 
-				sqlmock.AnyArg(), 
-				expectData.Image, 
-				expectData.Name, 
-				expectData.Description, 
-				expectData.CreateBY, 
 				expectData.ID,
-		).WillReturnResult(sqlmock.NewResult(0, 1))
+				sqlmock.AnyArg(),
+				expectData.Image,
+				expectData.Name,
+				expectData.Description,
+				expectData.CreateBY,
+				expectData.ID,
+			).WillReturnResult(sqlmock.NewResult(0, 1))
 		mock.ExpectCommit()
 
 		result, err := repo.UpdateSkincareById(int(expectData.ID), expectData)
@@ -206,14 +206,14 @@ func TestGormUpdateUpdateskin(t *testing.T) {
 		mock.ExpectBegin()
 		mock.ExpectExec(expectedSQL).
 			WithArgs(
-				expectData.ID, 
-				sqlmock.AnyArg(), 
-				expectData.Image, 
-				expectData.Name, 
-				expectData.Description, 
-				expectData.CreateBY, 
 				expectData.ID,
-		).WillReturnError(errors.New("database error"))
+				sqlmock.AnyArg(),
+				expectData.Image,
+				expectData.Name,
+				expectData.Description,
+				expectData.CreateBY,
+				expectData.ID,
+			).WillReturnError(errors.New("database error"))
 		mock.ExpectRollback()
 
 		_, err := repo.UpdateSkincareById(int(expectData.ID), expectData)
@@ -242,10 +242,10 @@ func TestGormDeleteskin(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Image: "innisfree/image/path",
-		Name: "innisfree",
+		Image:       "innisfree/image/path",
+		Name:        "innisfree",
 		Description: "green tea seed serum",
-		CreateBY: 1,
+		CreateBY:    1,
 	}
 
 	expectedSQL := `UPDATE "skincares" SET "deleted_at"=\$1 WHERE id = \$2 AND "skincares"."deleted_at" IS NULL`

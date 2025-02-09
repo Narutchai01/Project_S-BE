@@ -397,15 +397,14 @@ func TestDeleteAdminHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-
 	expectData := entities.Skincare{
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Image: "innisfree/image/path",
-		Name: "innisfree",
+		Image:       "innisfree/image/path",
+		Name:        "innisfree",
 		Description: "green tea seed serum",
-		CreateBY: 1,
+		CreateBY:    1,
 	}
 
 	t.Run("success", func(t *testing.T) {

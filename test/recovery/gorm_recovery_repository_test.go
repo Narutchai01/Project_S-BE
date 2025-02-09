@@ -27,7 +27,7 @@ func TestGormCreateRecovery(t *testing.T) {
 	repo := adapters.NewGormRecoveryRepository(gormDB)
 
 	expectData := entities.Recovery{
-		OTP: "123456",
+		OTP:    "123456",
 		UserId: 1,
 	}
 
@@ -73,7 +73,7 @@ func TestGormDeleteRecoveryById(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		OTP: "123456",
+		OTP:    "123456",
 		UserId: 1,
 	}
 
@@ -126,7 +126,7 @@ func TestGormGetRecoveries(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		OTP: "123456",
+		OTP:    "123456",
 		UserId: 1,
 	}
 
@@ -171,13 +171,13 @@ func TestGormGetRecoveryById(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		OTP: "123456",
+		OTP:    "123456",
 		UserId: 1,
 	}
 
 	expectedSQL := `SELECT \* FROM "recoveries" WHERE "recoveries"\."id" = \$1 AND "recoveries"\."deleted_at" IS NULL ORDER BY "recoveries"\."id" LIMIT \$2`
 	rows := sqlmock.NewRows([]string{"id", "otp", "user_id"}).
-	AddRow(expectData.ID, expectData.OTP, expectData.UserId)
+		AddRow(expectData.ID, expectData.OTP, expectData.UserId)
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectQuery(expectedSQL).
 			WithArgs(int(expectData.ID), 1).
@@ -220,13 +220,13 @@ func TestGormGetRecoveryByUserId(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		OTP: "123456",
+		OTP:    "123456",
 		UserId: 1,
 	}
 
 	expectedSQL := `SELECT \* FROM "recoveries" WHERE user_id = \$1 AND "recoveries"\."deleted_at" IS NULL ORDER BY "recoveries"\."id" LIMIT \$2`
 	rows := sqlmock.NewRows([]string{"id", "otp", "user_id"}).
-	AddRow(expectData.ID, expectData.OTP, expectData.UserId)
+		AddRow(expectData.ID, expectData.OTP, expectData.UserId)
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectQuery(expectedSQL).
 			WithArgs(int(expectData.UserId), 1).
@@ -269,7 +269,7 @@ func TestGormUpdateRecoveryOtpById(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		OTP: "123456",
+		OTP:    "123456",
 		UserId: 1,
 	}
 
@@ -304,4 +304,3 @@ func TestGormUpdateRecoveryOtpById(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
-

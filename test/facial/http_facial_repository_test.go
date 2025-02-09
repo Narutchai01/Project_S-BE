@@ -45,7 +45,7 @@ func (m *MockFacialService) DeleteFacial(id int) error {
 	return args.Error(0)
 }
 
-//Test
+// Test
 func TestCreateFacialHandler(t *testing.T) {
 	setup := func() (*MockFacialService, *adapters.HttpFacialHandler, *fiber.App) {
 		mockService := new(MockFacialService)
@@ -58,8 +58,8 @@ func TestCreateFacialHandler(t *testing.T) {
 	}
 
 	expectData := entities.Facial{
-		Name: "facial_type1",
-		Image: "facial/type1/path",
+		Name:     "facial_type1",
+		Image:    "facial/type1/path",
 		CreateBY: 1,
 	}
 
@@ -160,16 +160,16 @@ func TestGetFacialsHandler(t *testing.T) {
 			Model: gorm.Model{
 				ID: 1,
 			},
-			Name: "facial_type1",
-			Image: "facial/type1/path",
+			Name:     "facial_type1",
+			Image:    "facial/type1/path",
 			CreateBY: 1,
 		},
 		{
 			Model: gorm.Model{
 				ID: 2,
 			},
-			Name: "facial_type2",
-			Image: "facial/type2/path",
+			Name:     "facial_type2",
+			Image:    "facial/type2/path",
 			CreateBY: 1,
 		},
 	}
@@ -217,8 +217,8 @@ func TestGetFacialHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "facial_type1",
-		Image: "facial/type1/path",
+		Name:     "facial_type1",
+		Image:    "facial/type1/path",
 		CreateBY: 1,
 	}
 
@@ -276,8 +276,8 @@ func TestUpdateFacialHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "facial_type1",
-		Image: "facial/type1/path",
+		Name:     "facial_type1",
+		Image:    "facial/type1/path",
 		CreateBY: 1,
 	}
 
@@ -341,7 +341,7 @@ func TestUpdateFacialHandler(t *testing.T) {
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("name", expectData.Name) 
+		_ = writer.WriteField("name", expectData.Name)
 		writer.Close()
 
 		req := httptest.NewRequest("PUT", "/admin/facial/1", body)
@@ -392,7 +392,6 @@ func TestDeleteAdminHandler(t *testing.T) {
 
 		return mockService, handler, app
 	}
-
 
 	expectData := entities.Facial{
 		Model: gorm.Model{
