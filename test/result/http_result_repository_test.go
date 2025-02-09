@@ -94,3 +94,57 @@ func TestCreateResult(t *testing.T) {
 		require.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
 	})
 }
+func (m *MockResultsUsecase) GetResultLatest(token string) (entities.Result, error) {
+	args := m.Called(token)
+	return args.Get(0).(entities.Result), args.Error(1)
+}
+
+func TestGetResultLatest(t *testing.T) {
+	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
+		m := new(MockResultsUsecase)
+		handler := adapters.NewHttpResultHandler(m)
+		app := fiber.New()
+		app.Get("/result/latest", handler.GetResultLatest)
+		return m, handler, app
+	}
+
+	t.Run("successful retrieval", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		expectedResult := entities.Result{}
+
+		m.On("GetResultLatest", "token123").Return(expectedResult, nil)
+
+		req := httptest.NewRequest(http.MethodGet, "/result/latest", nil)
+		req.Header.Set("token", "token123")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("bad request on missing token", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest(http.MethodGet, "/result/latest", nil)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("internal server error on usecase failure", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		m.On("GetResultLatest", "token123").Return(entities.Result{}, fiber.ErrInternalServerError)
+
+		req := httptest.NewRequest(http.MethodGet, "/result/latest", nil)
+		req.Header.Set("token", "token123")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+	})
+}

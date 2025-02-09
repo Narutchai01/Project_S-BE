@@ -15,7 +15,7 @@ func ResultRoutes(app fiber.Router, db *gorm.DB) {
 	resultGroup := app.Group("/results")
 	resultGroup.Post("/", resultHandler.CreateResult)
 	resultGroup.Get("/", resultHandler.GetResults)
-	// resultGroup.Get("/latest", resultHandler.GetResultLatest)
+	resultGroup.Get("/latest", resultHandler.GetResultLatest)
 	// resultGroup.Get("/:id", resultHandler.GetResult)
 	// resultGroup.Put("/:id", resultHandler.UpdateResult)
 	// resultGroup.Delete("/:id", resultHandler.DeleteResult)

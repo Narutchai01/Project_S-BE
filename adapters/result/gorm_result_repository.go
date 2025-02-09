@@ -44,3 +44,17 @@ func (repo *GormResultRepository) GetResults(id uint) ([]entities.Result, error)
 	}
 	return results, nil
 }
+
+func (repo *GormResultRepository) GetResultLatest(id uint) (entities.Result, error) {
+	var result entities.Result
+	err := repo.db.Where("user_id = ?", id).Order("created_at desc").First(&result).Error
+	if err != nil {
+		return result, err
+	}
+	skincares, err2 := repo.FindSkincare(result.SkincareID)
+	if err2 != nil {
+		return result, err2
+	}
+	result.Skincare = skincares
+	return result, nil
+}
