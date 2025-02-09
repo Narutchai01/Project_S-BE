@@ -1,6 +1,8 @@
 package adapters
 
 import (
+	"strconv"
+
 	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
@@ -95,6 +97,36 @@ func (handler *HttpResultHandler) GetResultLatest(c *fiber.Ctx) error {
 	}
 
 	result, err := handler.resultUsecase.GetResultLatest(token)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
+}
+
+// GetResult godoc
+//
+//	@Summary		Get a result
+//	@Description	Get a result
+//	@Tags			results
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	string	true	"Result ID"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		500		{object}	presentation.Responses
+//	@Router			/results/{id} [get]
+func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	// Convert id from string to uint
+	uintID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	result, err := handler.resultUsecase.GetResult(uint(uintID))
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))

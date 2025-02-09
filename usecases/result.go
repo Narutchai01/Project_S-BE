@@ -18,7 +18,7 @@ import (
 type ResultsUsecase interface {
 	CreateResult(file multipart.FileHeader, token string, c *fiber.Ctx) (entities.Result, error)
 	GetResults(token string) ([]entities.Result, error)
-	// GetResult(id uint) (entities.Result, error)
+	GetResult(id uint) (entities.Result, error)
 	GetResultLatest(token string) (entities.Result, error)
 	// UpdateResult(result entities.Result, id uint) (entities.Result, error)
 	// DeleteResult(id uint) error
@@ -117,4 +117,8 @@ func (service *resultService) GetResultLatest(token string) (entities.Result, er
 	}
 
 	return service.repo.GetResultLatest(id)
+}
+
+func (service *resultService) GetResult(id uint) (entities.Result, error) {
+	return service.repo.GetResult(id)
 }
