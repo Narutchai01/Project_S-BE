@@ -69,7 +69,7 @@ func TestRegisterHandler(t *testing.T) {
 		FullName:      "aut",
 		Email:         "aut@gmail.com",
 		Birthday:      parseDate("12-09-2003"),
-		SensitiveSkin: true,
+		SensitiveSkin: func(b bool) *bool { return &b }(true),
 		Password:      "aut1234hashed",
 	}
 
@@ -332,7 +332,7 @@ func TestGetUserHandler(t *testing.T) {
 		FullName:      "aut",
 		Email:         "aut@gmail.com",
 		Birthday:      parseDate("12-09-2003"),
-		SensitiveSkin: true,
+		SensitiveSkin: func(b bool) *bool { return &b }(true),
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -387,7 +387,7 @@ func TestUpdateUserHandler(t *testing.T) {
 		FullName:      "aut",
 		Email:         "aut@gmail.com",
 		Birthday:      parseDate("12-09-2003"),
-		SensitiveSkin: true,
+		SensitiveSkin: func(b bool) *bool { return &b }(true),
 	}
 
 	t.Run("success", func(t *testing.T) {
