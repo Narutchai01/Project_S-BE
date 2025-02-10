@@ -19,4 +19,5 @@ func UserRoutes(app fiber.Router, db *gorm.DB) {
 	app.Put("/forget-password", userHandler.ForgetPassword)
 	app.Post("/goolge-signin", userHandler.GoogleSignIn)
 	app.Get("/me", middlewares.AuthorizationRequired(), userHandler.GetUser)
+	app.Put("/", middlewares.AuthorizationRequired(), userHandler.UpdateUser)
 }

@@ -2,11 +2,14 @@ package usecases
 
 import (
 	"fmt"
+	"mime/multipart"
+	"os"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
 	"github.com/Narutchai01/Project_S-BE/utils"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,6 +19,7 @@ type UserUsecases interface {
 	ChangePassword(id int, ewPassword string, c *fiber.Ctx) (entities.User, error)
 	GoogleSignIn(user entities.User) (string, error)
 	GetUser(token string) (entities.User, error)
+	UpdateUser(user entities.User, token string, file *multipart.FileHeader, c *fiber.Ctx) (entities.User, error)
 }
 
 type userService struct {
@@ -89,4 +93,53 @@ func (service *userService) GetUser(token string) (entities.User, error) {
 		return entities.User{}, err
 	}
 	return service.repo.GetUser(uint(id))
+}
+
+func (service *userService) UpdateUser(user entities.User, token string, file *multipart.FileHeader, c *fiber.Ctx) (entities.User, error) {
+
+	id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.User{}, err
+	}
+	user.ID = uint(id)
+
+	old_value, err := service.repo.GetUser(uint(id))
+
+	if err != nil {
+		return entities.User{}, err
+	}
+
+	if file != nil {
+		fileName := uuid.New().String() + ".jpg"
+		if err := utils.CheckDirectoryExist(); err != nil {
+			return entities.User{}, err
+		}
+
+		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+			return entities.User{}, err
+		}
+
+		imageUrl, err := utils.UploadImage(fileName, "/user")
+
+		if err != nil {
+			return entities.User{}, err
+		}
+
+		err = os.Remove("./uploads/" + fileName)
+
+		if err != nil {
+			return entities.User{}, err
+		}
+
+		user.Image = imageUrl
+	}
+
+	user.ID = old_value.ID
+	user.Email = utils.CheckEmptyValueBeforeUpdate(user.Email, old_value.Email)
+	user.FullName = utils.CheckEmptyValueBeforeUpdate(user.FullName, old_value.FullName)
+	user.Image = utils.CheckEmptyValueBeforeUpdate(user.Image, old_value.Image)
+	user.Password = utils.CheckEmptyValueBeforeUpdate(user.Password, old_value.Password)
+
+	return service.repo.UpdateUser(user)
+
 }

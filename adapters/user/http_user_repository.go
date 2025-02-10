@@ -136,3 +136,35 @@ func (handler *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
 }
+
+// UpdateUser godoc
+//
+//	@Summary		Update user
+//	@Description	Update user
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	header	string	true	"Token"
+//	@Param			user	body		entities.User	true	"User information"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/user/ [put]
+func (handler *HttpUserHandler) UpdateUser(c *fiber.Ctx) error {
+	var user entities.User
+
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	token := c.Get("token")
+
+	file, _ := c.FormFile("image")
+
+	result, err := handler.userUcase.UpdateUser(user, token, file, c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
+}

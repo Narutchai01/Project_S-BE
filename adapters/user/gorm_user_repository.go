@@ -37,3 +37,8 @@ func (repo *GormUserRepository) GetUser(id uint) (entities.User, error) {
 	err := repo.db.Select("id", "full_name", "email", "birthday", "sensitive_skin", "image").Where("id = ?", id).First(&user).Error
 	return user, err
 }
+
+func (repo *GormUserRepository) UpdateUser(user entities.User) (entities.User, error) {
+	err := repo.db.Model(&user).Where("id = ?", user.ID).Updates(user).Error
+	return user, err
+}
