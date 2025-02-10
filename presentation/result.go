@@ -25,6 +25,7 @@ func ToResultResponse(data entities.Result) *Responses {
 		AcneTpye:   data.AcneType,
 		FacialType: data.FacialType,
 		Skincare:   MapSkinCare(data.Skincare),
+		CreateAt:   &data.CreatedAt,
 	}
 	return &Responses{
 		Status: true,
@@ -43,6 +44,7 @@ func ToResultsResponse(data []entities.Result) *Responses {
 			AcneTpye:   result.AcneType,
 			FacialType: result.FacialType,
 			Skincare:   MapSkinCare(result.Skincare),
+			CreateAt:   &result.CreatedAt,
 		}
 	}
 	return &Responses{
