@@ -45,7 +45,7 @@ type User struct {
 	FullName      string     `json:"full_name"`
 	Email         string     `json:"email"`
 	Birthday      *time.Time `json:"birthday"`
-	SensitiveSkin bool       `json:"sensitive_skin"`
+	SensitiveSkin *bool      `json:"sensitive_skin"`
 	Image         string     `json:"image"`
 }
 
@@ -87,7 +87,7 @@ func TokenResponse(token string) *Responses {
 	return &Responses{
 		Status: true,
 		Data: map[string]string{
-			"token": token,
+			"token": "Bearer " + token,
 		},
 		Error: nil,
 	}

@@ -51,10 +51,10 @@ func (handler *HttpUserHandler) Register(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			admin	body		object{email=string,password=string}	true	"Admin Object"
 //
-// @Success		200		{object}	presentation.Responses
-// @Failure		400		{object}	presentation.Responses
-// @Failure		404		{object}	presentation.Responses
-// @Router			/user/login [post]
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/user/login [post]
 func (handler *HttpUserHandler) LogIn(c *fiber.Ctx) error {
 	var user entities.User
 
@@ -92,7 +92,7 @@ func (handler *HttpUserHandler) ForgetPassword(c *fiber.Ctx) error {
 //	@Tags			user
 //	@Accept			json
 //	@Produce		json
-//	@Param			user	body		entities.User	true	"User information"
+//	@Param			admin	body		object{email=string,fullname=string,image=string,sensitive_skin=boolean}	true	"Admin Object"
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		404		{object}	presentation.Responses
@@ -111,4 +111,60 @@ func (handler *HttpUserHandler) GoogleSignIn(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.TokenResponse(result))
+}
+
+// GetUser godoc
+//
+//	@Summary		Get user by id
+//	@Description	Get user by id
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	header	string	true	"Token"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/user/me [get]
+func (handler *HttpUserHandler) GetUser(c *fiber.Ctx) error {
+
+	token := c.Get("token")
+
+	result, err := handler.userUcase.GetUser(token)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
+}
+
+// UpdateUser godoc
+//
+//	@Summary		Update user
+//	@Description	Update user
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	header	string	true	"Token"
+//	@Param			user	body		entities.User	true	"User information"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		404		{object}	presentation.Responses
+//	@Router			/user/ [put]
+func (handler *HttpUserHandler) UpdateUser(c *fiber.Ctx) error {
+	var user entities.User
+
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	token := c.Get("token")
+
+	file, _ := c.FormFile("image")
+
+	result, err := handler.userUcase.UpdateUser(user, token, file, c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
 }

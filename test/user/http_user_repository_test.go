@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"mime/multipart"
 	"net/http/httptest"
 
 	"testing"
@@ -68,7 +69,7 @@ func TestRegisterHandler(t *testing.T) {
 		FullName:      "aut",
 		Email:         "aut@gmail.com",
 		Birthday:      parseDate("12-09-2003"),
-		SensitiveSkin: true,
+		SensitiveSkin: func(b bool) *bool { return &b }(true),
 		Password:      "aut1234hashed",
 	}
 
@@ -304,6 +305,137 @@ func TestGoogleSignInHandler(t *testing.T) {
 
 		req := httptest.NewRequest("POST", "/user/google-signin", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+}
+func (m *MockUserService) GetUser(token string) (entities.User, error) {
+	args := m.Called(token)
+	return args.Get(0).(entities.User), args.Error(1)
+}
+
+func TestGetUserHandler(t *testing.T) {
+	setup := func() (*MockUserService, *adapters.HttpUserHandler, *fiber.App) {
+		mockService := new(MockUserService)
+		handler := adapters.NewHttpUserHandler(mockService)
+
+		app := fiber.New()
+		app.Get("/user/me", handler.GetUser)
+
+		return mockService, handler, app
+	}
+
+	expectData := entities.User{
+		FullName:      "aut",
+		Email:         "aut@gmail.com",
+		Birthday:      parseDate("12-09-2003"),
+		SensitiveSkin: func(b bool) *bool { return &b }(true),
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.On("GetUser",
+			mock.Anything,
+		).Return(expectData, nil)
+
+		req := httptest.NewRequest("GET", "/user/me", nil)
+		req.Header.Set("token", "some token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed to get user", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.ExpectedCalls = nil
+		mockService.On("GetUser",
+			mock.Anything,
+		).Return(entities.User{}, errors.New("service error"))
+
+		req := httptest.NewRequest("GET", "/user/me", nil)
+		req.Header.Set("token", "some token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+}
+
+func (m *MockUserService) UpdateUser(user entities.User, token string, file *multipart.FileHeader, c *fiber.Ctx) (entities.User, error) {
+	args := m.Called(user, token, file, c)
+	return args.Get(0).(entities.User), args.Error(1)
+}
+
+func TestUpdateUserHandler(t *testing.T) {
+	setup := func() (*MockUserService, *adapters.HttpUserHandler, *fiber.App) {
+		mockService := new(MockUserService)
+		handler := adapters.NewHttpUserHandler(mockService)
+
+		app := fiber.New()
+		app.Put("/user/update", handler.UpdateUser)
+
+		return mockService, handler, app
+	}
+
+	expectData := entities.User{
+		FullName:      "aut",
+		Email:         "aut@gmail.com",
+		Birthday:      parseDate("12-09-2003"),
+		SensitiveSkin: func(b bool) *bool { return &b }(true),
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.On("UpdateUser",
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+		).Return(expectData, nil)
+
+		body, _ := json.Marshal(expectData)
+
+		req := httptest.NewRequest("PUT", "/user/update", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "some token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("failed in body parser", func(t *testing.T) {
+		_, _, app := setup()
+		req := httptest.NewRequest("PUT", "/user/update", bytes.NewBuffer([]byte("invalid body")))
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("failed to update user", func(t *testing.T) {
+		mockService, _, app := setup()
+		mockService.ExpectedCalls = nil
+		mockService.On("UpdateUser",
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+		).Return(entities.User{}, errors.New("service error"))
+
+		body, _ := json.Marshal(expectData)
+
+		req := httptest.NewRequest("PUT", "/user/update", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "some token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
