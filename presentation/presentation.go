@@ -63,6 +63,7 @@ type Result struct {
 	Skincare   []Skincare            `json:"skincare"`
 	AcneTpye   []entities.AcneFacial `json:"acne_type"`
 	FacialType []entities.AcneFacial `json:"facial_type"`
+	CreateAt   *time.Time            `json:"create_at"`
 }
 
 func DeleteResponse(id int) *Responses {

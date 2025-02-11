@@ -18,6 +18,7 @@ services:
       - SUPA_API_URL=${SUPA_API_URL}
       - SUPA_BUCKET_NAME=${SUPA_BUCKET_NAME}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - API_MODEL=http://project-s-model:8000
     ports:
       - "${PORT}:${PORT}"
 
