@@ -6,11 +6,11 @@ type Result struct {
 	gorm.Model
 	Image      string       `json:"image"`
 	UserID     uint         `json:"user_id"`
-	AcneType   []AcneFacial `json:"acne_type" gorm:"json"`
-	FacialType []AcneFacial `json:"facial_type" gorm:"json"`
+	AcneType   []AcneFacial `json:"acne_type" gorm:"serializer:json"`
+	FacialType []AcneFacial `json:"facial_type" gorm:"serializer:json"`
 	SkinID     uint         `json:"skin_id"`
-	SkincareID []uint       `json:"skincare_id" gorm:"json"`
-	Skincare   []Skincare   `json:"skincare" gorm:"many2many:skincare_result"`
+	SkincareID []uint       `json:"skincare_id" gorm:"serializer:json"`
+	Skincare   []Skincare   `json:"skincare" gorm:"-"`
 }
 
 type AcneFacial struct {
