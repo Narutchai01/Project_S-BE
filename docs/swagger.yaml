@@ -804,6 +804,46 @@ paths:
       summary: Get a result
       tags:
       - results
+  /results/compare:
+    post:
+      consumes:
+      - application/json
+      description: Get results by IDs
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: IDs
+        in: body
+        name: ids
+        required: true
+        schema:
+          properties:
+            IDs:
+              items:
+                type: integer
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get results by IDs
+      tags:
+      - results
   /results/latest:
     get:
       consumes:

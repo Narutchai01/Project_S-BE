@@ -46,7 +46,7 @@ func (m *MockAcneService) DeleteAcne(id int) error {
 	return args.Error(0)
 }
 
-//Test
+// Test
 func TestCreateAcneHandler(t *testing.T) {
 	setup := func() (*MockAcneService, *adapters.HttpAcneHandler, *fiber.App) {
 		mockService := new(MockAcneService)
@@ -59,8 +59,8 @@ func TestCreateAcneHandler(t *testing.T) {
 	}
 
 	expectData := entities.Acne{
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name:     "innisfree",
+		Image:    "innisfree/image/path",
 		CreateBY: 1,
 	}
 
@@ -161,16 +161,16 @@ func TestGetAcnesHandler(t *testing.T) {
 			Model: gorm.Model{
 				ID: 1,
 			},
-			Name: "innisfree",
-			Image: "innisfree/image/path",
+			Name:     "innisfree",
+			Image:    "innisfree/image/path",
 			CreateBY: 1,
 		},
 		{
 			Model: gorm.Model{
 				ID: 2,
 			},
-			Name: "Dr.Pong",
-			Image: "drpong/image/path",
+			Name:     "Dr.Pong",
+			Image:    "drpong/image/path",
 			CreateBY: 1,
 		},
 	}
@@ -218,8 +218,8 @@ func TestGetAcneHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name:     "innisfree",
+		Image:    "innisfree/image/path",
 		CreateBY: 1,
 	}
 
@@ -277,8 +277,8 @@ func TestUpdateAcneHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name:     "innisfree",
+		Image:    "innisfree/image/path",
 		CreateBY: 1,
 	}
 
@@ -342,7 +342,7 @@ func TestUpdateAcneHandler(t *testing.T) {
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("name", expectData.Name) 
+		_ = writer.WriteField("name", expectData.Name)
 		writer.Close()
 
 		req := httptest.NewRequest("PUT", "/admin/acne/1", body)
@@ -393,7 +393,6 @@ func TestDeleteAdminHandler(t *testing.T) {
 
 		return mockService, handler, app
 	}
-
 
 	expectData := entities.Acne{
 		Model: gorm.Model{

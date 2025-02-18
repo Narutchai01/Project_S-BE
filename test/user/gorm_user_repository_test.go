@@ -85,7 +85,7 @@ func TestGormUpdateUserPasswordById(t *testing.T) {
 		mock.ExpectBegin()
 		mock.ExpectQuery(regexp.QuoteMeta(expectedSQL)).
 			WithArgs(expectData.Password, sqlmock.AnyArg(), int(expectData.ID)).
-			WillReturnRows(columns,)
+			WillReturnRows(columns)
 		mock.ExpectCommit()
 
 		result, err := repo.UpdateUserPasswordById(int(expectData.ID), expectData.Password)

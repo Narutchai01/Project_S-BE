@@ -134,3 +134,31 @@ func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
 }
+
+// GetResultByIDs godoc
+//
+//	@Summary		Get results by IDs
+//	@Description	Get results by IDs
+//	@Tags			results
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	header		string	true	"Token"
+//	@Param			ids		body		object{IDs=[]uint}	true	"IDs"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		500		{object}	presentation.Responses
+//	@Router			/results/compare [post]
+func (handler *HttpResultHandler) GetResultByIDs(c *fiber.Ctx) error {
+	var ids struct{ IDs []uint }
+
+	if err := c.BodyParser(&ids); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	results, err := handler.resultUsecase.GetResultByIDs(ids.IDs)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToResultsResponse(results))
+}

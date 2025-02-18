@@ -82,7 +82,7 @@ func TestCreateRecovery(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		OTP: "123456",
+		OTP:    "123456",
 		UserId: 1,
 	}
 
@@ -95,18 +95,18 @@ func TestCreateRecovery(t *testing.T) {
 			mock.Anything,
 			mock.Anything,
 		).Return(expectData, nil)
-	
+
 		body, _ := json.Marshal(expectDataFromReq)
-	
+
 		req := httptest.NewRequest("POST", "/recovery", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
-	
+
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
-	
+
 	t.Run("success update recovery", func(t *testing.T) {
 		mockService, _, app := setup()
 
@@ -115,13 +115,13 @@ func TestCreateRecovery(t *testing.T) {
 			mock.Anything,
 			mock.Anything,
 		).Return(expectData, nil)
-	
+
 		body, _ := json.Marshal(expectDataFromReq)
-	
+
 		req := httptest.NewRequest("POST", "/recovery", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
-	
+
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
 		mockService.AssertExpectations(t)
@@ -146,13 +146,13 @@ func TestCreateRecovery(t *testing.T) {
 			mock.Anything,
 			mock.Anything,
 		).Return(entities.Recovery{}, errors.New("service error"))
-	
+
 		body, _ := json.Marshal(expectDataFromReq)
-	
+
 		req := httptest.NewRequest("POST", "/recovery", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
-	
+
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
 		mockService.AssertExpectations(t)
@@ -167,13 +167,13 @@ func TestCreateRecovery(t *testing.T) {
 			mock.Anything,
 			mock.Anything,
 		).Return(entities.Recovery{}, errors.New("service error"))
-	
+
 		body, _ := json.Marshal(expectDataFromReq)
-	
+
 		req := httptest.NewRequest("POST", "/recovery", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
-	
+
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
 		mockService.AssertExpectations(t)
@@ -196,7 +196,7 @@ func TestDeleteRecoveryByIdHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		OTP: "123456",
+		OTP:    "123456",
 		UserId: 1,
 	}
 
@@ -255,7 +255,7 @@ func TestGetRecoveriesHandler(t *testing.T) {
 			Model: gorm.Model{
 				ID: 1,
 			},
-			OTP: "123456",
+			OTP:    "123456",
 			UserId: 1,
 		},
 	}
@@ -303,7 +303,7 @@ func TestOtpValidationHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		OTP: "123456",
+		OTP:    "123456",
 		UserId: 1,
 	}
 
@@ -314,13 +314,13 @@ func TestOtpValidationHandler(t *testing.T) {
 		mockService.On("DeleteRecoveryById",
 			mock.Anything,
 		).Return(expectData, nil)
-	
+
 		body, _ := json.Marshal(expectData)
-	
+
 		req := httptest.NewRequest("POST", "/validation", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
-	
+
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
 		mockService.AssertExpectations(t)
@@ -341,13 +341,13 @@ func TestOtpValidationHandler(t *testing.T) {
 		mockService, _, app := setup()
 
 		mockService.On("OtpValidation", int(expectData.UserId), expectData.OTP).Return(false, errors.New("service error"))
-	
+
 		body, _ := json.Marshal(expectData)
-	
+
 		req := httptest.NewRequest("POST", "/validation", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
-	
+
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusUnprocessableEntity, resp.StatusCode)
 		mockService.AssertExpectations(t)
@@ -360,7 +360,7 @@ func TestOtpValidationHandler(t *testing.T) {
 		mockService.On("DeleteRecoveryById", int(expectData.ID)).Return(entities.Recovery{}, errors.New("service error"))
 
 		body, _ := json.Marshal(expectData)
-	
+
 		req := httptest.NewRequest("POST", "/validation", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)

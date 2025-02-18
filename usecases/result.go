@@ -20,6 +20,7 @@ type ResultsUsecase interface {
 	GetResults(token string) ([]entities.Result, error)
 	GetResult(id uint) (entities.Result, error)
 	GetResultLatest(token string) (entities.Result, error)
+	GetResultByIDs(ids []uint) ([]entities.Result, error)
 	// UpdateResult(result entities.Result, id uint) (entities.Result, error)
 	// DeleteResult(id uint) error
 }
@@ -121,4 +122,8 @@ func (service *resultService) GetResultLatest(token string) (entities.Result, er
 
 func (service *resultService) GetResult(id uint) (entities.Result, error) {
 	return service.repo.GetResult(id)
+}
+
+func (service *resultService) GetResultByIDs(ids []uint) ([]entities.Result, error) {
+	return service.repo.GetResultByIDs(ids)
 }

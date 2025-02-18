@@ -27,8 +27,8 @@ func TestGormCreateAcne(t *testing.T) {
 	repo := adapters.NewGormAcneRepository(gormDB)
 
 	expectData := entities.Acne{
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name:     "innisfree",
+		Image:    "innisfree/image/path",
 		CreateBY: 1,
 	}
 
@@ -74,8 +74,8 @@ func TestGormGetAcnes(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name:     "innisfree",
+		Image:    "innisfree/image/path",
 		CreateBY: 1,
 	}
 
@@ -120,8 +120,8 @@ func TestGormGetAcne(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name:     "innisfree",
+		Image:    "innisfree/image/path",
 		CreateBY: 1,
 	}
 
@@ -170,8 +170,8 @@ func TestGormUpdateUpdateAcne(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name:     "innisfree",
+		Image:    "innisfree/image/path",
 		CreateBY: 1,
 	}
 
@@ -194,7 +194,7 @@ func TestGormUpdateUpdateAcne(t *testing.T) {
 	t.Run("failure", func(t *testing.T) {
 		mock.ExpectBegin()
 		mock.ExpectExec(expectedSQL).
-		WithArgs(expectData.ID, sqlmock.AnyArg(), expectData.Name, expectData.Image, expectData.CreateBY, expectData.ID).
+			WithArgs(expectData.ID, sqlmock.AnyArg(), expectData.Name, expectData.Image, expectData.CreateBY, expectData.ID).
 			WillReturnError(errors.New("database error"))
 		mock.ExpectRollback()
 
@@ -224,8 +224,8 @@ func TestGormDeleteAcne(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "innisfree",
-		Image: "innisfree/image/path",
+		Name:     "innisfree",
+		Image:    "innisfree/image/path",
 		CreateBY: 1,
 	}
 

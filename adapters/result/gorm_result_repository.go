@@ -42,6 +42,21 @@ func (repo *GormResultRepository) GetResults(id uint) ([]entities.Result, error)
 	if err != nil {
 		return nil, err
 	}
+
+	for i, result := range results {
+		skincares, err := repo.FindSkincare(result.SkincareID)
+		if err != nil {
+			return nil, err
+		}
+		results[i].Skincare = skincares
+
+		skin, err := repo.FindSkin(result.SkinID)
+		if err != nil {
+			return nil, err
+		}
+		results[i].Skin = skin
+	}
+
 	return results, nil
 }
 
@@ -70,5 +85,42 @@ func (repo *GormResultRepository) GetResult(id uint) (entities.Result, error) {
 		return result, err2
 	}
 	result.Skincare = skincares
+
+	skin, err3 := repo.FindSkin(result.SkinID)
+	if err3 != nil {
+		return result, err3
+	}
+	result.Skin = skin
+
 	return result, nil
+}
+
+func (repo *GormResultRepository) FindSkin(id uint) (entities.Skin, error) {
+	var result entities.Skin
+	err := repo.db.First(&result, id).Error
+	return result, err
+}
+
+func (repo *GormResultRepository) GetResultByIDs(ids []uint) ([]entities.Result, error) {
+	var results []entities.Result
+	err := repo.db.Find(&results, ids).Error
+	if err != nil {
+		return results, err
+	}
+
+	for i, result := range results {
+		skincares, err := repo.FindSkincare(result.SkincareID)
+		if err != nil {
+			return results, err
+		}
+		results[i].Skincare = skincares
+
+		skin, err := repo.FindSkin(result.SkinID)
+		if err != nil {
+			return results, err
+		}
+		results[i].Skin = skin
+	}
+
+	return results, nil
 }

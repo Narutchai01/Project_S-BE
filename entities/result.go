@@ -9,6 +9,7 @@ type Result struct {
 	AcneType   []AcneFacial `json:"acne_type" gorm:"serializer:json"`
 	FacialType []AcneFacial `json:"facial_type" gorm:"serializer:json"`
 	SkinID     uint         `json:"skin_id"`
+	Skin       Skin         `json:"skin" gorm:"foreignKey:SkinID"`
 	SkincareID []uint       `json:"skincare_id" gorm:"serializer:json"`
 	Skincare   []Skincare   `json:"skincare" gorm:"-"`
 }

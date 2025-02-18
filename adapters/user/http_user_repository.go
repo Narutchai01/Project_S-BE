@@ -120,7 +120,7 @@ func (handler *HttpUserHandler) GoogleSignIn(c *fiber.Ctx) error {
 //	@Tags			user
 //	@Accept			json
 //	@Produce		json
-//	@Param			token	header	string	true	"Token"
+//	@Param			token	header		string	true	"Token"
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses
 //	@Failure		404		{object}	presentation.Responses
@@ -144,7 +144,7 @@ func (handler *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 //	@Tags			user
 //	@Accept			json
 //	@Produce		json
-//	@Param			token	header	string	true	"Token"
+//	@Param			token	header		string			true	"Token"
 //	@Param			user	body		entities.User	true	"User information"
 //	@Success		200		{object}	presentation.Responses
 //	@Failure		400		{object}	presentation.Responses

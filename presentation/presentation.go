@@ -58,7 +58,9 @@ type Facial struct {
 type Result struct {
 	ID         uint                  `json:"id"`
 	UserID     uint                  `json:"user_id"`
-	SkincareID uint                  `json:"skincare_id"`
+	SkincareID []uint                `json:"skincare_id"`
+	SkinID     uint                  `json:"skin_id"`
+	Skin       Skin                  `json:"skin"`
 	Image      string                `json:"image"`
 	Skincare   []Skincare            `json:"skincare"`
 	AcneTpye   []entities.AcneFacial `json:"acne_type"`
