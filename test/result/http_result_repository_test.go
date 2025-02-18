@@ -199,3 +199,63 @@ func TestGetResult(t *testing.T) {
 		require.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
 	})
 }
+func (m *MockResultsUsecase) GetResultByIDs(ids []uint) ([]entities.Result, error) {
+	args := m.Called(ids)
+	return args.Get(0).([]entities.Result), args.Error(1)
+}
+
+func TestGetResultByIDs(t *testing.T) {
+	setup := func() (*MockResultsUsecase, *adapters.HttpResultHandler, *fiber.App) {
+		m := new(MockResultsUsecase)
+		handler := adapters.NewHttpResultHandler(m)
+		app := fiber.New()
+		app.Post("/results/compare", handler.GetResultByIDs)
+		return m, handler, app
+	}
+
+	t.Run("successful retrieval", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		expectedResults := []entities.Result{}
+		m.On("GetResultByIDs", []uint{1, 2, 3}).Return(expectedResults, nil)
+
+		body := bytes.NewBufferString(`{"IDs":[1,2,3]}`)
+		req := httptest.NewRequest(http.MethodPost, "/results/compare", body)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "token123")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("bad request on invalid body", func(t *testing.T) {
+		_, _, app := setup()
+
+		body := bytes.NewBufferString(`invalid body`)
+		req := httptest.NewRequest(http.MethodPost, "/results/compare", body)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "token123")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("internal server error on usecase failure", func(t *testing.T) {
+		m, _, app := setup()
+
+		// Mock the usecase response
+		m.On("GetResultByIDs", []uint{1, 2, 3}).Return(nil, fiber.ErrInternalServerError)
+
+		body := bytes.NewBufferString(`{"IDs":[1,2,3]}`)
+		req := httptest.NewRequest(http.MethodPost, "/results/compare", body)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "token123")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		require.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+	})
+}
