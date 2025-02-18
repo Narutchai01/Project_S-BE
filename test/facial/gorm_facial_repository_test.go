@@ -27,8 +27,8 @@ func TestGormCreateFacial(t *testing.T) {
 	repo := adapters.NewGormFacialRepository(gormDB)
 
 	expectData := entities.Facial{
-		Name: "facial_type1",
-		Image: "facial/type1/path",
+		Name:     "facial_type1",
+		Image:    "facial/type1/path",
 		CreateBY: 1,
 	}
 
@@ -74,8 +74,8 @@ func TestGormGetfacials(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "facial_type1",
-		Image: "facial/type1/path",
+		Name:     "facial_type1",
+		Image:    "facial/type1/path",
 		CreateBY: 1,
 	}
 
@@ -120,8 +120,8 @@ func TestGormGetfacial(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "facial_type1",
-		Image: "facial/type1/path",
+		Name:     "facial_type1",
+		Image:    "facial/type1/path",
 		CreateBY: 1,
 	}
 
@@ -170,8 +170,8 @@ func TestGormUpdateUpdatefacial(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "facial_type1",
-		Image: "facial/type1/path",
+		Name:     "facial_type1",
+		Image:    "facial/type1/path",
 		CreateBY: 1,
 	}
 
@@ -194,7 +194,7 @@ func TestGormUpdateUpdatefacial(t *testing.T) {
 	t.Run("failure", func(t *testing.T) {
 		mock.ExpectBegin()
 		mock.ExpectExec(expectedSQL).
-		WithArgs(expectData.ID, sqlmock.AnyArg(), expectData.Name, expectData.Image, expectData.CreateBY, expectData.ID).
+			WithArgs(expectData.ID, sqlmock.AnyArg(), expectData.Name, expectData.Image, expectData.CreateBY, expectData.ID).
 			WillReturnError(errors.New("database error"))
 		mock.ExpectRollback()
 
@@ -224,8 +224,8 @@ func TestGormDeletefacial(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "facial_type1",
-		Image: "facial/type1/path",
+		Name:     "facial_type1",
+		Image:    "facial/type1/path",
 		CreateBY: 1,
 	}
 

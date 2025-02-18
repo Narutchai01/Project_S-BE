@@ -45,7 +45,7 @@ func (m *MockSkinService) DeleteSkin(id int) error {
 	return args.Error(0)
 }
 
-//Test
+// Test
 func TestCreateSkinHandler(t *testing.T) {
 	setup := func() (*MockSkinService, *adapters.HttpSkinHandler, *fiber.App) {
 		mockService := new(MockSkinService)
@@ -58,8 +58,8 @@ func TestCreateSkinHandler(t *testing.T) {
 	}
 
 	expectData := entities.Skin{
-		Name: "skintype1",
-		Image: "skin/type1/path",
+		Name:     "skintype1",
+		Image:    "skin/type1/path",
 		CreateBY: 1,
 	}
 
@@ -160,16 +160,16 @@ func TestGetSkinsHandler(t *testing.T) {
 			Model: gorm.Model{
 				ID: 1,
 			},
-			Name: "skintype1",
-			Image: "skin/type1/path",
+			Name:     "skintype1",
+			Image:    "skin/type1/path",
 			CreateBY: 1,
 		},
 		{
 			Model: gorm.Model{
 				ID: 2,
 			},
-			Name: "skintype2",
-			Image: "skin/type2/path",
+			Name:     "skintype2",
+			Image:    "skin/type2/path",
 			CreateBY: 1,
 		},
 	}
@@ -217,8 +217,8 @@ func TestGetSkinHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "skintype1",
-		Image: "skin/type1/path",
+		Name:     "skintype1",
+		Image:    "skin/type1/path",
 		CreateBY: 1,
 	}
 
@@ -276,8 +276,8 @@ func TestUpdateSkinHandler(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "skintype1",
-		Image: "skin/type1/path",
+		Name:     "skintype1",
+		Image:    "skin/type1/path",
 		CreateBY: 1,
 	}
 
@@ -341,7 +341,7 @@ func TestUpdateSkinHandler(t *testing.T) {
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("name", expectData.Name) 
+		_ = writer.WriteField("name", expectData.Name)
 		writer.Close()
 
 		req := httptest.NewRequest("PUT", "/admin/skin/1", body)
@@ -393,13 +393,12 @@ func TestDeleteAdminHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-
 	expectData := entities.Skin{
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Name: "skintype1",
-		Image: "skin/type1/path",
+		Name:     "skintype1",
+		Image:    "skin/type1/path",
 		CreateBY: 1,
 	}
 
