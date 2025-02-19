@@ -51,3 +51,19 @@ func (repo *GormThreadRepository) CreateThread(threadDetails []entities.ThreadDe
 
 	return thread, nil
 }
+func (repo *GormThreadRepository) GetThreads() ([]entities.Thread, error) {
+	var threads []entities.Thread
+	if err := repo.db.Preload("User").Preload("Threads").Find(&threads).Error; err != nil {
+		return []entities.Thread{}, err
+	}
+
+	for i := range threads {
+		var threadDetails []entities.ThreadDetail
+		if err := repo.db.Preload("Skincare").Where("thread_id = ?", threads[i].ID).Limit(1).Find(&threadDetails).Error; err != nil {
+			return []entities.Thread{}, err
+		}
+		threads[i].Threads = threadDetails
+	}
+
+	return threads, nil
+}

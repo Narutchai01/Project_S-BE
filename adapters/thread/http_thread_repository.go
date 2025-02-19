@@ -44,3 +44,13 @@ func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToThreadResponse(result))
 }
+
+func (handler *HttpThreadHandler) GetThreads(c *fiber.Ctx) error {
+	result, err := handler.threadUsecase.GetThreads()
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadListResponse(result))
+}

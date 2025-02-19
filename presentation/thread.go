@@ -46,3 +46,26 @@ func ToThreadResponse(data entities.Thread) *Responses {
 		Error:  nil,
 	}
 }
+
+func ToThreadListResponse(data []entities.Thread) *Responses {
+	threads := []Thread{}
+
+	for _, thread := range data {
+		threads = append(threads, Thread{
+			ID:     thread.ID,
+			UserID: thread.UserID,
+			User: User{
+				ID:       thread.UserID,
+				FullName: thread.User.FullName,
+				Email:    thread.User.Email,
+			},
+			ThreadDetail: MapThreadDetails(thread.Threads),
+		})
+	}
+
+	return &Responses{
+		Status: true,
+		Data:   threads,
+		Error:  nil,
+	}
+}

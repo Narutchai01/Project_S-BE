@@ -8,6 +8,7 @@ import (
 
 type ThreadUseCase interface {
 	CreateThread(threadDetails entities.ThreadRequest, token string) (entities.Thread, error)
+	GetThreads() ([]entities.Thread, error)
 }
 
 type threadService struct {
@@ -31,5 +32,13 @@ func (service *threadService) CreateThread(threadDetails entities.ThreadRequest,
 		return entities.Thread{}, err
 	}
 
+	return result, nil
+}
+
+func (service *threadService) GetThreads() ([]entities.Thread, error) {
+	result, err := service.repo.GetThreads()
+	if err != nil {
+		return []entities.Thread{}, err
+	}
 	return result, nil
 }
