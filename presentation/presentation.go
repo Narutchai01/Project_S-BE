@@ -68,6 +68,19 @@ type Result struct {
 	CreateAt   *time.Time            `json:"create_at"`
 }
 
+type Thread struct {
+	ID           uint           `json:"id"`
+	UserID       uint           `json:"user_id"`
+	User         User           `json:"user"`
+	ThreadDetail []ThreadDetail `json:"thread_detail"`
+}
+
+type ThreadDetail struct {
+	ID       uint     `json:"id"`
+	Skincare Skincare `json:"skincare"`
+	Caption  string   `json:"caption"`
+}
+
 func DeleteResponse(id int) *Responses {
 	return &Responses{
 		Status: true,

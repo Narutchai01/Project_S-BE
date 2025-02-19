@@ -28,4 +28,6 @@ func Router(app *fiber.App, db *gorm.DB) {
 	SkinRouters(api, admin, db)
 	ResultRoutes(api, db)
 
+	ThreadRouters(api, db)
+
 }
