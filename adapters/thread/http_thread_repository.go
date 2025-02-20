@@ -135,3 +135,26 @@ func (handler *HttpThreadHandler) DeleteThread(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(threadID))
 }
+
+func (handler *HttpThreadHandler) BookMark(c *fiber.Ctx) error {
+	id := c.Params("id")
+	threadID, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread ID")))
+	}
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("token is required")))
+	}
+
+	result, err := handler.threadUsecase.Bookmark(uint(threadID), token)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread ID")))
+
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
+}
