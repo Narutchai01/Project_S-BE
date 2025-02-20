@@ -59,6 +59,17 @@ func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToThreadResponse(result))
 }
 
+// Get Threads godoc
+//
+// @Summary		Get all threads
+// @Description	Get all threads
+// @Tags			thread
+// @Accept			json
+// @Produce		json
+// @Param			token	header	string	true	"Token"
+// @Success		200		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Router			/thread/ [get]
 func (handler *HttpThreadHandler) GetThreads(c *fiber.Ctx) error {
 	result, err := handler.threadUsecase.GetThreads()
 
