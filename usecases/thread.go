@@ -27,11 +27,30 @@ func (service *threadService) CreateThread(threadDetails entities.ThreadRequest,
 		return entities.Thread{}, err
 	}
 
-	result, err := service.repo.CreateThread(threadDetails.ThreadDetail, user_id)
-
+	thread, err := service.repo.CreateThread(user_id)
 	if err != nil {
 		return entities.Thread{}, err
 	}
+
+	for _, threadDetail := range threadDetails.ThreadDetail {
+		threadDetail.ThreadID = thread.ID
+		_, err := service.repo.CreateThreadDetail(threadDetail)
+		if err != nil {
+			return entities.Thread{}, err
+		}
+	}
+
+	result, err := service.GetThread(thread.ID)
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	thread_details, err := service.repo.GetThreadDetails(result.ID)
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	result.Threads = thread_details
 
 	return result, nil
 }

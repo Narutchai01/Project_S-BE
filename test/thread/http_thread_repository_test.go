@@ -17,6 +17,16 @@ type MockThreadUseCase struct {
 	mock.Mock
 }
 
+// GetThread implements usecases.ThreadUseCase.
+func (m *MockThreadUseCase) GetThread(id uint) (entities.Thread, error) {
+	panic("unimplemented")
+}
+
+// GetThreads implements usecases.ThreadUseCase.
+func (m *MockThreadUseCase) GetThreads() ([]entities.Thread, error) {
+	panic("unimplemented")
+}
+
 func (m *MockThreadUseCase) CreateThread(thread entities.ThreadRequest, token string) (entities.Thread, error) {
 	args := m.Called(thread, token)
 	return args.Get(0).(entities.Thread), args.Error(1)
@@ -78,5 +88,28 @@ func TestCraeteThread(t *testing.T) {
 
 		resp, _ := app.Test(req)
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+}
+
+func TestGetThreads(t *testing.T) {
+	setup := func() (*MockThreadUseCase, *adapters.HttpThreadHandler, *fiber.App) {
+		mockThreadUseCase := new(MockThreadUseCase)
+		httpThreadHandler := adapters.NewHttpThreadHandler(mockThreadUseCase)
+		app := fiber.New()
+
+		app.Get("/thread", httpThreadHandler.GetThreads)
+
+		return mockThreadUseCase, httpThreadHandler, app
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		mockThreadUseCase, _, app := setup()
+
+		mockThreadUseCase.On("GetThreads").Return([]entities.Thread{}, nil)
+
+		req := httptest.NewRequest(fiber.MethodGet, "/thread", nil)
+		resp, _ := app.Test(req)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockThreadUseCase.AssertExpectations(t)
 	})
 }
