@@ -56,14 +56,25 @@ func (repo *GormThreadRepository) GetThreads() ([]entities.Thread, error) {
 	if err := repo.db.Preload("User").Preload("Threads").Find(&threads).Error; err != nil {
 		return []entities.Thread{}, err
 	}
+	return threads, nil
+}
 
-	for i := range threads {
-		var threadDetails []entities.ThreadDetail
-		if err := repo.db.Preload("Skincare").Where("thread_id = ?", threads[i].ID).Limit(1).Find(&threadDetails).Error; err != nil {
-			return []entities.Thread{}, err
-		}
-		threads[i].Threads = threadDetails
+func (repo *GormThreadRepository) GetThread(id uint) (entities.Thread, error) {
+	var thread entities.Thread
+
+	if err := repo.db.Preload("User").Preload("Threads").First(&thread, id).Error; err != nil {
+		return entities.Thread{}, err
 	}
 
-	return threads, nil
+	return thread, nil
+}
+
+func (repo *GormThreadRepository) GetThreadDetails(thread_id uint) ([]entities.ThreadDetail, error) {
+	var threadDetail []entities.ThreadDetail
+
+	if err := repo.db.Preload("Skincare").Where("thread_id = ?", thread_id).Find(&threadDetail).Error; err != nil {
+		return []entities.ThreadDetail{}, err
+	}
+
+	return threadDetail, nil
 }

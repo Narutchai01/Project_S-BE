@@ -9,6 +9,7 @@ import (
 type ThreadUseCase interface {
 	CreateThread(threadDetails entities.ThreadRequest, token string) (entities.Thread, error)
 	GetThreads() ([]entities.Thread, error)
+	GetThread(id uint) (entities.Thread, error)
 }
 
 type threadService struct {
@@ -40,5 +41,31 @@ func (service *threadService) GetThreads() ([]entities.Thread, error) {
 	if err != nil {
 		return []entities.Thread{}, err
 	}
+
+	for i, thread := range result {
+		thread_details, err := service.repo.GetThreadDetails(thread.ID)
+		if err != nil {
+			return []entities.Thread{}, err
+		}
+
+		result[i].Threads = thread_details
+	}
+
+	return result, nil
+}
+
+func (service *threadService) GetThread(id uint) (entities.Thread, error) {
+	result, err := service.repo.GetThread(id)
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	thread_details, err := service.repo.GetThreadDetails(result.ID)
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	result.Threads = thread_details
+
 	return result, nil
 }
