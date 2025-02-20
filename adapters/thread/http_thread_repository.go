@@ -18,6 +18,19 @@ func NewHttpThreadHandler(threadUcase usecases.ThreadUseCase) *HttpThreadHandler
 	return &HttpThreadHandler{threadUcase}
 }
 
+// Create Thread godoc
+//
+// @Summary		Create a thread
+// @Description	Create a thread
+// @Tags			thread
+// @Accept			json
+// @Produce		json
+// @Param			thread	body	entities.ThreadRequest	true	"Thread Object"
+// @Param			token	header	string	true	"Token"
+// @Success		201		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Failure		404		{object}	presentation.Responses
+// @Router			/thread/ [post]
 func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 	var thread entities.ThreadRequest
 
@@ -46,6 +59,17 @@ func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToThreadResponse(result))
 }
 
+// Get Threads godoc
+//
+// @Summary		Get all threads
+// @Description	Get all threads
+// @Tags			thread
+// @Accept			json
+// @Produce		json
+// @Param			token	header	string	true	"Token"
+// @Success		200		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Router			/thread/ [get]
 func (handler *HttpThreadHandler) GetThreads(c *fiber.Ctx) error {
 	result, err := handler.threadUsecase.GetThreads()
 
@@ -56,6 +80,18 @@ func (handler *HttpThreadHandler) GetThreads(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadListResponse(result))
 }
 
+// Get Thread godoc
+//
+// @Summary		Get a thread
+// @Description	Get a thread
+// @Tags			thread
+// @Accept			json
+// @Produce		json
+// @Param			id	path	int	true	"Thread ID"
+// @Param			token	header	string	true	"Token"
+// @Success		200		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Router			/thread/{id} [get]
 func (handler *HttpThreadHandler) GetThread(c *fiber.Ctx) error {
 	id := c.Params("id")
 	threadID, err := strconv.Atoi(id)

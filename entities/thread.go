@@ -11,10 +11,10 @@ type Thread struct {
 
 type ThreadDetail struct {
 	gorm.Model `swaggerignore:"true"`
-	ThreadID   uint `json:"thread_id"`
-	SkincareID uint `json:"skincare_id"`
-	Skincare   Skincare
-	Caption    string `json:"caption"`
+	ThreadID   uint     `json:"thread_id" swaggerignore:"true"`
+	SkincareID uint     `json:"skincare_id"`
+	Skincare   Skincare `swaggerignore:"true"`
+	Caption    string   `json:"caption"`
 }
 
 type ThreadRequest struct {
