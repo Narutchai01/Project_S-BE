@@ -1050,6 +1050,36 @@ paths:
       summary: Create a thread
       tags:
       - thread
+  /thread/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a thread
+      parameters:
+      - description: Thread ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get a thread
+      tags:
+      - thread
   /user/:
     put:
       consumes:

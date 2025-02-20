@@ -80,6 +80,18 @@ func (handler *HttpThreadHandler) GetThreads(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadListResponse(result))
 }
 
+// Get Thread godoc
+//
+// @Summary		Get a thread
+// @Description	Get a thread
+// @Tags			thread
+// @Accept			json
+// @Produce		json
+// @Param			id	path	int	true	"Thread ID"
+// @Param			token	header	string	true	"Token"
+// @Success		200		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Router			/thread/{id} [get]
 func (handler *HttpThreadHandler) GetThread(c *fiber.Ctx) error {
 	id := c.Params("id")
 	threadID, err := strconv.Atoi(id)

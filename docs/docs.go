@@ -1530,6 +1530,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/thread/{id}": {
+            "get": {
+                "description": "Get a thread",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "thread"
+                ],
+                "summary": "Get a thread",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thread ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            }
+        },
         "/user/": {
             "put": {
                 "description": "Update user",
