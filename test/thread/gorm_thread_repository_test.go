@@ -31,14 +31,14 @@ func TestGetThreadDetails(t *testing.T) {
 			AddRow(1, 1, 1)
 
 		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "thread_details" WHERE thread_id = $1 AND "thread_details"."deleted_at" IS NULL`)).
-			WithArgs(sqlmock.AnyArg(), 1).
+			WithArgs(1).
 			WillReturnRows(rows)
 
 		skincareRows := sqlmock.NewRows([]string{"id"}).
 			AddRow(1)
 
 		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "skincares" WHERE "skincares"."id" = $1 AND "skincares"."deleted_at" IS NULL`)).
-			WithArgs(sqlmock.AnyArg(), 1).
+			WithArgs(1).
 			WillReturnRows(skincareRows)
 
 		threadDetails, err := repo.GetThreadDetails(1)
