@@ -16,5 +16,7 @@ func ThreadRouters(app fiber.Router, db *gorm.DB) {
 
 	threadGroup := app.Group("/thread")
 	threadGroup.Post("/", middlewares.AuthorizationRequired(), threadHandler.CreateThread)
+	threadGroup.Get("/", threadHandler.GetThreads)
+	threadGroup.Get("/:id", threadHandler.GetThread)
 
 }

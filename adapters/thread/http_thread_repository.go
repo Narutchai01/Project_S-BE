@@ -2,6 +2,7 @@ package adapters
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/presentation"
@@ -43,4 +44,30 @@ func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToThreadResponse(result))
+}
+
+func (handler *HttpThreadHandler) GetThreads(c *fiber.Ctx) error {
+	result, err := handler.threadUsecase.GetThreads()
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadListResponse(result))
+}
+
+func (handler *HttpThreadHandler) GetThread(c *fiber.Ctx) error {
+	id := c.Params("id")
+	threadID, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread ID")))
+	}
+
+	result, err := handler.threadUsecase.GetThread(uint(threadID))
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadResponse(result))
 }
