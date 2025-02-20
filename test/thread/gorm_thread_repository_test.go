@@ -31,14 +31,14 @@ func TestGetThreadDetails(t *testing.T) {
 			AddRow(1, 1, 1)
 
 		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "thread_details" WHERE thread_id = $1 AND "thread_details"."deleted_at" IS NULL`)).
-			WithArgs(1).
+			WithArgs(sqlmock.AnyArg(), 1).
 			WillReturnRows(rows)
 
 		skincareRows := sqlmock.NewRows([]string{"id"}).
 			AddRow(1)
 
 		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "skincares" WHERE "skincares"."id" = $1 AND "skincares"."deleted_at" IS NULL`)).
-			WithArgs(1).
+			WithArgs(sqlmock.AnyArg(), 1).
 			WillReturnRows(skincareRows)
 
 		threadDetails, err := repo.GetThreadDetails(1)
@@ -260,6 +260,61 @@ func TestGetThreadss(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Len(t, threads, 0)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+}
+func TestDeleteThreadGorm(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormThreadRepository(gormDB)
+	t.Run("DeleteThread", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "threads" SET "deleted_at"=$1 WHERE id = $2 AND "threads"."deleted_at" IS NULL`)).
+			WithArgs(sqlmock.AnyArg(), 1).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+		mock.ExpectCommit()
+
+		err := repo.DeleteThread(1)
+
+		assert.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("DeleteThread Error", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "threads" SET "deleted_at"=$1 WHERE id = $2 AND "threads"."deleted_at" IS NULL`)).
+			WithArgs(sqlmock.AnyArg(), 1).
+			WillReturnError(gorm.ErrInvalidData)
+		mock.ExpectRollback()
+
+		err := repo.DeleteThread(1)
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	// create test case data not found
+	t.Run("DeleteThread not found", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "threads" SET "deleted_at"=$1 WHERE id = $2 AND "threads"."deleted_at" IS NULL`)).
+			WithArgs(sqlmock.AnyArg(), 1).
+			WillReturnError(gorm.ErrRecordNotFound)
+		mock.ExpectRollback()
+
+		err := repo.DeleteThread(1)
+
+		assert.Error(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
