@@ -63,3 +63,10 @@ func (repo *GormThreadRepository) GetThreadDetails(thread_id uint) ([]entities.T
 
 	return threadDetail, nil
 }
+
+func (repo *GormThreadRepository) DeleteThread(thread_id uint) error {
+	if err := repo.db.Where("id = ?", thread_id).Delete(&entities.Thread{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
