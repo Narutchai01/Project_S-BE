@@ -142,7 +142,7 @@ func TestGetThreads(t *testing.T) {
 			},
 		}
 
-		mockThreadUseCase.On("GetThread", uint(1)).Return(mockThreads, nil)
+		mockThreadUseCase.On("GetThreads").Return(mockThreads, nil)
 
 		req := httptest.NewRequest(fiber.MethodGet, "/thread", nil)
 		resp, _ := app.Test(req)
