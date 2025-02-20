@@ -19,9 +19,9 @@ type MockThreadUseCase struct {
 	mock.Mock
 }
 
-// GetThread implements usecases.ThreadUseCase.
 func (m *MockThreadUseCase) GetThread(id uint) (entities.Thread, error) {
-	panic("unimplemented")
+	args := m.Called(id)
+	return args.Get(0).(entities.Thread), args.Error(1)
 }
 
 // GetThreads implements usecases.ThreadUseCase.
@@ -142,7 +142,7 @@ func TestGetThreads(t *testing.T) {
 			},
 		}
 
-		mockThreadUseCase.On("GetThreads").Return(mockThreads, nil)
+		mockThreadUseCase.On("GetThread", uint(1)).Return(mockThreads, nil)
 
 		req := httptest.NewRequest(fiber.MethodGet, "/thread", nil)
 		resp, _ := app.Test(req)
@@ -157,6 +157,84 @@ func TestGetThreads(t *testing.T) {
 		mockThreadUseCase.On("GetThreads").Return([]entities.Thread{}, errors.New("something went wrong"))
 
 		req := httptest.NewRequest(fiber.MethodGet, "/thread", nil)
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+		mockThreadUseCase.AssertExpectations(t)
+	})
+}
+
+func TestGetThreadByID(t *testing.T) {
+	setup := func() (*MockThreadUseCase, *adapters.HttpThreadHandler, *fiber.App) {
+		mockThreadUseCase := new(MockThreadUseCase)
+		httpThreadHandler := adapters.NewHttpThreadHandler(mockThreadUseCase)
+		app := fiber.New()
+
+		app.Get("/thread/:id", httpThreadHandler.GetThread)
+
+		return mockThreadUseCase, httpThreadHandler, app
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		mockThreadUseCase, _, app := setup()
+
+		user := entities.User{
+			Model:         gorm.Model{ID: 1},
+			FullName:      "09 Narutchai Mauensaen",
+			Email:         "mauensaennarutchai@gmail.com",
+			Birthday:      nil,
+			SensitiveSkin: nil,
+			Image:         "",
+		}
+
+		skincare := entities.Skincare{
+			Model:       gorm.Model{ID: 1},
+			Name:        "test skincares",
+			Description: "test",
+			Image:       "imageurl",
+			CreateBY:    1,
+		}
+
+		thread_detail := []entities.ThreadDetail{
+			{
+				Model:      gorm.Model{ID: 1},
+				SkincareID: 1,
+				Skincare:   skincare,
+				Caption:    "test 1",
+			},
+		}
+
+		mockThread := entities.Thread{
+			Model:   gorm.Model{ID: 1},
+			UserID:  1,
+			User:    user,
+			Threads: thread_detail,
+		}
+
+		mockThreadUseCase.On("GetThread", uint(1)).Return(mockThread, nil)
+
+		req := httptest.NewRequest(fiber.MethodGet, "/thread/1", nil)
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockThreadUseCase.AssertExpectations(t)
+	})
+
+	t.Run("Invalid ID", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest(fiber.MethodGet, "/thread/invalid", nil)
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("Thread Not Found", func(t *testing.T) {
+		mockThreadUseCase, _, app := setup()
+
+		mockThreadUseCase.On("GetThread", uint(1)).Return(entities.Thread{}, errors.New("thread not found"))
+
+		req := httptest.NewRequest(fiber.MethodGet, "/thread/1", nil)
 		resp, _ := app.Test(req)
 
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
