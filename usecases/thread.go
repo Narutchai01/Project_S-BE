@@ -11,7 +11,7 @@ type ThreadUseCase interface {
 	GetThreads() ([]entities.Thread, error)
 	GetThread(id uint) (entities.Thread, error)
 	DeleteThread(thread_id uint) error
-	Bookmark(thread_id uint, token string) (entities.Bookmark, error)
+	AddBookmark(thread_id uint, token string) (entities.Bookmark, error)
 }
 
 type threadService struct {
@@ -100,7 +100,7 @@ func (service *threadService) DeleteThread(thread_id uint) error {
 	return nil
 }
 
-func (service *threadService) Bookmark(thread_id uint, token string) (entities.Bookmark, error) {
+func (service *threadService) AddBookmark(thread_id uint, token string) (entities.Bookmark, error) {
 
 	user_id, err := utils.ExtractToken(token)
 	if err != nil {

@@ -149,7 +149,7 @@ func (handler *HttpThreadHandler) BookMark(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	result, err := handler.threadUsecase.Bookmark(uint(threadID), token)
+	result, err := handler.threadUsecase.AddBookmark(uint(threadID), token)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread ID")))
