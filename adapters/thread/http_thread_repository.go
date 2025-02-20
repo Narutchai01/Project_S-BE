@@ -18,6 +18,19 @@ func NewHttpThreadHandler(threadUcase usecases.ThreadUseCase) *HttpThreadHandler
 	return &HttpThreadHandler{threadUcase}
 }
 
+// Create Thread godoc
+//
+// @Summary		Create a thread
+// @Description	Create a thread
+// @Tags			thread
+// @Accept			json
+// @Produce		json
+// @Param			thread	body	entities.ThreadRequest	true	"Thread Object"
+// @Param			token	header	string	true	"Token"
+// @Success		201		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Failure		404		{object}	presentation.Responses
+// @Router			/thread/ [post]
 func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 	var thread entities.ThreadRequest
 

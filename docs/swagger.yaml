@@ -9,6 +9,20 @@ definitions:
       password:
         type: string
     type: object
+  entities.ThreadDetail:
+    properties:
+      caption:
+        type: string
+      skincare_id:
+        type: integer
+    type: object
+  entities.ThreadRequest:
+    properties:
+      thread_detail:
+        items:
+          $ref: '#/definitions/entities.ThreadDetail'
+        type: array
+    type: object
   entities.User:
     properties:
       birthday:
@@ -977,6 +991,41 @@ paths:
       summary: Get a skincare
       tags:
       - skincare
+  /thread/:
+    post:
+      consumes:
+      - application/json
+      description: Create a thread
+      parameters:
+      - description: Thread Object
+        in: body
+        name: thread
+        required: true
+        schema:
+          $ref: '#/definitions/entities.ThreadRequest'
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create a thread
+      tags:
+      - thread
   /user/:
     put:
       consumes:
