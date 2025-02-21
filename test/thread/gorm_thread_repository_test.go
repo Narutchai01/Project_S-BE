@@ -80,8 +80,8 @@ func TestCreateThread(t *testing.T) {
 	repo := adapters.NewGormThreadRepository(gormDB)
 	t.Run("CreateThread", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "threads" ("created_at","updated_at","deleted_at","user_id") VALUES ($1,$2,$3,$4) RETURNING "id"`)).
-			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1).
+		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "threads" ("created_at","updated_at","deleted_at","user_id","bookmark") VALUES ($1,$2,$3,$4,$5) RETURNING "id"`)).
+			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1, sqlmock.AnyArg()).
 			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectCommit()
 
@@ -94,8 +94,8 @@ func TestCreateThread(t *testing.T) {
 
 	t.Run("CreateThread Error", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "threads" ("created_at","updated_at","deleted_at","user_id") VALUES ($1,$2,$3,$4) RETURNING "id"`)).
-			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1).
+		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "threads" ("created_at","updated_at","deleted_at","user_id","bookmark") VALUES ($1,$2,$3,$4,$5) RETURNING "id"`)).
+			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1, sqlmock.AnyArg()).
 			WillReturnError(gorm.ErrInvalidData)
 		mock.ExpectRollback()
 
