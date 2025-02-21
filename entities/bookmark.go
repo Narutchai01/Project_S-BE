@@ -8,5 +8,5 @@ type Bookmark struct {
 	Thread     Thread `gorm:"foreignKey:ThreadID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" swaggerignore:"true"`
 	UserID     uint   `json:"user_id"`
 	User       User   `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" swaggerignore:"true"`
-	Status     *bool  `json:"status" gorm:"default:true"`
+	Status     bool   `json:"status" gorm:"default:true"`
 }

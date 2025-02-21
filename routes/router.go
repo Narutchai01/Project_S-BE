@@ -29,5 +29,6 @@ func Router(app *fiber.App, db *gorm.DB) {
 	ResultRoutes(api, db)
 
 	ThreadRouters(api, db)
+	BookMarkRouters(api, db)
 
 }
