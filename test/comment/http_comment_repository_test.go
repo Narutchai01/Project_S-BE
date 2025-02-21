@@ -19,6 +19,12 @@ type MockCommentUsecase struct {
 	mock.Mock
 }
 
+// GetComments implements usecases.CommentUsecase.
+func (m *MockCommentUsecase) GetComments(thread_id uint, token string) ([]entities.Comment, error) {
+	args := m.Called(thread_id, token)
+	return args.Get(0).([]entities.Comment), args.Error(1)
+}
+
 func (m *MockCommentUsecase) CreateComment(comment entities.Comment, token string) (entities.Comment, error) {
 	args := m.Called(comment, token)
 	return args.Get(0).(entities.Comment), args.Error(1)
