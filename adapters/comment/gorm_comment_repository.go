@@ -20,3 +20,13 @@ func (repo *GormCommentRepository) CreateComment(comment entities.Comment) (enti
 	}
 	return comment, nil
 }
+
+func (repo *GormCommentRepository) GetComments(thread_id uint) ([]entities.Comment, error) {
+	var comments []entities.Comment
+
+	if err := repo.db.Preload("User").Where("thread_id = ?", thread_id).Find(&comments).Error; err != nil {
+		return []entities.Comment{}, err
+	}
+
+	return comments, nil
+}

@@ -71,7 +71,14 @@ func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 // @Failure		400		{object}	presentation.Responses
 // @Router			/thread/ [get]
 func (handler *HttpThreadHandler) GetThreads(c *fiber.Ctx) error {
-	result, err := handler.threadUsecase.GetThreads()
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
+	}
+
+	result, err := handler.threadUsecase.GetThreads(token)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
