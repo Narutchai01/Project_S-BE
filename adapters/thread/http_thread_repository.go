@@ -107,3 +107,31 @@ func (handler *HttpThreadHandler) GetThread(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadResponse(result))
 }
+
+// Delete Thread godoc
+//
+// @Summary		Delete a thread
+// @Description	Delete a thread
+// @Tags			thread
+// @Accept			json
+// @Produce		json
+// @Param			id	path	int	true	"Thread ID"
+// @Param			token	header	string	true	"Token"
+// @Success		200		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Router			/thread/{id} [delete]
+func (handler *HttpThreadHandler) DeleteThread(c *fiber.Ctx) error {
+	id := c.Params("id")
+	threadID, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread ID")))
+	}
+
+	err = handler.threadUsecase.DeleteThread(uint(threadID))
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(threadID))
+}

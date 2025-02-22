@@ -10,6 +10,7 @@ type ThreadUseCase interface {
 	CreateThread(threadDetails entities.ThreadRequest, token string) (entities.Thread, error)
 	GetThreads() ([]entities.Thread, error)
 	GetThread(id uint) (entities.Thread, error)
+	DeleteThread(thread_id uint) error
 }
 
 type threadService struct {
@@ -87,4 +88,13 @@ func (service *threadService) GetThread(id uint) (entities.Thread, error) {
 	result.Threads = thread_details
 
 	return result, nil
+}
+
+func (service *threadService) DeleteThread(thread_id uint) error {
+	err := service.repo.DeleteThread(thread_id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

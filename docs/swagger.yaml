@@ -1051,6 +1051,35 @@ paths:
       tags:
       - thread
   /thread/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a thread
+      parameters:
+      - description: Thread ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Delete a thread
+      tags:
+      - thread
     get:
       consumes:
       - application/json

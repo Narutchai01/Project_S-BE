@@ -35,6 +35,11 @@ func (m *MockThreadUseCase) CreateThread(thread entities.ThreadRequest, token st
 	return args.Get(0).(entities.Thread), args.Error(1)
 }
 
+func (m *MockThreadUseCase) DeleteThread(thread_id uint) error {
+	args := m.Called(thread_id)
+	return args.Error(0)
+}
+
 func TestCraeteThread(t *testing.T) {
 	setup := func() (*MockThreadUseCase, *adapters.HttpThreadHandler, *fiber.App) {
 		mockThreadUseCase := new(MockThreadUseCase)
@@ -235,6 +240,51 @@ func TestGetThreadByID(t *testing.T) {
 		mockThreadUseCase.On("GetThread", uint(1)).Return(entities.Thread{}, errors.New("thread not found"))
 
 		req := httptest.NewRequest(fiber.MethodGet, "/thread/1", nil)
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+		mockThreadUseCase.AssertExpectations(t)
+	})
+}
+
+func TestDeleteThread(t *testing.T) {
+	setup := func() (*MockThreadUseCase, *adapters.HttpThreadHandler, *fiber.App) {
+		mockThreadUseCase := new(MockThreadUseCase)
+		httpThreadHandler := adapters.NewHttpThreadHandler(mockThreadUseCase)
+		app := fiber.New()
+
+		app.Delete("/thread/:id", httpThreadHandler.DeleteThread)
+
+		return mockThreadUseCase, httpThreadHandler, app
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		mockThreadUseCase, _, app := setup()
+
+		mockThreadUseCase.On("DeleteThread", uint(1)).Return(nil)
+
+		req := httptest.NewRequest(fiber.MethodDelete, "/thread/1", nil)
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockThreadUseCase.AssertExpectations(t)
+	})
+
+	t.Run("Invalid ID", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest(fiber.MethodDelete, "/thread/invalid", nil)
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("Thread Not Found", func(t *testing.T) {
+		mockThreadUseCase, _, app := setup()
+
+		mockThreadUseCase.On("DeleteThread", uint(1)).Return(errors.New("thread not found"))
+
+		req := httptest.NewRequest(fiber.MethodDelete, "/thread/1", nil)
 		resp, _ := app.Test(req)
 
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)

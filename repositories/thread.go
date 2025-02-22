@@ -8,4 +8,5 @@ type ThreadRepository interface {
 	GetThreads() ([]entities.Thread, error)
 	GetThread(id uint) (entities.Thread, error)
 	GetThreadDetails(thread_id uint) ([]entities.ThreadDetail, error)
+	DeleteThread(thread_id uint) error
 }
