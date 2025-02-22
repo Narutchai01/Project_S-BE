@@ -14,17 +14,23 @@ func NewGormFavoriteRepository(db *gorm.DB) repositories.FavoriteRepository {
 	return &GormFavoriteRepository{db: db}
 }
 
-func (repo *GormFavoriteRepository) FavoriteComment(comment_id uint, user_id uint) (entities.FavoriteComment, error) {
-	favorite := entities.FavoriteComment{
-		UserID:    user_id,
-		CommentID: comment_id,
+func (r *GormFavoriteRepository) FavoriteComment(commentID uint, userID uint) (entities.FavoriteComment, error) {
+	favoriteComment := entities.FavoriteComment{
+		CommentID: commentID,
+		UserID:    userID,
+		Status:    true,
 	}
 
-	if err := repo.db.Create(&favorite).Error; err != nil {
+	if err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&favoriteComment).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		return entities.FavoriteComment{}, err
 	}
 
-	return favorite, nil
+	return favoriteComment, nil
 }
 
 func (repo *GormFavoriteRepository) FindFavoriteComment(thread_id uint, user_id uint) (entities.FavoriteComment, error) {
