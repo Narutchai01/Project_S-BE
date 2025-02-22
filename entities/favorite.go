@@ -8,3 +8,10 @@ type FavoriteComment struct {
 	UserID    uint `json:"user_id" gorm:"not null;uniqueIndex:idx_comment_user"`
 	Status    bool `json:"status" gorm:"default:true"`
 }
+
+type FavoriteThread struct {
+	gorm.Model
+	ThreadID uint `json:"thread_id" gorm:"not null;uniqueIndex:idx_comment_user"`
+	UserID   uint `json:"user_id" gorm:"not null;uniqueIndex:idx_comment_user"`
+	Status   bool `json:"status" gorm:"default:true"`
+}

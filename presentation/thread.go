@@ -33,6 +33,7 @@ func ToThreadResponse(data entities.Thread) *Responses {
 		ID:       data.ID,
 		UserID:   data.UserID,
 		Bookmark: data.Bookmark,
+		Favorite: data.Favorite,
 		User: User{
 			ID:       data.UserID,
 			FullName: data.User.FullName,
@@ -56,6 +57,7 @@ func ToThreadListResponse(data []entities.Thread) *Responses {
 			ID:       thread.ID,
 			UserID:   thread.UserID,
 			Bookmark: thread.Bookmark,
+			Favorite: thread.Favorite,
 			User: User{
 				ID:       thread.UserID,
 				FullName: thread.User.FullName,
