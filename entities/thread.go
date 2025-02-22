@@ -7,6 +7,7 @@ type Thread struct {
 	UserID     uint `json:"user_id" gorm:"not null"`
 	User       User `gorm:"foreignKey:UserID;references:ID"`
 	Bookmark   bool `json:"bookmark"`
+	Favorite   bool `json:"favorite"`
 	Threads    []ThreadDetail
 }
 

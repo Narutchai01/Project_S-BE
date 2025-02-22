@@ -8,6 +8,7 @@ import (
 
 type FavoriteUseCase interface {
 	FavoriteComment(thread_id uint, token string) (entities.FavoriteComment, error)
+	FavoriteThread(thread_id uint, token string) (entities.FavoriteThread, error)
 }
 
 type favoriteService struct {
@@ -33,4 +34,20 @@ func (service *favoriteService) FavoriteComment(comment_id uint, token string) (
 	favorite.Status = !favorite.Status
 	return service.repo.UpdateFavoriteComment(favorite)
 
+}
+
+func (service *favoriteService) FavoriteThread(thread_id uint, token string) (entities.FavoriteThread, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.FavoriteThread{}, err
+	}
+
+	favorite, err := service.repo.FindFavoriteThread(thread_id, user_id)
+	if err != nil {
+		return service.repo.FavoriteThread(thread_id, user_id)
+	}
+
+	favorite.Status = !favorite.Status
+	return service.repo.UpdateFavoriteThread(favorite)
 }
