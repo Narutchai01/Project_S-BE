@@ -6,6 +6,7 @@ type Thread struct {
 	gorm.Model `swaggerignore:"true"`
 	UserID     uint `json:"user_id" gorm:"not null"`
 	User       User `gorm:"foreignKey:UserID;references:ID"`
+	Bookmark   bool `json:"bookmark"`
 	Threads    []ThreadDetail
 }
 

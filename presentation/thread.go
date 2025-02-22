@@ -30,8 +30,9 @@ func MapThreadDetails(data []entities.ThreadDetail) []ThreadDetail {
 
 func ToThreadResponse(data entities.Thread) *Responses {
 	threads := Thread{
-		ID:     data.ID,
-		UserID: data.UserID,
+		ID:       data.ID,
+		UserID:   data.UserID,
+		Bookmark: data.Bookmark,
 		User: User{
 			ID:       data.UserID,
 			FullName: data.User.FullName,
@@ -52,8 +53,9 @@ func ToThreadListResponse(data []entities.Thread) *Responses {
 
 	for _, thread := range data {
 		threads = append(threads, Thread{
-			ID:     thread.ID,
-			UserID: thread.UserID,
+			ID:       thread.ID,
+			UserID:   thread.UserID,
+			Bookmark: thread.Bookmark,
 			User: User{
 				ID:       thread.UserID,
 				FullName: thread.User.FullName,

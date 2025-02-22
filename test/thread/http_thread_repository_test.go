@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/thread"
 	"github.com/Narutchai01/Project_S-BE/entities"
@@ -19,8 +20,8 @@ type MockThreadUseCase struct {
 	mock.Mock
 }
 
-func (m *MockThreadUseCase) GetThread(id uint) (entities.Thread, error) {
-	args := m.Called(id)
+func (m *MockThreadUseCase) GetThread(id uint, token string) (entities.Thread, error) {
+	args := m.Called(id, token)
 	return args.Get(0).(entities.Thread), args.Error(1)
 }
 
@@ -38,6 +39,11 @@ func (m *MockThreadUseCase) CreateThread(thread entities.ThreadRequest, token st
 func (m *MockThreadUseCase) DeleteThread(thread_id uint) error {
 	args := m.Called(thread_id)
 	return args.Error(0)
+}
+
+func (m *MockThreadUseCase) AddBookmark(thread_id uint, token string) (entities.Bookmark, error) {
+	args := m.Called(thread_id, token)
+	return args.Get(0).(entities.Bookmark), args.Error(1)
 }
 
 func TestCraeteThread(t *testing.T) {
@@ -116,8 +122,8 @@ func TestGetThreads(t *testing.T) {
 			Model:         gorm.Model{ID: 1},
 			FullName:      "09 Narutchai Mauensaen",
 			Email:         "mauensaennarutchai@gmail.com",
-			Birthday:      nil,
-			SensitiveSkin: nil,
+			Birthday:      (*time.Time)(nil),
+			SensitiveSkin: (*bool)(nil),
 			Image:         "",
 		}
 
@@ -210,15 +216,16 @@ func TestGetThreadByID(t *testing.T) {
 		}
 
 		mockThread := entities.Thread{
-			Model:   gorm.Model{ID: 1},
-			UserID:  1,
-			User:    user,
-			Threads: thread_detail,
+			Model:    gorm.Model{ID: 1},
+			UserID:   1,
+			Bookmark: true,
+			User:     user,
+			Threads:  thread_detail,
 		}
 
-		mockThreadUseCase.On("GetThread", uint(1)).Return(mockThread, nil)
-
+		mockThreadUseCase.On("GetThread", uint(1), "test-token").Return(mockThread, nil)
 		req := httptest.NewRequest(fiber.MethodGet, "/thread/1", nil)
+		req.Header.Set("token", "test-token")
 		resp, _ := app.Test(req)
 
 		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
@@ -237,9 +244,10 @@ func TestGetThreadByID(t *testing.T) {
 	t.Run("Thread Not Found", func(t *testing.T) {
 		mockThreadUseCase, _, app := setup()
 
-		mockThreadUseCase.On("GetThread", uint(1)).Return(entities.Thread{}, errors.New("thread not found"))
+		mockThreadUseCase.On("GetThread", uint(1), "test-token").Return(entities.Thread{}, errors.New("thread not found"))
 
 		req := httptest.NewRequest(fiber.MethodGet, "/thread/1", nil)
+		req.Header.Set("token", "test-token")
 		resp, _ := app.Test(req)
 
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)

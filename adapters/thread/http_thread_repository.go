@@ -99,7 +99,13 @@ func (handler *HttpThreadHandler) GetThread(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread ID")))
 	}
 
-	result, err := handler.threadUsecase.GetThread(uint(threadID))
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("token is require")))
+	}
+
+	result, err := handler.threadUsecase.GetThread(uint(threadID), token)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))

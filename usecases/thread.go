@@ -9,16 +9,18 @@ import (
 type ThreadUseCase interface {
 	CreateThread(threadDetails entities.ThreadRequest, token string) (entities.Thread, error)
 	GetThreads() ([]entities.Thread, error)
-	GetThread(id uint) (entities.Thread, error)
+	GetThread(id uint, token string) (entities.Thread, error)
 	DeleteThread(thread_id uint) error
+	// AddBookmark(thread_id uint, token string) (entities.Bookmark, error)
 }
 
 type threadService struct {
-	repo repositories.ThreadRepository
+	repo         repositories.ThreadRepository
+	bookmarkRepo repositories.BookmarkRepository
 }
 
-func NewThreadUseCase(repo repositories.ThreadRepository) ThreadUseCase {
-	return &threadService{repo}
+func NewThreadUseCase(repo repositories.ThreadRepository, bookmarkRepo repositories.BookmarkRepository) ThreadUseCase {
+	return &threadService{repo, bookmarkRepo}
 }
 
 func (service *threadService) CreateThread(threadDetails entities.ThreadRequest, token string) (entities.Thread, error) {
@@ -41,7 +43,7 @@ func (service *threadService) CreateThread(threadDetails entities.ThreadRequest,
 		}
 	}
 
-	result, err := service.GetThread(thread.ID)
+	result, err := service.GetThread(thread.ID, token)
 	if err != nil {
 		return entities.Thread{}, err
 	}
@@ -74,7 +76,13 @@ func (service *threadService) GetThreads() ([]entities.Thread, error) {
 	return result, nil
 }
 
-func (service *threadService) GetThread(id uint) (entities.Thread, error) {
+func (service *threadService) GetThread(id uint, token string) (entities.Thread, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
 	result, err := service.repo.GetThread(id)
 	if err != nil {
 		return entities.Thread{}, err
@@ -86,6 +94,14 @@ func (service *threadService) GetThread(id uint) (entities.Thread, error) {
 	}
 
 	result.Threads = thread_details
+
+	bookmark, err := service.bookmarkRepo.FindBookMark(result.ID, user_id)
+
+	if err != nil {
+		result.Bookmark = false
+	} else {
+		result.Bookmark = bookmark.Status
+	}
 
 	return result, nil
 }
