@@ -31,7 +31,7 @@ func TestFavoriteCommnet(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "favorite_comments" ("created_at","updated_at","deleted_at","comment_id","user_id") VALUES ($1,$2,$3,$4,$5)`)).WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1, 1).WillReturnResult(sqlmock.NewResult(1, 1))
+		mock.ExpectQuery(`INSERT INTO "favorite_comments"`).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectCommit()
 
 		_, err := repo.FavoriteComment(1, 1)
@@ -42,7 +42,7 @@ func TestFavoriteCommnet(t *testing.T) {
 
 	t.Run("error", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "favorite_comments" ("created_at","updated_at","deleted_at","comment_id","user_id") VALUES ($1,$2,$3,$4,$5)`)).WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1, 1).WillReturnError(gorm.ErrInvalidData)
+		mock.ExpectQuery(`INSERT INTO "favorite_comments"`).WillReturnError(gorm.ErrInvalidData)
 		mock.ExpectRollback()
 
 		_, err := repo.FavoriteComment(1, 1)
