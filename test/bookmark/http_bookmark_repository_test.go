@@ -1,67 +1,50 @@
 package adapters_test
 
-// func TestBookmarkThread(t *testing.T) {
-// 	setup := func() (*MockThreadUseCase, *adapters.HttpThreadHandler, *fiber.App) {
-// 		mockThreadUseCase := new(MockThreadUseCase)
-// 		httpThreadHandler := adapters.NewHttpThreadHandler(mockThreadUseCase)
-// 		app := fiber.New()
+import (
+	"net/http/httptest"
+	"testing"
 
-// 		app.Post("/thread/:id/bookmark", httpThreadHandler.BookMark)
+	adapters "github.com/Narutchai01/Project_S-BE/adapters/bookmark"
+	"github.com/Narutchai01/Project_S-BE/entities"
+	"github.com/gofiber/fiber/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+)
 
-// 		return mockThreadUseCase, httpThreadHandler, app
-// 	}
+type MockBookmarkUsecase struct {
+	mock.Mock
+}
 
-// 	t.Run("Success", func(t *testing.T) {
-// 		mockThreadUseCase, _, app := setup()
+func (m *MockBookmarkUsecase) BookmarkThread(user_id uint, token string) (entities.Bookmark, error) {
+	args := m.Called(user_id, token)
+	return args.Get(0).(entities.Bookmark), args.Error(1)
+}
 
-// 		mockBookmark := entities.Bookmark{
-// 			ThreadID: 1,
-// 			UserID:   1,
-// 		}
+func TestBookmarkThread(t *testing.T) {
+	app := fiber.New()
 
-// 		mockThreadUseCase.On("AddBookmark", uint(1), "test-token").Return(mockBookmark, nil)
+	mockBookmarkUsecase := new(MockBookmarkUsecase)
+	handler := adapters.NewHttpBookmarkHandler(mockBookmarkUsecase)
 
-// 		req := httptest.NewRequest(fiber.MethodPost, "/thread/1/bookmark", nil)
-// 		req.Header.Set("token", "test-token")
+	app.Post("/bookmark/:id", handler.BookMarkThread)
 
-// 		resp, _ := app.Test(req)
+	t.Run("Bookmark Thread Success", func(t *testing.T) {
+		mockBookmarkUsecase.On("BookmarkThread", uint(1), "token").Return(entities.Bookmark{}, nil)
 
-// 		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-// 		mockThreadUseCase.AssertExpectations(t)
-// 	})
+		req := httptest.NewRequest("POST", "/bookmark/1", nil)
+		req.Header.Add("token", "token")
+		resp, err := app.Test(req)
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+	})
 
-// 	t.Run("Invalid ID", func(t *testing.T) {
-// 		_, _, app := setup()
+	t.Run("Unauthorized", func(t *testing.T) {
+		mockBookmarkUsecase.On("BookmarkThread", uint(1), "").Return(nil, assert.AnError)
 
-// 		req := httptest.NewRequest(fiber.MethodPost, "/thread/invalid/bookmark", nil)
-// 		req.Header.Set("token", "test-token")
-
-// 		resp, _ := app.Test(req)
-
-// 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-// 	})
-
-// 	t.Run("Missing Token", func(t *testing.T) {
-// 		_, _, app := setup()
-
-// 		req := httptest.NewRequest(fiber.MethodPost, "/thread/1/bookmark", nil)
-
-// 		resp, _ := app.Test(req)
-
-// 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-// 	})
-
-// 	t.Run("Error Adding Bookmark", func(t *testing.T) {
-// 		mockThreadUseCase, _, app := setup()
-
-// 		mockThreadUseCase.On("AddBookmark", uint(1), "test-token").Return(entities.Bookmark{}, errors.New("invalid thread ID"))
-
-// 		req := httptest.NewRequest(fiber.MethodPost, "/thread/1/bookmark", nil)
-// 		req.Header.Set("token", "test-token")
-
-// 		resp, _ := app.Test(req)
-
-// 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-// 		mockThreadUseCase.AssertExpectations(t)
-// 	})
-// }
+		req := httptest.NewRequest("POST", "/bookmark/1", nil)
+		req.Header.Add("token", "")
+		resp, err := app.Test(req)
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusUnauthorized, resp.StatusCode)
+	})
+}

@@ -27,7 +27,7 @@ func (handler *HttpBookmarkHandler) BookMarkThread(c *fiber.Ctx) error {
 	token := c.Get("token")
 
 	if token == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("token is required")))
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
 	result, err := handler.bookMark.BookmarkThread(uint(threadID), token)

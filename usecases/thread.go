@@ -8,7 +8,7 @@ import (
 
 type ThreadUseCase interface {
 	CreateThread(threadDetails entities.ThreadRequest, token string) (entities.Thread, error)
-	GetThreads() ([]entities.Thread, error)
+	GetThreads(token string) ([]entities.Thread, error)
 	GetThread(id uint, token string) (entities.Thread, error)
 	DeleteThread(thread_id uint) error
 	// AddBookmark(thread_id uint, token string) (entities.Bookmark, error)
@@ -58,13 +58,28 @@ func (service *threadService) CreateThread(threadDetails entities.ThreadRequest,
 	return result, nil
 }
 
-func (service *threadService) GetThreads() ([]entities.Thread, error) {
+func (service *threadService) GetThreads(token string) ([]entities.Thread, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return []entities.Thread{}, err
+	}
+
 	result, err := service.repo.GetThreads()
 	if err != nil {
 		return []entities.Thread{}, err
 	}
 
 	for i, thread := range result {
+
+		bookmark, err := service.bookmarkRepo.FindBookMark(thread.ID, user_id)
+
+		if err != nil {
+			result[i].Bookmark = false
+		} else {
+			result[i].Bookmark = bookmark.Status
+		}
+
 		thread_details, err := service.repo.GetThreadDetails(thread.ID)
 		if err != nil {
 			return []entities.Thread{}, err
