@@ -26,8 +26,10 @@ func NewHttpThreadHandler(threadUcase usecases.ThreadUseCase) *HttpThreadHandler
 // @Tags			thread
 // @Accept			json
 // @Produce		json
-// @Param			thread	body	entities.ThreadRequest	true	"Thread Object"
 // @Param			token	header	string	true	"Token"
+// @Param			title	formData 	string	true	"Thread Title"
+// @Param			thread_details	formData 	string	true	"Thread Details"
+// @Param			file	formData 	file	true	"Thread Image"
 // @Success		201		{object}	presentation.Responses
 // @Failure		400		{object}	presentation.Responses
 // @Failure		404		{object}	presentation.Responses
@@ -155,6 +157,22 @@ func (handler *HttpThreadHandler) DeleteThread(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(threadID))
 }
 
+// Update Thread godoc
+//
+// @Summary		Update a thread
+// @Description	Update a thread
+// @Tags			thread
+// @Accept			json
+// @Produce		json
+// @Param			token	header	string	true	"Token"
+// @Param			id	path	int	true	"Thread ID"
+// @Param			title	formData 	string	false	"Thread Title"
+// @Param			thread_details	formData 	string	false	"Thread Details"
+// @Param			file	formData 	file	false	"Thread Image"
+// @Success		201		{object}	presentation.Responses
+// @Failure		400		{object}	presentation.Responses
+// @Failure		404		{object}	presentation.Responses
+// @Router			/thread/{id} [put]
 func (handler *HttpThreadHandler) UpdateThread(c *fiber.Ctx) error {
 	id := c.Params("id")
 	thread_id, err := strconv.Atoi(id)
@@ -166,10 +184,6 @@ func (handler *HttpThreadHandler) UpdateThread(c *fiber.Ctx) error {
 
 	title := c.FormValue("title")
 
-	if title == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("title is required")))
-	}
-
 	file, err := c.FormFile("file")
 
 	if err != nil {
@@ -177,9 +191,7 @@ func (handler *HttpThreadHandler) UpdateThread(c *fiber.Ctx) error {
 	}
 
 	var threadDetails []entities.ThreadDetail
-	if err := json.Unmarshal([]byte(c.FormValue("thread_details")), &threadDetails); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread details format")))
-	}
+	_ = json.Unmarshal([]byte(c.FormValue("thread_details")), &threadDetails)
 
 	result, err := handler.threadUsecase.UpdateThread(uint(thread_id), token, title, threadDetails, file, c)
 

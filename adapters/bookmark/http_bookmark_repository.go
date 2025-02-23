@@ -17,6 +17,18 @@ func NewHttpBookmarkHandler(bookmarkUsecase usecases.BookmarkUseCase) *HttpBookm
 	return &HttpBookmarkHandler{bookmarkUsecase}
 }
 
+// BookMarkThread godoc
+// @Summary Bookmark a thread
+// @Description Bookmark a thread
+// @Tags bookmark
+// @Accept json
+// @Produce json
+// @Param id path int true "Thread ID"
+// @Param token header string true "Token"
+// @Success 200 {object} presentation.Responses
+// @Failure 400 {object} presentation.Responses
+// @Failure 401 {object} presentation.Responses
+// @Router /bookmark/{id} [post]
 func (handler *HttpBookmarkHandler) BookMarkThread(c *fiber.Ctx) error {
 	id := c.Params("id")
 	threadID, err := strconv.Atoi(id)

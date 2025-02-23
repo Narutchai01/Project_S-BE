@@ -18,11 +18,10 @@ func ThreadRouters(app fiber.Router, db *gorm.DB) {
 	threadService := usecases.NewThreadUseCase(threadRepo, bookmarkRepo, favoriteRepo)
 	threadHandler := adapters.NewHttpThreadHandler(threadService)
 
-	threadGroup := app.Group("/thread")
-	threadGroup.Post("/", middlewares.AuthorizationRequired(), threadHandler.CreateThread)
+	threadGroup := app.Group("/thread").Use(middlewares.AuthorizationRequired())
+	threadGroup.Post("/", threadHandler.CreateThread)
 	threadGroup.Get("/", threadHandler.GetThreads)
 	threadGroup.Get("/:id", threadHandler.GetThread)
-	// threadGroup.Post("/:id/bookmark", threadHandler.BookMark)
 	threadGroup.Delete("/:id", threadHandler.DeleteThread)
 	threadGroup.Put("/:id", threadHandler.UpdateThread)
 

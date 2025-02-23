@@ -9,20 +9,6 @@ definitions:
       password:
         type: string
     type: object
-  entities.ThreadDetail:
-    properties:
-      caption:
-        type: string
-      skincare_id:
-        type: integer
-    type: object
-  entities.ThreadRequest:
-    properties:
-      thread_detail:
-        items:
-          $ref: '#/definitions/entities.ThreadDetail'
-        type: array
-    type: object
   entities.User:
     properties:
       birthday:
@@ -699,6 +685,110 @@ paths:
       summary: Update a skincare
       tags:
       - skincare
+  /bookmark/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Bookmark a thread
+      parameters:
+      - description: Thread ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Bookmark a thread
+      tags:
+      - bookmark
+  /comment:
+    post:
+      consumes:
+      - application/json
+      description: Create a comment
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Comment
+        in: body
+        name: comment
+        required: true
+        schema:
+          properties:
+            text:
+              type: string
+            thread_id:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create a comment
+      tags:
+      - comment
+  /comment/{thread_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a comment
+      parameters:
+      - description: Thread ID
+        in: path
+        name: thread_id
+        required: true
+        type: integer
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get a comment
+      tags:
+      - comment
   /facial:
     get:
       consumes:
@@ -1021,17 +1111,26 @@ paths:
       - application/json
       description: Create a thread
       parameters:
-      - description: Thread Object
-        in: body
-        name: thread
-        required: true
-        schema:
-          $ref: '#/definitions/entities.ThreadRequest'
       - description: Token
         in: header
         name: token
         required: true
         type: string
+      - description: Thread Title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Thread Details
+        in: formData
+        name: thread_details
+        required: true
+        type: string
+      - description: Thread Image
+        in: formData
+        name: file
+        required: true
+        type: file
       produces:
       - application/json
       responses:
@@ -1107,6 +1206,51 @@ paths:
           schema:
             $ref: '#/definitions/presentation.Responses'
       summary: Get a thread
+      tags:
+      - thread
+    put:
+      consumes:
+      - application/json
+      description: Update a thread
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Thread ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Thread Title
+        in: formData
+        name: title
+        type: string
+      - description: Thread Details
+        in: formData
+        name: thread_details
+        type: string
+      - description: Thread Image
+        in: formData
+        name: file
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Update a thread
       tags:
       - thread
   /user/:
