@@ -154,3 +154,38 @@ func (handler *HttpThreadHandler) DeleteThread(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(threadID))
 }
+
+func (handler *HttpThreadHandler) UpdateThread(c *fiber.Ctx) error {
+	id := c.Params("id")
+	thread_id, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread ID")))
+	}
+
+	token := c.Get("token")
+
+	title := c.FormValue("title")
+
+	if title == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("title is required")))
+	}
+
+	file, err := c.FormFile("file")
+
+	if err != nil {
+		file = nil
+	}
+
+	var threadDetails []entities.ThreadDetail
+	if err := json.Unmarshal([]byte(c.FormValue("thread_details")), &threadDetails); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread details format")))
+	}
+
+	result, err := handler.threadUsecase.UpdateThread(uint(thread_id), token, title, threadDetails, file, c)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread details format")))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadResponse(result))
+}

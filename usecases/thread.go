@@ -16,7 +16,7 @@ type ThreadUseCase interface {
 	GetThreads(token string) ([]entities.Thread, error)
 	GetThread(id uint, token string) (entities.Thread, error)
 	DeleteThread(thread_id uint) error
-	// AddBookmark(thread_id uint, token string) (entities.Bookmark, error)
+	UpdateThread(thread_id uint, token string, title string, thread_details []entities.ThreadDetail, file *multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error)
 }
 
 type threadService struct {
@@ -182,4 +182,77 @@ func (service *threadService) DeleteThread(thread_id uint) error {
 	}
 
 	return nil
+}
+
+func (service *threadService) UpdateThread(thread_id uint, token string, title string, thread_details []entities.ThreadDetail, file *multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error) {
+
+	thread, err := service.repo.GetThread(thread_id)
+
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	if file != nil {
+		fileName := uuid.New().String() + ".jpg"
+
+		if err := utils.CheckDirectoryExist(); err != nil {
+			return entities.Thread{}, err
+		}
+
+		if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+			return entities.Thread{}, err
+		}
+
+		imageUrl, err := utils.UploadImage(fileName, "/thread")
+
+		if err != nil {
+			return entities.Thread{}, err
+		}
+
+		err = os.Remove("./uploads/" + fileName)
+
+		if err != nil {
+			return entities.Thread{}, err
+		}
+
+		thread.Image = imageUrl
+	}
+
+	thread.Title = utils.CheckEmptyValueBeforeUpdate(title, thread.Title)
+
+	thread, err = service.repo.UpdateThread(thread)
+
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	for _, threadDetail := range thread_details {
+		old_thread_detail, err := service.repo.GetThreadDetail(threadDetail.ID)
+
+		if err != nil {
+			return entities.Thread{}, err
+		}
+
+		threadDetail.ID = old_thread_detail.ID
+		threadDetail.ThreadID = thread.ID
+		threadDetail.SkincareID = old_thread_detail.SkincareID
+		threadDetail.Caption = utils.CheckEmptyValueBeforeUpdate(threadDetail.Caption, old_thread_detail.Caption)
+
+		_, err = service.repo.UpdateThreadDetail(threadDetail)
+
+		if err != nil {
+			return entities.Thread{}, err
+		}
+
+	}
+
+	thread_details, err = service.repo.GetThreadDetails(thread.ID)
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	thread.Threads = thread_details
+
+	return thread, nil
+
 }
