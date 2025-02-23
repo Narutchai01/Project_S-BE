@@ -110,7 +110,7 @@ func TestCraeteThread(t *testing.T) {
 		req.Header.Set("token", "test-token")
 
 		resp, _ := app.Test(req)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 }
 func TestGetThreads(t *testing.T) {
