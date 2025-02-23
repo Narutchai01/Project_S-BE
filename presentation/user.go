@@ -4,7 +4,7 @@ import (
 	"github.com/Narutchai01/Project_S-BE/entities"
 )
 
-func UserResponse(data entities.User) *Responses {
+func PublicUser(data entities.User) *User {
 	user := User{
 		ID:            data.ID,
 		FullName:      data.FullName,
@@ -13,6 +13,13 @@ func UserResponse(data entities.User) *Responses {
 		SensitiveSkin: data.SensitiveSkin,
 		Image:         data.Image,
 	}
+
+	return &user
+}
+
+func UserResponse(data entities.User) *Responses {
+
+	user := PublicUser(data)
 
 	return &Responses{
 		Status: true,

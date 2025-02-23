@@ -28,45 +28,38 @@ func MapThreadDetails(data []entities.ThreadDetail) []ThreadDetail {
 	return threadDetail
 }
 
-func ToThreadResponse(data entities.Thread) *Responses {
-	threads := Thread{
-		ID:       data.ID,
-		UserID:   data.UserID,
-		Bookmark: data.Bookmark,
-		Favorite: data.Favorite,
-		User: User{
-			ID:       data.UserID,
-			FullName: data.User.FullName,
-			Email:    data.User.Email,
-		},
+func PublicThread(data entities.Thread) *Thread {
+	thread := Thread{
+		ID:           data.ID,
+		UserID:       data.UserID,
+		Title:        data.Title,
+		Bookmark:     data.Bookmark,
+		Image:        data.Image,
+		Favorite:     data.Favorite,
+		Owner:        data.Owner,
+		User:         *PublicUser(data.User),
 		ThreadDetail: MapThreadDetails(data.Threads),
 	}
 
+	return &thread
+}
+
+func ToThreadResponse(data entities.Thread) *Responses {
+
+	thread := PublicThread(data)
+
 	return &Responses{
 		Status: true,
-		Data:   threads,
+		Data:   thread,
 		Error:  nil,
 	}
 }
 
 func ToThreadListResponse(data []entities.Thread) *Responses {
 	threads := []Thread{}
-
 	for _, thread := range data {
-		threads = append(threads, Thread{
-			ID:       thread.ID,
-			UserID:   thread.UserID,
-			Bookmark: thread.Bookmark,
-			Favorite: thread.Favorite,
-			User: User{
-				ID:       thread.UserID,
-				FullName: thread.User.FullName,
-				Email:    thread.User.Email,
-			},
-			ThreadDetail: MapThreadDetails(thread.Threads),
-		})
+		threads = append(threads, *PublicThread(thread))
 	}
-
 	return &Responses{
 		Status: true,
 		Data:   threads,

@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"encoding/json"
 	"errors"
 	"strconv"
 
@@ -32,13 +33,12 @@ func NewHttpThreadHandler(threadUcase usecases.ThreadUseCase) *HttpThreadHandler
 // @Failure		404		{object}	presentation.Responses
 // @Router			/thread/ [post]
 func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
-	var thread entities.ThreadRequest
 
-	if err := c.BodyParser(&thread); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+	var threadDetails []entities.ThreadDetail
+	if err := json.Unmarshal([]byte(c.FormValue("thread_details")), &threadDetails); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread details format")))
 	}
+	title := c.FormValue("title")
 
 	token := c.Get("token")
 
@@ -46,11 +46,17 @@ func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	if len(thread.ThreadDetail) == 0 {
+	file, err := c.FormFile("file")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	if len(threadDetails) == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("ThreadDetail is required")))
 	}
 
-	result, err := handler.threadUsecase.CreateThread(thread, token)
+	result, err := handler.threadUsecase.CreateThread(threadDetails, title, token, *file, c)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
