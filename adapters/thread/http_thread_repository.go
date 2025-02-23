@@ -182,6 +182,10 @@ func (handler *HttpThreadHandler) UpdateThread(c *fiber.Ctx) error {
 
 	token := c.Get("token")
 
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
+	}
+
 	title := c.FormValue("title")
 
 	file, err := c.FormFile("file")
