@@ -45,7 +45,7 @@ func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 	token := c.Get("token")
 
 	if token == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("token is required")))
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
 	}
 
 	file, err := c.FormFile("file")

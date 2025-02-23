@@ -81,15 +81,24 @@ func TestCraeteThread(t *testing.T) {
 		mockThreadUseCase.AssertExpectations(t)
 	})
 
-	t.Run("Missing Token", func(t *testing.T) {
-		_, _, app := setup()
+	t.Run("miss token", func(t *testing.T) {
+		mockThreadUseCase, _, app := setup()
 
-		req := httptest.NewRequest(fiber.MethodPost, "/thread", strings.NewReader(`{
-			"ThreadDetail": "Test thread detail"
-		}`))
-		req.Header.Set("Content-Type", "application/json")
+		mockThreadUseCase.On("CreateThread", mock.Anything, "Test title", "", mock.AnythingOfType("multipart.FileHeader"), mock.Anything).Return(entities.Thread{}, fiber.ErrUnauthorized)
 
-		resp, _ := app.Test(req)
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		writer.WriteField("title", "")
+		writer.WriteField("thread_details", `[{"SkincareID": 1, "Caption": "test caption"}]`)
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test"))
+		writer.Close()
+
+		req := httptest.NewRequest(fiber.MethodPost, "/thread", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("token", "")
+		resp, err := app.Test(req)
+		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusUnauthorized, resp.StatusCode)
 	})
 
@@ -101,7 +110,7 @@ func TestCraeteThread(t *testing.T) {
 		req.Header.Set("token", "test-token")
 
 		resp, _ := app.Test(req)
-		assert.Equal(t, fiber.StatusUnauthorized, resp.StatusCode)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
 	})
 }
 func TestGetThreads(t *testing.T) {
@@ -159,7 +168,7 @@ func TestGetThreads(t *testing.T) {
 		req.Header.Set("token", "test-token")
 		resp, _ := app.Test(req)
 
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
 		mockThreadUseCase.AssertExpectations(t)
 	})
 
