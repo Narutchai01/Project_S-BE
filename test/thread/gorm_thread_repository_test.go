@@ -83,7 +83,7 @@ func TestCreateThread(t *testing.T) {
 		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "threads"`)).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectCommit()
 
-		thread, err := repo.CreateThread(1)
+		thread, err := repo.CreateThread(1, "title test", "imageirl")
 
 		assert.NoError(t, err)
 		assert.Equal(t, uint(1), thread.UserID)
@@ -95,7 +95,7 @@ func TestCreateThread(t *testing.T) {
 		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "threads"`)).WillReturnError(gorm.ErrInvalidData)
 		mock.ExpectRollback()
 
-		thread, err := repo.CreateThread(1)
+		thread, err := repo.CreateThread(1, "title test", "imageirl")
 
 		assert.Error(t, err)
 		assert.Equal(t, uint(0), thread.UserID)

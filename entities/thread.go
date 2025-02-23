@@ -4,10 +4,13 @@ import "gorm.io/gorm"
 
 type Thread struct {
 	gorm.Model `swaggerignore:"true"`
-	UserID     uint `json:"user_id" gorm:"not null"`
-	User       User `gorm:"foreignKey:UserID;references:ID"`
-	Bookmark   bool `json:"bookmark"`
-	Favorite   bool `json:"favorite"`
+	UserID     uint   `json:"user_id" gorm:"not null"`
+	Title      string `json:"title" gorm:"not null"`
+	Image      string `json:"image"`
+	User       User   `gorm:"foreignKey:UserID;references:ID"`
+	Bookmark   bool   `json:"bookmark"`
+	Owner      bool   `json:"owner"`
+	Favorite   bool   `json:"favorite"`
 	Threads    []ThreadDetail
 }
 
@@ -20,5 +23,6 @@ type ThreadDetail struct {
 }
 
 type ThreadRequest struct {
+	Title        string         `json:"title"`
 	ThreadDetail []ThreadDetail `json:"thread_detail"`
 }

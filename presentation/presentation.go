@@ -72,8 +72,11 @@ type Thread struct {
 	ID           uint           `json:"id"`
 	UserID       uint           `json:"user_id"`
 	User         User           `json:"user"`
+	Title        string         `json:"title"`
+	Image        string         `json:"image"`
 	Bookmark     bool           `json:"bookmark"`
 	Favorite     bool           `json:"favorite"`
+	Owner        bool           `json:"owner"`
 	ThreadDetail []ThreadDetail `json:"thread_detail"`
 }
 

@@ -1,7 +1,9 @@
 package adapter_test
 
 import (
+	"bytes"
 	"errors"
+	"mime/multipart"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -31,8 +33,8 @@ func (m *MockThreadUseCase) GetThreads(token string) ([]entities.Thread, error) 
 	return args.Get(0).([]entities.Thread), args.Error(1)
 }
 
-func (m *MockThreadUseCase) CreateThread(thread entities.ThreadRequest, token string) (entities.Thread, error) {
-	args := m.Called(thread, token)
+func (m *MockThreadUseCase) CreateThread(threadDetails []entities.ThreadDetail, title string, token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error) {
+	args := m.Called(threadDetails, title, token, file, c)
 	return args.Get(0).(entities.Thread), args.Error(1)
 }
 
@@ -59,24 +61,22 @@ func TestCraeteThread(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		mockThreadUseCase, _, app := setup()
 
-		mockThreadUseCase.On("CreateThread", mock.Anything, mock.Anything).Return(entities.Thread{}, nil)
+		mockThreadUseCase.On("CreateThread", mock.Anything, "Test title", "test-token", mock.AnythingOfType("multipart.FileHeader"), mock.Anything).Return(entities.Thread{}, nil)
 
-		req := httptest.NewRequest(fiber.MethodPost, "/thread", strings.NewReader(`{
-			"thread_detail": [
-				{
-					"skincare_id": 4,
-					"caption": "caption"
-				},
-				{
-					"skincare_id": 3,
-					"caption": "caption"
-				}
-			]
-		}`))
-		req.Header.Set("Content-Type", "application/json")
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		writer.WriteField("title", "Test title")
+		writer.WriteField("thread_details", `[{"SkincareID": 1, "Caption": "test caption"}]`)
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test"))
+		writer.Close()
+
+		req := httptest.NewRequest(fiber.MethodPost, "/thread", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
 		req.Header.Set("token", "test-token")
+		resp, err := app.Test(req)
 
-		resp, _ := app.Test(req)
+		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
 		mockThreadUseCase.AssertExpectations(t)
 	})

@@ -14,10 +14,12 @@ func NewGormThreadRepository(db *gorm.DB) repositories.ThreadRepository {
 	return &GormThreadRepository{db: db}
 }
 
-func (repo *GormThreadRepository) CreateThread(user_id uint) (entities.Thread, error) {
+func (repo *GormThreadRepository) CreateThread(user_id uint, title string, image string) (entities.Thread, error) {
 
 	thread := entities.Thread{
 		UserID: user_id,
+		Title:  title,
+		Image:  image,
 	}
 
 	if err := repo.db.Create(&thread).Error; err != nil {

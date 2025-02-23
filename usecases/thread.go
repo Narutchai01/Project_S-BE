@@ -1,13 +1,18 @@
 package usecases
 
 import (
+	"mime/multipart"
+	"os"
+
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
 	"github.com/Narutchai01/Project_S-BE/utils"
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type ThreadUseCase interface {
-	CreateThread(threadDetails entities.ThreadRequest, token string) (entities.Thread, error)
+	CreateThread(threadDetails []entities.ThreadDetail, title string, token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error)
 	GetThreads(token string) ([]entities.Thread, error)
 	GetThread(id uint, token string) (entities.Thread, error)
 	DeleteThread(thread_id uint) error
@@ -24,19 +29,39 @@ func NewThreadUseCase(repo repositories.ThreadRepository, bookmarkRepo repositor
 	return &threadService{repo, bookmarkRepo, favoriteRepo}
 }
 
-func (service *threadService) CreateThread(threadDetails entities.ThreadRequest, token string) (entities.Thread, error) {
+func (service *threadService) CreateThread(threadDetails []entities.ThreadDetail, title string, token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error) {
 
 	user_id, err := utils.ExtractToken(token)
 	if err != nil {
 		return entities.Thread{}, err
 	}
+	fileName := uuid.New().String() + ".jpg"
 
-	thread, err := service.repo.CreateThread(user_id)
+	if err := utils.CheckDirectoryExist(); err != nil {
+		return entities.Thread{}, err
+	}
+
+	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
+		return entities.Thread{}, err
+	}
+
+	imageUrl, err := utils.UploadImage(fileName, "/thread")
+
 	if err != nil {
 		return entities.Thread{}, err
 	}
 
-	for _, threadDetail := range threadDetails.ThreadDetail {
+	err = os.Remove("./uploads/" + fileName)
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	thread, err := service.repo.CreateThread(user_id, title, imageUrl)
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	for _, threadDetail := range threadDetails {
 		threadDetail.ThreadID = thread.ID
 		_, err := service.repo.CreateThreadDetail(threadDetail)
 		if err != nil {
@@ -89,6 +114,12 @@ func (service *threadService) GetThreads(token string) ([]entities.Thread, error
 			result[i].Favorite = favorite.Status
 		}
 
+		if result[i].UserID != user_id {
+			result[i].Owner = false
+		} else {
+			result[i].Owner = true
+		}
+
 		thread_details, err := service.repo.GetThreadDetails(thread.ID)
 		if err != nil {
 			return []entities.Thread{}, err
@@ -125,6 +156,12 @@ func (service *threadService) GetThread(id uint, token string) (entities.Thread,
 		result.Bookmark = false
 	} else {
 		result.Bookmark = bookmark.Status
+	}
+
+	if result.UserID != user_id {
+		result.Owner = false
+	} else {
+		result.Owner = true
 	}
 
 	favorite, err := service.favoriteRepo.FindFavoriteThread(result.ID, user_id)
