@@ -1000,6 +1000,163 @@ const docTemplate = `{
                 }
             }
         },
+        "/bookmark/{id}": {
+            "post": {
+                "description": "Bookmark a thread",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bookmark"
+                ],
+                "summary": "Bookmark a thread",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thread ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            }
+        },
+        "/comment": {
+            "post": {
+                "description": "Create a comment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "Create a comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Comment",
+                        "name": "comment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "text": {
+                                    "type": "string"
+                                },
+                                "thread_id": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            }
+        },
+        "/comment/{thread_id}": {
+            "get": {
+                "description": "Get a comment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "Get a comment",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thread ID",
+                        "name": "thread_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            }
+        },
         "/facial": {
             "get": {
                 "description": "Get all facials",
@@ -1492,19 +1649,31 @@ const docTemplate = `{
                 "summary": "Create a thread",
                 "parameters": [
                     {
-                        "description": "Thread Object",
-                        "name": "thread",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.ThreadRequest"
-                        }
-                    },
-                    {
                         "type": "string",
                         "description": "Token",
                         "name": "token",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Thread Title",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Thread Details",
+                        "name": "thread_details",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Thread Image",
+                        "name": "file",
+                        "in": "formData",
                         "required": true
                     }
                 ],
@@ -1568,6 +1737,73 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a thread",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "thread"
+                ],
+                "summary": "Update a thread",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Thread ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Thread Title",
+                        "name": "title",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Thread Details",
+                        "name": "thread_details",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Thread Image",
+                        "name": "file",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/presentation.Responses"
                         }
@@ -1888,28 +2124,6 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
-                }
-            }
-        },
-        "entities.ThreadDetail": {
-            "type": "object",
-            "properties": {
-                "caption": {
-                    "type": "string"
-                },
-                "skincare_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "entities.ThreadRequest": {
-            "type": "object",
-            "properties": {
-                "thread_detail": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.ThreadDetail"
-                    }
                 }
             }
         },

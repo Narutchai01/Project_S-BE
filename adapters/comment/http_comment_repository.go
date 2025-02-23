@@ -18,6 +18,18 @@ func NewHttpCommentHandler(commentUsecase usecases.CommentUsecase) *HtppCommentH
 	return &HtppCommentHandler{commentUsecase}
 }
 
+// create swwager for CreateComment
+// CreateComment godoc
+// @Summary Create a comment
+// @Description Create a comment
+// @Tags comment
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Param comment body object{thread_id=uint,text=string} true "Comment"
+// @Success 200 {object} presentation.Responses
+// @Failure 400 {object} presentation.Responses
+// @Router /comment [post]
 func (handler *HtppCommentHandler) CreateComment(c *fiber.Ctx) error {
 
 	token := c.Get("token")
@@ -39,6 +51,19 @@ func (handler *HtppCommentHandler) CreateComment(c *fiber.Ctx) error {
 
 }
 
+// create swwager for GetComment
+// GetComment godoc
+// @Summary Get a comment
+// @Description Get a comment
+// @Tags comment
+// @Accept json
+// @Produce json
+// @Param thread_id path int true "Thread ID"
+// @Param token header string true "Token"
+// @Success 200 {object} presentation.Responses
+// @Failure 400 {object} presentation.Responses
+// @Failure 401 {object} presentation.Responses
+// @Router /comment/{thread_id} [get]
 func (handler *HtppCommentHandler) GetComment(c *fiber.Ctx) error {
 	id := c.Params("thread_id")
 
