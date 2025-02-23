@@ -43,9 +43,9 @@ func (m *MockThreadUseCase) DeleteThread(thread_id uint) error {
 	return args.Error(0)
 }
 
-func (m *MockThreadUseCase) AddBookmark(thread_id uint, token string) (entities.Bookmark, error) {
-	args := m.Called(thread_id, token)
-	return args.Get(0).(entities.Bookmark), args.Error(1)
+func (m *MockThreadUseCase) UpdateThread(thread_id uint, token string, title string, thread_details []entities.ThreadDetail, file *multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error) {
+	args := m.Called(thread_id, token, title, thread_details, file, c)
+	return args.Get(0).(entities.Thread), args.Error(1)
 }
 
 func TestCraeteThread(t *testing.T) {
@@ -295,5 +295,63 @@ func TestDeleteThread(t *testing.T) {
 
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 		mockThreadUseCase.AssertExpectations(t)
+	})
+}
+
+func TestUpdateThread(t *testing.T) {
+	setup := func() (*MockThreadUseCase, *adapters.HttpThreadHandler, *fiber.App) {
+		mockThreadUseCase := new(MockThreadUseCase)
+		httpThreadHandler := adapters.NewHttpThreadHandler(mockThreadUseCase)
+		app := fiber.New()
+
+		app.Put("/thread/:id", httpThreadHandler.UpdateThread)
+
+		return mockThreadUseCase, httpThreadHandler, app
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		mockThreadUseCase, _, app := setup()
+
+		mockThreadUseCase.On("UpdateThread", uint(1), "test-token", "Test title", mock.Anything, mock.Anything, mock.Anything).Return(entities.Thread{}, nil)
+
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		writer.WriteField("title", "Test title")
+		writer.WriteField("thread_details", `[{"ID": 1, "SkincareID": 1, "Caption": "test caption"}]`)
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test"))
+		writer.Close()
+
+		req := httptest.NewRequest(fiber.MethodPut, "/thread/1", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("token", "test-token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockThreadUseCase.AssertExpectations(t)
+	})
+
+	t.Run("Missing Token", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest(fiber.MethodPut, "/thread/1", strings.NewReader(`{
+			"ThreadDetail": "Test thread detail"
+		}`))
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, _ := app.Test(req)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("Missing ThreadDetail", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest(fiber.MethodPut, "/thread/1", strings.NewReader(`{}`))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "test-token")
+
+		resp, _ := app.Test(req)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 }
