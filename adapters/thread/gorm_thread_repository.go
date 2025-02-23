@@ -72,3 +72,27 @@ func (repo *GormThreadRepository) DeleteThread(thread_id uint) error {
 	}
 	return nil
 }
+
+func (repo *GormThreadRepository) UpdateThread(thread entities.Thread) (entities.Thread, error) {
+	if err := repo.db.Save(&thread).Error; err != nil {
+		return entities.Thread{}, err
+	}
+	return thread, nil
+}
+
+func (repo *GormThreadRepository) UpdateThreadDetail(threadDetail entities.ThreadDetail) (entities.ThreadDetail, error) {
+	if err := repo.db.Save(&threadDetail).Error; err != nil {
+		return entities.ThreadDetail{}, err
+	}
+	return threadDetail, nil
+}
+
+func (repo *GormThreadRepository) GetThreadDetail(id uint) (entities.ThreadDetail, error) {
+	var threadDetail entities.ThreadDetail
+
+	if err := repo.db.First(&threadDetail, id).Error; err != nil {
+		return entities.ThreadDetail{}, err
+	}
+
+	return threadDetail, nil
+}

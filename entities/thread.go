@@ -8,8 +8,8 @@ type Thread struct {
 	Title      string `json:"title" gorm:"not null"`
 	Image      string `json:"image"`
 	User       User   `gorm:"foreignKey:UserID;references:ID"`
-	Bookmark   bool   `json:"bookmark"`
-	Owner      bool   `json:"owner"`
+	Bookmark   bool   `json:"bookmark" gorm:"-"`
+	Owner      bool   `json:"owner" gorm:"-"`
 	Favorite   bool   `json:"favorite"`
 	Threads    []ThreadDetail
 }

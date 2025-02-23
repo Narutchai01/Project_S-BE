@@ -9,7 +9,7 @@ type ThreadRepository interface {
 	GetThread(id uint) (entities.Thread, error)
 	GetThreadDetails(thread_id uint) ([]entities.ThreadDetail, error)
 	DeleteThread(thread_id uint) error
-	// CreateBookmark(thread_id uint, user_id uint) (entities.Bookmark, error)
-	// FindBookMark(thread_id uint, user_id uint) (entities.Bookmark, error)
-	// UpdateBookMark(thread_id uint, user_id uint, status bool) (entities.Bookmark, error)
+	UpdateThread(thread entities.Thread) (entities.Thread, error)
+	UpdateThreadDetail(threadDetails entities.ThreadDetail) (entities.ThreadDetail, error)
+	GetThreadDetail(id uint) (entities.ThreadDetail, error)
 }
