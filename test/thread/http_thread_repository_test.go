@@ -66,7 +66,7 @@ func TestCraeteThread(t *testing.T) {
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		writer.WriteField("title", "Test title")
-		writer.WriteField("thread_details", `[{"SkincareID": 1, "Caption": "test caption"}]`)
+		writer.WriteField("thread_details", `[{"skincare_id": 1, "caption": "test caption"}]`)
 		part, _ := writer.CreateFormFile("file", "test.jpg")
 		part.Write([]byte("test"))
 		writer.Close()

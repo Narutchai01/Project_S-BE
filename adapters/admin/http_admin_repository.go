@@ -15,6 +15,14 @@ func NewHttpAdminHandler(adminUcase usecases.AdminUsecases) *HttpAdminHandler {
 	return &HttpAdminHandler{adminUcase}
 }
 
+// create func for validate admin
+func validateAdmin(admin entities.Admin) error {
+	if admin.Email == "" || admin.Password == "" || admin.FullName == "" {
+		return fiber.ErrBadRequest
+	}
+	return nil
+}
+
 // CreateAdmin godoc
 //
 //	@Summary		Create an admin
@@ -38,6 +46,10 @@ func (handler *HttpAdminHandler) CreateAdmin(c *fiber.Ctx) error {
 	file, err := c.FormFile("file")
 
 	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	if err := validateAdmin(admin); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 

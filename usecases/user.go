@@ -32,11 +32,14 @@ func NewUserUseCase(repo repositories.UserRepository) UserUsecases {
 
 func (service *userService) Register(user entities.User, c *fiber.Ctx) (entities.User, error) {
 
+	_, err := service.repo.GetUserByEmail(user.Email)
+	if err == nil {
+		return user, fmt.Errorf("email already exists")
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return user, c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return user, fmt.Errorf("failed to hashed password: %w", err)
 	}
 
 	user.Password = string(hashedPassword)

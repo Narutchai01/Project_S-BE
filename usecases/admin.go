@@ -34,6 +34,11 @@ func NewAdminUseCase(repo repositories.AdminRepository) AdminUsecases {
 
 func (service *adminService) CreateAdmin(admin entities.Admin, file multipart.FileHeader, c *fiber.Ctx) (entities.Admin, error) {
 
+	_, err := service.repo.GetAdminByEmail(admin.Email)
+	if err == nil {
+		return entities.Admin{}, fmt.Errorf("email already exists")
+	}
+
 	fileName := uuid.New().String() + ".jpg"
 
 	if err := utils.CheckDirectoryExist(); err != nil {

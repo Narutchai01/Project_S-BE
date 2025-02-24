@@ -15,6 +15,14 @@ func NewHttpUserHandler(userUcase usecases.UserUsecases) *HttpUserHandler {
 	return &HttpUserHandler{userUcase}
 }
 
+func validateUser(user entities.User) error {
+	if user.Email == "" || user.Password == "" || user.FullName == "" || user.SensitiveSkin == nil || user.Birthday == nil {
+		return fiber.ErrBadRequest
+	}
+	return nil
+
+}
+
 // Register godoc
 //
 //	@Summary		Register new user
@@ -31,6 +39,10 @@ func (handler *HttpUserHandler) Register(c *fiber.Ctx) error {
 	var user entities.User
 
 	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
+	if err := validateUser(user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
