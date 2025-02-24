@@ -16,11 +16,11 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func CheckDirectoryExist() error  {
+func CheckDirectoryExist() error {
 	dir := "./uploads"
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		    return err
+			return err
 		}
 	}
 	return nil
@@ -75,7 +75,7 @@ func UpdateImage(oldFilePath string, newFilePath string, folderName string) erro
 		ContentType: func() *string { contentType := "image/jpeg"; return &contentType }(),
 	}
 
-	_, err = storageClient.UpdateFile(bucket_name, folderName + "/" + oldFilePath, file, options)
+	_, err = storageClient.UpdateFile(bucket_name, folderName+"/"+oldFilePath, file, options)
 	if err != nil {
 		return fmt.Errorf("failed to update file %w", err)
 	}
@@ -84,18 +84,18 @@ func UpdateImage(oldFilePath string, newFilePath string, folderName string) erro
 }
 
 func DeleteImage(oldFilePath string, folderName string) error {
-      supa_api_url := config.GetEnv("SUPA_API_URL")
-      supa_api_key := config.GetEnv("SUPA_API_KEY")
-      bucket_name := config.GetEnv("SUPA_BUCKET_NAME")
+	supa_api_url := config.GetEnv("SUPA_API_URL")
+	supa_api_key := config.GetEnv("SUPA_API_KEY")
+	bucket_name := config.GetEnv("SUPA_BUCKET_NAME")
 
-      storageClient := storage_go.NewClient(supa_api_url, supa_api_key, nil)
+	storageClient := storage_go.NewClient(supa_api_url, supa_api_key, nil)
 
-      _, err := storageClient.RemoveFile(bucket_name, []string{folderName + "/" + oldFilePath})
-      if err != nil {
-            return fmt.Errorf("failed to update file %w", err)
-      }
+	_, err := storageClient.RemoveFile(bucket_name, []string{folderName + "/" + oldFilePath})
+	if err != nil {
+		return fmt.Errorf("failed to update file %w", err)
+	}
 
-      return nil
+	return nil
 }
 
 func CreateJWTToken(secretKey string, claims jwt.MapClaims) (string, error) {
@@ -117,7 +117,7 @@ func GenerateToken(userID int) (string, error) {
 }
 
 func GenerateOTP() (string, error) {
-      range_number := big.NewInt(900000)
+	range_number := big.NewInt(900000)
 	random_big, err := rand.Int(rand.Reader, range_number)
 	if err != nil {
 		return "", err
@@ -141,16 +141,16 @@ func SendEmailVerification(email string, otp string) error {
 	    </body>
 	    </html>
 	`, otp))
-  
+
 	dialer := gomail.NewDialer(
 		"smtp.gmail.com",
-	    	587, 
-	    	config.GetEnv("SENDING_EMAIL"),
-	    	config.GetEnv("EMAIL_PASSWORD"),
+		587,
+		config.GetEnv("SENDING_EMAIL"),
+		config.GetEnv("EMAIL_PASSWORD"),
 	)
-  
+
 	if err := dialer.DialAndSend(message); err != nil {
-	    return fmt.Errorf("failed to send email OTP verification: %w", err)
+		return fmt.Errorf("failed to send email OTP verification: %w", err)
 	}
 
 	return nil

@@ -58,6 +58,13 @@ func (handler *HttpThreadHandler) CreateThread(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("ThreadDetail is required")))
 	}
 
+	for _, detail := range threadDetails {
+		if detail.SkincareID == 0 || detail.Caption == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("SkincareID and Caption is required")))
+
+		}
+	}
+
 	result, err := handler.threadUsecase.CreateThread(threadDetails, title, token, *file, c)
 
 	if err != nil {
@@ -83,7 +90,7 @@ func (handler *HttpThreadHandler) GetThreads(c *fiber.Ctx) error {
 	token := c.Get("token")
 
 	if token == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
 	}
 
 	result, err := handler.threadUsecase.GetThreads(token)
@@ -117,7 +124,7 @@ func (handler *HttpThreadHandler) GetThread(c *fiber.Ctx) error {
 	token := c.Get("token")
 
 	if token == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("token is require")))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
 	}
 
 	result, err := handler.threadUsecase.GetThread(uint(threadID), token)
