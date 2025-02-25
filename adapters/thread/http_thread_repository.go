@@ -17,11 +17,22 @@ func NewHttpThreadRepository(threadUsecase usecases.ThreadUseCase) *HttpThreadRe
 	return &HttpThreadRepository{threadUsecase}
 }
 
+func validateThread(thread entities.Thread) error {
+	if thread.Title == "" || thread.Caption == "" {
+		return fiber.ErrBadRequest
+	}
+	return nil
+}
+
 func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
 	var thread entities.Thread
 
 	if err := c.BodyParser(&thread); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(err)
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
+	if err := validateThread(thread); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
 	}
 
 	token := c.Get("token")
