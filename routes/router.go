@@ -31,5 +31,6 @@ func Router(app *fiber.App, db *gorm.DB) {
 	BookMarkRouters(api, db)
 	CommentRouters(api, db)
 	FavoriteRoutes(api, db)
+	ThreadRouters(api, db)
 
 }

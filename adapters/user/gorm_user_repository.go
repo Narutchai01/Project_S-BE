@@ -34,7 +34,7 @@ func (repo *GormUserRepository) UpdateUserPasswordById(id int, newPassword strin
 
 func (repo *GormUserRepository) GetUser(id uint) (entities.User, error) {
 	var user entities.User
-	err := repo.db.Select("id", "full_name", "email", "birthday", "sensitive_skin", "image").Where("id = ?", id).First(&user).Error
+	err := repo.db.Where("id = ?", id).First(&user).Error
 	return user, err
 }
 
