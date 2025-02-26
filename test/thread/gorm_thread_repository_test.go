@@ -229,6 +229,9 @@ func TestGormGetThreads(t *testing.T) {
 			AddRow(expectData[1].ID, expectData[1].Title, expectData[1].Caption, expectData[1].UserID)
 		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "threads" WHERE "threads"."deleted_at" IS NULL`)).
 			WillReturnRows(rows)
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE "users"."id" IN ($1,$2) AND "users"."deleted_at" IS NULL`)).
+			WithArgs(1, 2).
+			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1).AddRow(2))
 
 		threads, err := repo.GetThreads()
 
@@ -242,6 +245,7 @@ func TestGormGetThreads(t *testing.T) {
 		assert.Equal(t, expectData[1].Caption, threads[1].Caption)
 		assert.Equal(t, expectData[1].UserID, threads[1].UserID)
 		assert.NoError(t, mock.ExpectationsWereMet())
+
 	})
 
 	t.Run("threads not found", func(t *testing.T) {
