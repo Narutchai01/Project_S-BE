@@ -24,6 +24,21 @@ func validateThread(thread entities.Thread) error {
 	return nil
 }
 
+// CreateThread godoc
+//
+//	@Summary		Create a thread
+//	@Description	Create a thread
+//	@Tags			threads
+//	@Accept			multipart/form-data
+//	@Produce		json
+//	@Param			token	header	string	true	"Token"
+//	@Param			title	formData	string	false	"Title"
+//	@Param			caption	formData	string	false	"Caption"
+//	@Param			files	formData	file	false	"File"
+//	@Success		201		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		500		{object}	presentation.Responses
+//	@Router			/thread/ [post]
 func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
 	var thread entities.Thread
 
@@ -56,6 +71,19 @@ func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToThreadResponse(result))
 }
 
+// GetThread godoc
+//
+//	@Summary		Get a thread
+//	@Description	Get a thread
+//	@Tags			threads
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"ID"
+//	@Param			token	header	string	true	"Token"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		500		{object}	presentation.Responses
+//	@Router			/thread/{id} [get]
 func (repo *HttpThreadRepository) GetThread(c *fiber.Ctx) error {
 
 	id, err := c.ParamsInt("id")
@@ -75,6 +103,18 @@ func (repo *HttpThreadRepository) GetThread(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadResponse(result))
 }
 
+// GetThreads godoc
+//
+//	@Summary		Get threads
+//	@Description	Get threads
+//	@Tags			threads
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	header	string	true	"Token"
+//	@Success		200		{object}	presentation.Responses
+//	@Failure		400		{object}	presentation.Responses
+//	@Failure		500		{object}	presentation.Responses
+//	@Router			/thread/ [get]
 func (repo *HttpThreadRepository) GetThreads(c *fiber.Ctx) error {
 	token := c.Get("token")
 
