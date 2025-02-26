@@ -34,7 +34,8 @@ func TestGormCreateThread(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		mock.ExpectQuery(`INSERT INTO "threads"`).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+		mock.ExpectBegin()
+		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "threads"`)).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectCommit()
 
 		thread, err := repo.CreateThread(expectData)
