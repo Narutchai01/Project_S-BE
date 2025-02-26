@@ -13,15 +13,17 @@ import (
 
 type ThreadUseCase interface {
 	CreateThread(thread entities.Thread, token string, files []*multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error)
+	GetThread(thread_id uint, token string) (entities.Thread, error)
 }
 
 type threadService struct {
-	threadRepo repositories.ThreadRepository
-	userRepo   repositories.UserRepository
+	threadRepo   repositories.ThreadRepository
+	userRepo     repositories.UserRepository
+	favoriteRepo repositories.FavoriteRepository
 }
 
-func NewThreadUseCase(threadRepo repositories.ThreadRepository, userRepo repositories.UserRepository) ThreadUseCase {
-	return &threadService{threadRepo, userRepo}
+func NewThreadUseCase(threadRepo repositories.ThreadRepository, userRepo repositories.UserRepository, favoriteRepo repositories.FavoriteRepository) ThreadUseCase {
+	return &threadService{threadRepo, userRepo, favoriteRepo}
 }
 
 func (service *threadService) CreateThread(thread entities.Thread, token string, files []*multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error) {
@@ -98,6 +100,60 @@ func (service *threadService) CreateThread(thread entities.Thread, token string,
 	}
 
 	thread.Images = Images
+
+	favorite, err := service.favoriteRepo.FindFavoriteThread(user_id, thread.ID)
+
+	if err != nil {
+		thread.Favorite = false
+	} else {
+		thread.Favorite = favorite.Status
+	}
+
+	favoriteCount, err := service.favoriteRepo.CountFavoriteThread(thread.ID)
+
+	if err != nil {
+		thread.FavoriteCount = 0
+	}
+
+	thread.FavoriteCount = favoriteCount
+
+	return thread, nil
+}
+
+func (service *threadService) GetThread(thread_id uint, token string) (entities.Thread, error) {
+
+	user_id, err := utils.ExtractToken(token)
+
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	thread, err := service.threadRepo.GetThread(thread_id)
+	if err != nil {
+		return entities.Thread{}, fiber.NewError(fiber.StatusNotFound, "thread not found")
+	}
+
+	thread_images, err := service.threadRepo.GetThreadImages(thread.ID)
+
+	if err != nil {
+		return entities.Thread{}, fiber.NewError(fiber.StatusInternalServerError, "internal server error")
+	}
+
+	thread.Images = thread_images
+
+	favorite, err := service.favoriteRepo.FindFavoriteThread(thread_id, user_id)
+	if err != nil {
+		thread.Favorite = false
+	} else {
+		thread.Favorite = favorite.Status
+	}
+
+	favoriteCount, err := service.favoriteRepo.CountFavoriteThread(thread_id)
+	if err != nil {
+		thread.FavoriteCount = 0
+	} else {
+		thread.FavoriteCount = favoriteCount
+	}
 
 	return thread, nil
 }

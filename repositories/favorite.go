@@ -9,4 +9,5 @@ type FavoriteRepository interface {
 	FavoriteThread(thread_id uint, user_id uint) (entities.FavoriteThread, error)
 	FindFavoriteThread(thread_id uint, user_id uint) (entities.FavoriteThread, error)
 	UpdateFavoriteThread(favorite_thread entities.FavoriteThread) (entities.FavoriteThread, error)
+	CountFavoriteThread(thread_id uint) (int64, error)
 }

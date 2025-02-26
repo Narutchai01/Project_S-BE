@@ -55,3 +55,22 @@ func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToThreadResponse(result))
 }
+
+func (repo *HttpThreadRepository) GetThread(c *fiber.Ctx) error {
+
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
+	token := c.Get("token")
+
+	result, err := repo.threadUsecase.GetThread(uint(id), token)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadResponse(result))
+}

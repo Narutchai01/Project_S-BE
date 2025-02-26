@@ -17,12 +17,14 @@ func PublicThreadImage(threadImages []entities.ThreadImage) []ThreadImage {
 
 func PublicThread(thread entities.Thread) Thread {
 	return Thread{
-		ID:       thread.ID,
-		Title:    thread.Title,
-		User:     *PublicUser(thread.User),
-		Caption:  thread.Caption,
-		Images:   PublicThreadImage(thread.Images),
-		CreateAt: thread.CreatedAt,
+		ID:            thread.ID,
+		Title:         thread.Title,
+		Favorite:      thread.Favorite,
+		FavoriteCount: thread.FavoriteCount,
+		User:          *PublicUser(thread.User),
+		Caption:       thread.Caption,
+		Images:        PublicThreadImage(thread.Images),
+		CreateAt:      thread.CreatedAt,
 	}
 }
 

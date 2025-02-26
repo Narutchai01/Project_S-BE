@@ -69,12 +69,14 @@ type Result struct {
 }
 
 type Thread struct {
-	ID       uint          `json:"id"`
-	User     User          `json:"user"`
-	Title    string        `json:"title"`
-	Images   []ThreadImage `json:"images"`
-	Caption  string        `json:"caption"`
-	CreateAt time.Time     `json:"create_at"`
+	ID            uint          `json:"id"`
+	User          User          `json:"user"`
+	Title         string        `json:"title"`
+	Favorite      bool          `json:"favorite"`
+	FavoriteCount int64         `json:"favorite_count"`
+	Images        []ThreadImage `json:"images"`
+	Caption       string        `json:"caption"`
+	CreateAt      time.Time     `json:"create_at"`
 }
 
 type ThreadImage struct {

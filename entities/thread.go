@@ -4,11 +4,13 @@ import "gorm.io/gorm"
 
 type Thread struct {
 	gorm.Model
-	Title   string        `json:"title"`
-	Caption string        `json:"caption"`
-	UserID  uint          `json:"user_id"`
-	User    User          `json:"user"`
-	Images  []ThreadImage `json:"images" gorm:"-"`
+	Title         string        `json:"title"`
+	Caption       string        `json:"caption"`
+	UserID        uint          `json:"user_id"`
+	User          User          `json:"user"`
+	Favorite      bool          `json:"favorite" gorm:"-"`
+	FavoriteCount int64         `json:"favorite_count" gorm:"-"`
+	Images        []ThreadImage `json:"images" gorm:"-"`
 }
 
 type ThreadImage struct {
