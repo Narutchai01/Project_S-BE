@@ -74,3 +74,20 @@ func (repo *HttpThreadRepository) GetThread(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadResponse(result))
 }
+
+func (repo *HttpThreadRepository) GetThreads(c *fiber.Ctx) error {
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
+
+	}
+
+	result, err := repo.threadUsecase.GetThreads(token)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadsResponse(result))
+}
