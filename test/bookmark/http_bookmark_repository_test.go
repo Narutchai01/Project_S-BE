@@ -15,9 +15,9 @@ type MockBookmarkUsecase struct {
 	mock.Mock
 }
 
-func (m *MockBookmarkUsecase) BookmarkThread(user_id uint, token string) (entities.Bookmark, error) {
+func (m *MockBookmarkUsecase) BookmarkThread(user_id uint, token string) (entities.BookmarkThread, error) {
 	args := m.Called(user_id, token)
-	return args.Get(0).(entities.Bookmark), args.Error(1)
+	return args.Get(0).(entities.BookmarkThread), args.Error(1)
 }
 
 func TestBookmarkThread(t *testing.T) {
@@ -29,7 +29,7 @@ func TestBookmarkThread(t *testing.T) {
 	app.Post("/bookmark/:id", handler.BookMarkThread)
 
 	t.Run("Bookmark Thread Success", func(t *testing.T) {
-		mockBookmarkUsecase.On("BookmarkThread", uint(1), "token").Return(entities.Bookmark{}, nil)
+		mockBookmarkUsecase.On("BookmarkThread", uint(1), "token").Return(entities.BookmarkThread{}, nil)
 
 		req := httptest.NewRequest("POST", "/bookmark/1", nil)
 		req.Header.Add("token", "token")

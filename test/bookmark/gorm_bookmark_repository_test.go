@@ -27,9 +27,9 @@ func TestCreateBookmark(t *testing.T) {
 
 	t.Run("Create Bookmark Success", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "bookmarks" ("created_at","updated_at","deleted_at","thread_id","user_id","status") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1, 1, true).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "bookmark_threads" ("created_at","updated_at","deleted_at","thread_id","user_id","status") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1, 1, true).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectCommit()
-		result, err := repo.CreateBookmark(1, 1)
+		result, err := repo.CreateBookmarkThread(1, 1)
 		assert.NoError(t, err)
 		assert.Equal(t, uint(1), result.ID)
 		assert.Equal(t, uint(1), result.UserID)
@@ -39,9 +39,9 @@ func TestCreateBookmark(t *testing.T) {
 
 	t.Run("Create Bookmark Failed", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "bookmarks" ("created_at","updated_at","deleted_at","thread_id","user_id","status") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1, 1, true).WillReturnError(assert.AnError)
+		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "bookmark_threads" ("created_at","updated_at","deleted_at","thread_id","user_id","status") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 1, 1, true).WillReturnError(assert.AnError)
 		mock.ExpectRollback()
-		_, err := repo.CreateBookmark(1, 1)
+		_, err := repo.CreateBookmarkThread(1, 1)
 		assert.Error(t, err)
 	})
 }
