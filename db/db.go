@@ -46,7 +46,7 @@ func ConnectDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&entities.Admin{}, &entities.Skincare{}, &entities.User{}, &entities.Recovery{}, &entities.Facial{}, &entities.Acne{}, &entities.Skin{}, &entities.Result{}, entities.Thread{}, entities.ThreadImage{}, entities.FavoriteThread{}, entities.BookmarkThread{})
+	db.AutoMigrate(&entities.Admin{}, &entities.Skincare{}, &entities.User{}, &entities.Recovery{}, &entities.Facial{}, &entities.Acne{}, &entities.Skin{}, &entities.Result{}, entities.Thread{}, entities.ThreadImage{}, entities.FavoriteThread{}, entities.BookmarkThread{}, entities.ReviewSkincare{})
 
 	return db, nil
 }
