@@ -1085,7 +1085,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all threads
+      description: Get threads
       parameters:
       - description: Token
         in: header
@@ -1103,12 +1103,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/presentation.Responses'
-      summary: Get all threads
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get threads
       tags:
-      - thread
+      - threads
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Create a thread
       parameters:
       - description: Token
@@ -1116,20 +1120,17 @@ paths:
         name: token
         required: true
         type: string
-      - description: Thread Title
+      - description: Title
         in: formData
         name: title
-        required: true
         type: string
-      - description: Thread Details
+      - description: Caption
         in: formData
-        name: thread_details
-        required: true
+        name: caption
         type: string
-      - description: Thread Image
+      - description: File
         in: formData
-        name: file
-        required: true
+        name: files
         type: file
       produces:
       - application/json
@@ -1142,49 +1143,20 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/presentation.Responses'
-        "404":
-          description: Not Found
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/presentation.Responses'
       summary: Create a thread
       tags:
-      - thread
+      - threads
   /thread/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a thread
-      parameters:
-      - description: Thread ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Token
-        in: header
-        name: token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-      summary: Delete a thread
-      tags:
-      - thread
     get:
       consumes:
       - application/json
       description: Get a thread
       parameters:
-      - description: Thread ID
+      - description: ID
         in: path
         name: id
         required: true
@@ -1205,54 +1177,13 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
       summary: Get a thread
       tags:
-      - thread
-    put:
-      consumes:
-      - application/json
-      description: Update a thread
-      parameters:
-      - description: Token
-        in: header
-        name: token
-        required: true
-        type: string
-      - description: Thread ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Thread Title
-        in: formData
-        name: title
-        type: string
-      - description: Thread Details
-        in: formData
-        name: thread_details
-        type: string
-      - description: Thread Image
-        in: formData
-        name: file
-        type: file
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/presentation.Responses'
-      summary: Update a thread
-      tags:
-      - thread
+      - threads
   /user/:
     put:
       consumes:

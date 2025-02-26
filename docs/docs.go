@@ -1600,7 +1600,7 @@ const docTemplate = `{
         },
         "/thread/": {
             "get": {
-                "description": "Get all threads",
+                "description": "Get threads",
                 "consumes": [
                     "application/json"
                 ],
@@ -1608,9 +1608,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "thread"
+                    "threads"
                 ],
-                "summary": "Get all threads",
+                "summary": "Get threads",
                 "parameters": [
                     {
                         "type": "string",
@@ -1632,19 +1632,25 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/presentation.Responses"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presentation.Responses"
+                        }
                     }
                 }
             },
             "post": {
                 "description": "Create a thread",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "thread"
+                    "threads"
                 ],
                 "summary": "Create a thread",
                 "parameters": [
@@ -1657,24 +1663,21 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Thread Title",
+                        "description": "Title",
                         "name": "title",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "Thread Details",
-                        "name": "thread_details",
-                        "in": "formData",
-                        "required": true
+                        "description": "Caption",
+                        "name": "caption",
+                        "in": "formData"
                     },
                     {
                         "type": "file",
-                        "description": "Thread Image",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
+                        "description": "File",
+                        "name": "files",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1690,8 +1693,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/presentation.Responses"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/presentation.Responses"
                         }
@@ -1709,13 +1712,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "thread"
+                    "threads"
                 ],
                 "summary": "Get a thread",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Thread ID",
+                        "description": "ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1740,113 +1743,9 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/presentation.Responses"
                         }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a thread",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "thread"
-                ],
-                "summary": "Update a thread",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
                     },
-                    {
-                        "type": "integer",
-                        "description": "Thread ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Thread Title",
-                        "name": "title",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Thread Details",
-                        "name": "thread_details",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "file",
-                        "description": "Thread Image",
-                        "name": "file",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a thread",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "thread"
-                ],
-                "summary": "Delete a thread",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Thread ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presentation.Responses"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/presentation.Responses"
                         }
