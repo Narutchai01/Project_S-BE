@@ -21,6 +21,7 @@ func PublicThread(thread entities.Thread) Thread {
 		Title:         thread.Title,
 		Favorite:      thread.Favorite,
 		FavoriteCount: thread.FavoriteCount,
+		Bookmark:      thread.Bookmark,
 		User:          *PublicUser(thread.User),
 		Caption:       thread.Caption,
 		Images:        PublicThreadImage(thread.Images),

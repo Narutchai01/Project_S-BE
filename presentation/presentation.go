@@ -74,6 +74,7 @@ type Thread struct {
 	Title         string        `json:"title"`
 	Favorite      bool          `json:"favorite"`
 	FavoriteCount int64         `json:"favorite_count"`
+	Bookmark      bool          `json:"bookmark"`
 	Images        []ThreadImage `json:"images"`
 	Caption       string        `json:"caption"`
 	CreateAt      time.Time     `json:"create_at"`
