@@ -297,3 +297,42 @@ func TestUpdateFavoriteThreads(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+func TestCountFavoriteThread(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormFavoriteRepository(gormDB)
+	t.Run("success", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "favorite_threads" WHERE (thread_id = $1 AND status != false) AND "favorite_threads"."deleted_at" IS NULL`)).
+			WithArgs(1).
+			WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(5))
+
+		count, err := repo.CountFavoriteThread(1)
+
+		assert.NoError(t, err)
+		assert.Equal(t, int64(5), count)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "favorite_threads" WHERE (thread_id = $1 AND status != false) AND "favorite_threads"."deleted_at" IS NULL`)).
+			WithArgs(1).
+			WillReturnError(gorm.ErrInvalidData)
+
+		_, err := repo.CountFavoriteThread(1)
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}

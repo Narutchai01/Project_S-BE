@@ -1,6 +1,7 @@
 package routes
 
 import (
+	adaptersFav "github.com/Narutchai01/Project_S-BE/adapters/favorite"
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/thread"
 	adaptersUser "github.com/Narutchai01/Project_S-BE/adapters/user"
 	"github.com/Narutchai01/Project_S-BE/usecases"
@@ -12,10 +13,12 @@ func ThreadRouters(app fiber.Router, db *gorm.DB) {
 
 	threadRepo := adapters.NewGormThreadRepository(db)
 	userRepo := adaptersUser.NewGormUserRepository(db)
-	threadService := usecases.NewThreadUseCase(threadRepo, userRepo)
+	favoriteRepo := adaptersFav.NewGormFavoriteRepository(db)
+	threadService := usecases.NewThreadUseCase(threadRepo, userRepo, favoriteRepo)
 	threadHandler := adapters.NewHttpThreadRepository(threadService)
 
 	threadGroup := app.Group("/thread")
 	threadGroup.Post("/", threadHandler.CreateThread)
+	threadGroup.Get("/:id", threadHandler.GetThread)
 
 }
