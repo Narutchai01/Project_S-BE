@@ -21,10 +21,11 @@ type threadService struct {
 	threadRepo   repositories.ThreadRepository
 	userRepo     repositories.UserRepository
 	favoriteRepo repositories.FavoriteRepository
+	bookmarkRepo repositories.BookmarkRepository
 }
 
-func NewThreadUseCase(threadRepo repositories.ThreadRepository, userRepo repositories.UserRepository, favoriteRepo repositories.FavoriteRepository) ThreadUseCase {
-	return &threadService{threadRepo, userRepo, favoriteRepo}
+func NewThreadUseCase(threadRepo repositories.ThreadRepository, userRepo repositories.UserRepository, favoriteRepo repositories.FavoriteRepository, bookmarkRepo repositories.BookmarkRepository) ThreadUseCase {
+	return &threadService{threadRepo, userRepo, favoriteRepo, bookmarkRepo}
 }
 
 func (service *threadService) CreateThread(thread entities.Thread, token string, files []*multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error) {
@@ -118,6 +119,14 @@ func (service *threadService) CreateThread(thread entities.Thread, token string,
 
 	thread.FavoriteCount = favoriteCount
 
+	bookmark, err := service.bookmarkRepo.FindBookMarkThread(thread.ID, user_id)
+
+	if err != nil {
+		thread.Bookmark = false
+	} else {
+		thread.Bookmark = bookmark.Status
+	}
+
 	return thread, nil
 }
 
@@ -154,6 +163,13 @@ func (service *threadService) GetThread(thread_id uint, token string) (entities.
 		thread.FavoriteCount = 0
 	} else {
 		thread.FavoriteCount = favoriteCount
+	}
+
+	bookmark, err := service.bookmarkRepo.FindBookMarkThread(thread_id, user_id)
+	if err != nil {
+		thread.Bookmark = false
+	} else {
+		thread.Bookmark = bookmark.Status
 	}
 
 	return thread, nil
@@ -194,6 +210,13 @@ func (service *threadService) GetThreads(token string) ([]entities.Thread, error
 			threads[i].FavoriteCount = 0
 		} else {
 			threads[i].FavoriteCount = favoriteCount
+		}
+
+		bookmark, err := service.bookmarkRepo.FindBookMarkThread(thread.ID, user_id)
+		if err != nil {
+			threads[i].Bookmark = false
+		} else {
+			threads[i].Bookmark = bookmark.Status
 		}
 	}
 

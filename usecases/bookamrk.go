@@ -7,7 +7,7 @@ import (
 )
 
 type BookmarkUseCase interface {
-	BookmarkThread(thread_id uint, token string) (entities.Bookmark, error)
+	BookmarkThread(thread_id uint, token string) (entities.BookmarkThread, error)
 }
 type bookmarkService struct {
 	repo repositories.BookmarkRepository
@@ -17,19 +17,19 @@ func NewBookmarkUseCase(repo repositories.BookmarkRepository) BookmarkUseCase {
 	return &bookmarkService{repo}
 }
 
-func (service *bookmarkService) BookmarkThread(thread_id uint, token string) (entities.Bookmark, error) {
+func (service *bookmarkService) BookmarkThread(thread_id uint, token string) (entities.BookmarkThread, error) {
 
 	user_id, err := utils.ExtractToken(token)
 	if err != nil {
-		return entities.Bookmark{}, err
+		return entities.BookmarkThread{}, err
 	}
 
-	bookmark, err := service.repo.FindBookMark(thread_id, user_id)
+	bookmark, err := service.repo.FindBookMarkThread(thread_id, user_id)
 	if err != nil {
-		return service.repo.CreateBookmark(thread_id, user_id)
+		return service.repo.CreateBookmarkThread(thread_id, user_id)
 	}
 
 	status := !bookmark.Status
 
-	return service.repo.UpdateBookMark(thread_id, user_id, status)
+	return service.repo.UpdateBookMarkThread(thread_id, user_id, status)
 }
