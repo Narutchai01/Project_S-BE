@@ -35,3 +35,16 @@ func ToThreadResponse(data entities.Thread) *Responses {
 		Error:  nil,
 	}
 }
+
+func ToThreadsResponse(data []entities.Thread) *Responses {
+	var threads []Thread
+	for _, thread := range data {
+		threads = append(threads, PublicThread(thread))
+	}
+
+	return &Responses{
+		Status: true,
+		Data:   threads,
+		Error:  nil,
+	}
+}

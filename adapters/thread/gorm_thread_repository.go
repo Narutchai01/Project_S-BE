@@ -35,3 +35,9 @@ func (repo *GormThreadRepository) GetThreadImages(thread_id uint) ([]entities.Th
 	err := repo.db.Where("thread_id = ?", thread_id).Find(&threadImages).Error
 	return threadImages, err
 }
+
+func (repo *GormThreadRepository) GetThreads() ([]entities.Thread, error) {
+	threads := []entities.Thread{}
+	err := repo.db.Preload("User").Find(&threads).Error
+	return threads, err
+}

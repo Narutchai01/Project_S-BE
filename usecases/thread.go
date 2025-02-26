@@ -14,6 +14,7 @@ import (
 type ThreadUseCase interface {
 	CreateThread(thread entities.Thread, token string, files []*multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error)
 	GetThread(thread_id uint, token string) (entities.Thread, error)
+	GetThreads(token string) ([]entities.Thread, error)
 }
 
 type threadService struct {
@@ -156,4 +157,45 @@ func (service *threadService) GetThread(thread_id uint, token string) (entities.
 	}
 
 	return thread, nil
+}
+
+func (service *threadService) GetThreads(token string) ([]entities.Thread, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return []entities.Thread{}, err
+	}
+
+	threads, err := service.threadRepo.GetThreads()
+	if err != nil {
+		return []entities.Thread{}, fiber.NewError(fiber.StatusInternalServerError, "internal server error")
+	}
+
+	for i, thread := range threads {
+		thread_images, err := service.threadRepo.GetThreadImages(thread.ID)
+
+		if err != nil {
+			return []entities.Thread{}, fiber.NewError(fiber.StatusInternalServerError, "internal server error")
+		}
+
+		threads[i].Images = thread_images
+
+		favorite, err := service.favoriteRepo.FindFavoriteThread(thread.ID, user_id)
+
+		if err != nil {
+			threads[i].Favorite = false
+		} else {
+			threads[i].Favorite = favorite.Status
+		}
+
+		favoriteCount, err := service.favoriteRepo.CountFavoriteThread(thread.ID)
+
+		if err != nil {
+			threads[i].FavoriteCount = 0
+		} else {
+			threads[i].FavoriteCount = favoriteCount
+		}
+	}
+
+	return threads, nil
 }
