@@ -12,6 +12,7 @@ type Result struct {
 	Skin       Skin         `json:"skin" gorm:"foreignKey:SkinID"`
 	SkincareID []uint       `json:"skincare_id" gorm:"serializer:json"`
 	Skincare   []Skincare   `json:"skincare" gorm:"-"`
+	User       User         `json:"user" gorm:"foreignKey:UserID"`
 }
 
 type AcneFacial struct {

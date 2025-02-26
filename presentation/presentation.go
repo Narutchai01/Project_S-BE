@@ -69,21 +69,20 @@ type Result struct {
 }
 
 type Thread struct {
-	ID           uint           `json:"id"`
-	UserID       uint           `json:"user_id"`
-	User         User           `json:"user"`
-	Title        string         `json:"title"`
-	Image        string         `json:"image"`
-	Bookmark     bool           `json:"bookmark"`
-	Favorite     bool           `json:"favorite"`
-	Owner        bool           `json:"owner"`
-	ThreadDetail []ThreadDetail `json:"thread_detail"`
+	ID            uint          `json:"id"`
+	User          User          `json:"user"`
+	Title         string        `json:"title"`
+	Favorite      bool          `json:"favorite"`
+	FavoriteCount int64         `json:"favorite_count"`
+	Images        []ThreadImage `json:"images"`
+	Caption       string        `json:"caption"`
+	CreateAt      time.Time     `json:"create_at"`
 }
 
-type ThreadDetail struct {
-	ID       uint     `json:"id"`
-	Skincare Skincare `json:"skincare"`
-	Caption  string   `json:"caption"`
+type ThreadImage struct {
+	ID       uint   `json:"id"`
+	ThreadID uint   `json:"thread_id"`
+	Image    string `json:"image"`
 }
 
 func DeleteResponse(id int) *Responses {

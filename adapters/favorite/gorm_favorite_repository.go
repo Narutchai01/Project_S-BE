@@ -87,3 +87,12 @@ func (repo *GormFavoriteRepository) UpdateFavoriteThread(favorite_thread entitie
 
 	return favorite_thread, nil
 }
+
+func (repo *GormFavoriteRepository) CountFavoriteThread(thread_id uint) (int64, error) {
+	var count int64
+	if err := repo.db.Model(&entities.FavoriteThread{}).Where("thread_id = ? AND status != false", thread_id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}

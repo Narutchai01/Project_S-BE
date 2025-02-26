@@ -12,187 +12,43 @@ import (
 )
 
 type ThreadUseCase interface {
-	CreateThread(threadDetails []entities.ThreadDetail, title string, token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error)
-	GetThreads(token string) ([]entities.Thread, error)
-	GetThread(id uint, token string) (entities.Thread, error)
-	DeleteThread(thread_id uint) error
-	UpdateThread(thread_id uint, token string, title string, thread_details []entities.ThreadDetail, file *multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error)
+	CreateThread(thread entities.Thread, token string, files []*multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error)
+	GetThread(thread_id uint, token string) (entities.Thread, error)
 }
 
 type threadService struct {
-	repo         repositories.ThreadRepository
-	bookmarkRepo repositories.BookmarkRepository
+	threadRepo   repositories.ThreadRepository
+	userRepo     repositories.UserRepository
 	favoriteRepo repositories.FavoriteRepository
 }
 
-func NewThreadUseCase(repo repositories.ThreadRepository, bookmarkRepo repositories.BookmarkRepository, favoriteRepo repositories.FavoriteRepository) ThreadUseCase {
-	return &threadService{repo, bookmarkRepo, favoriteRepo}
+func NewThreadUseCase(threadRepo repositories.ThreadRepository, userRepo repositories.UserRepository, favoriteRepo repositories.FavoriteRepository) ThreadUseCase {
+	return &threadService{threadRepo, userRepo, favoriteRepo}
 }
 
-func (service *threadService) CreateThread(threadDetails []entities.ThreadDetail, title string, token string, file multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error) {
-
-	user_id, err := utils.ExtractToken(token)
-	if err != nil {
-		return entities.Thread{}, err
-	}
-	fileName := uuid.New().String() + ".jpg"
-
-	if err := utils.CheckDirectoryExist(); err != nil {
-		return entities.Thread{}, err
-	}
-
-	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
-		return entities.Thread{}, err
-	}
-
-	imageUrl, err := utils.UploadImage(fileName, "/thread")
-
-	if err != nil {
-		return entities.Thread{}, err
-	}
-
-	err = os.Remove("./uploads/" + fileName)
-	if err != nil {
-		return entities.Thread{}, err
-	}
-
-	thread, err := service.repo.CreateThread(user_id, title, imageUrl)
-	if err != nil {
-		return entities.Thread{}, err
-	}
-
-	for _, threadDetail := range threadDetails {
-		threadDetail.ThreadID = thread.ID
-		_, err := service.repo.CreateThreadDetail(threadDetail)
-		if err != nil {
-			return entities.Thread{}, err
-		}
-	}
-
-	result, err := service.GetThread(thread.ID, token)
-	if err != nil {
-		return entities.Thread{}, err
-	}
-
-	thread_details, err := service.repo.GetThreadDetails(result.ID)
-	if err != nil {
-		return entities.Thread{}, err
-	}
-
-	result.Threads = thread_details
-
-	return result, nil
-}
-
-func (service *threadService) GetThreads(token string) ([]entities.Thread, error) {
-
-	user_id, err := utils.ExtractToken(token)
-	if err != nil {
-		return []entities.Thread{}, err
-	}
-
-	result, err := service.repo.GetThreads()
-	if err != nil {
-		return []entities.Thread{}, err
-	}
-
-	for i, thread := range result {
-
-		bookmark, err := service.bookmarkRepo.FindBookMark(thread.ID, user_id)
-
-		if err != nil {
-			result[i].Bookmark = false
-		} else {
-			result[i].Bookmark = bookmark.Status
-		}
-
-		favorite, err := service.favoriteRepo.FindFavoriteThread(thread.ID, user_id)
-
-		if err != nil {
-			result[i].Favorite = false
-		} else {
-			result[i].Favorite = favorite.Status
-		}
-
-		if result[i].UserID != user_id {
-			result[i].Owner = false
-		} else {
-			result[i].Owner = true
-		}
-
-		thread_details, err := service.repo.GetThreadDetails(thread.ID)
-		if err != nil {
-			return []entities.Thread{}, err
-		}
-
-		result[i].Threads = thread_details
-	}
-
-	return result, nil
-}
-
-func (service *threadService) GetThread(id uint, token string) (entities.Thread, error) {
+func (service *threadService) CreateThread(thread entities.Thread, token string, files []*multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error) {
 
 	user_id, err := utils.ExtractToken(token)
 	if err != nil {
 		return entities.Thread{}, err
 	}
 
-	result, err := service.repo.GetThread(id)
+	_, err = service.userRepo.GetUser(user_id)
 	if err != nil {
 		return entities.Thread{}, err
 	}
 
-	thread_details, err := service.repo.GetThreadDetails(result.ID)
-	if err != nil {
-		return entities.Thread{}, err
-	}
+	thread.UserID = user_id
 
-	result.Threads = thread_details
-
-	bookmark, err := service.bookmarkRepo.FindBookMark(result.ID, user_id)
-
-	if err != nil {
-		result.Bookmark = false
-	} else {
-		result.Bookmark = bookmark.Status
-	}
-
-	if result.UserID != user_id {
-		result.Owner = false
-	} else {
-		result.Owner = true
-	}
-
-	favorite, err := service.favoriteRepo.FindFavoriteThread(result.ID, user_id)
-
-	if err != nil {
-		result.Favorite = false
-	} else {
-		result.Favorite = favorite.Status
-	}
-
-	return result, nil
-}
-
-func (service *threadService) DeleteThread(thread_id uint) error {
-	err := service.repo.DeleteThread(thread_id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (service *threadService) UpdateThread(thread_id uint, token string, title string, thread_details []entities.ThreadDetail, file *multipart.FileHeader, c *fiber.Ctx) (entities.Thread, error) {
-
-	thread, err := service.repo.GetThread(thread_id)
+	thread, err = service.threadRepo.CreateThread(thread)
 
 	if err != nil {
 		return entities.Thread{}, err
 	}
 
-	if file != nil {
+	ImageURLs := []string{}
+
+	for _, file := range files {
 		fileName := uuid.New().String() + ".jpg"
 
 		if err := utils.CheckDirectoryExist(); err != nil {
@@ -215,44 +71,89 @@ func (service *threadService) UpdateThread(thread_id uint, token string, title s
 			return entities.Thread{}, err
 		}
 
-		thread.Image = imageUrl
+		ImageURLs = append(ImageURLs, imageUrl)
 	}
 
-	thread.Title = utils.CheckEmptyValueBeforeUpdate(title, thread.Title)
+	for _, imageUrl := range ImageURLs {
+		image := entities.ThreadImage{
+			ThreadID: thread.ID,
+			Image:    imageUrl,
+		}
 
-	thread, err = service.repo.UpdateThread(thread)
+		_, err := service.threadRepo.CreateThreadImage(image)
+
+		if err != nil {
+			return entities.Thread{}, err
+		}
+	}
+
+	thread, err = service.threadRepo.GetThread(thread.ID)
 
 	if err != nil {
 		return entities.Thread{}, err
 	}
 
-	for _, threadDetail := range thread_details {
-		old_thread_detail, err := service.repo.GetThreadDetail(threadDetail.ID)
+	Images, err := service.threadRepo.GetThreadImages(thread.ID)
 
-		if err != nil {
-			return entities.Thread{}, err
-		}
-
-		threadDetail.ID = old_thread_detail.ID
-		threadDetail.ThreadID = thread.ID
-		threadDetail.SkincareID = old_thread_detail.SkincareID
-		threadDetail.Caption = utils.CheckEmptyValueBeforeUpdate(threadDetail.Caption, old_thread_detail.Caption)
-
-		_, err = service.repo.UpdateThreadDetail(threadDetail)
-
-		if err != nil {
-			return entities.Thread{}, err
-		}
-
-	}
-
-	thread_details, err = service.repo.GetThreadDetails(thread.ID)
 	if err != nil {
 		return entities.Thread{}, err
 	}
 
-	thread.Threads = thread_details
+	thread.Images = Images
+
+	favorite, err := service.favoriteRepo.FindFavoriteThread(user_id, thread.ID)
+
+	if err != nil {
+		thread.Favorite = false
+	} else {
+		thread.Favorite = favorite.Status
+	}
+
+	favoriteCount, err := service.favoriteRepo.CountFavoriteThread(thread.ID)
+
+	if err != nil {
+		thread.FavoriteCount = 0
+	}
+
+	thread.FavoriteCount = favoriteCount
 
 	return thread, nil
+}
 
+func (service *threadService) GetThread(thread_id uint, token string) (entities.Thread, error) {
+
+	user_id, err := utils.ExtractToken(token)
+
+	if err != nil {
+		return entities.Thread{}, err
+	}
+
+	thread, err := service.threadRepo.GetThread(thread_id)
+	if err != nil {
+		return entities.Thread{}, fiber.NewError(fiber.StatusNotFound, "thread not found")
+	}
+
+	thread_images, err := service.threadRepo.GetThreadImages(thread.ID)
+
+	if err != nil {
+		return entities.Thread{}, fiber.NewError(fiber.StatusInternalServerError, "internal server error")
+	}
+
+	thread.Images = thread_images
+
+	favorite, err := service.favoriteRepo.FindFavoriteThread(thread_id, user_id)
+	if err != nil {
+		thread.Favorite = false
+	} else {
+		thread.Favorite = favorite.Status
+	}
+
+	favoriteCount, err := service.favoriteRepo.CountFavoriteThread(thread_id)
+	if err != nil {
+		thread.FavoriteCount = 0
+	} else {
+		thread.FavoriteCount = favoriteCount
+	}
+
+	return thread, nil
 }

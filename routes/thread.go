@@ -1,10 +1,9 @@
 package routes
 
 import (
-	adaptersBookmark "github.com/Narutchai01/Project_S-BE/adapters/bookmark"
-	adaptersFavorite "github.com/Narutchai01/Project_S-BE/adapters/favorite"
+	adaptersFav "github.com/Narutchai01/Project_S-BE/adapters/favorite"
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/thread"
-	"github.com/Narutchai01/Project_S-BE/middlewares"
+	adaptersUser "github.com/Narutchai01/Project_S-BE/adapters/user"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -13,16 +12,13 @@ import (
 func ThreadRouters(app fiber.Router, db *gorm.DB) {
 
 	threadRepo := adapters.NewGormThreadRepository(db)
-	bookmarkRepo := adaptersBookmark.NewGormBookmarkRepository(db)
-	favoriteRepo := adaptersFavorite.NewGormFavoriteRepository(db)
-	threadService := usecases.NewThreadUseCase(threadRepo, bookmarkRepo, favoriteRepo)
-	threadHandler := adapters.NewHttpThreadHandler(threadService)
+	userRepo := adaptersUser.NewGormUserRepository(db)
+	favoriteRepo := adaptersFav.NewGormFavoriteRepository(db)
+	threadService := usecases.NewThreadUseCase(threadRepo, userRepo, favoriteRepo)
+	threadHandler := adapters.NewHttpThreadRepository(threadService)
 
-	threadGroup := app.Group("/thread").Use(middlewares.AuthorizationRequired())
+	threadGroup := app.Group("/thread")
 	threadGroup.Post("/", threadHandler.CreateThread)
-	threadGroup.Get("/", threadHandler.GetThreads)
 	threadGroup.Get("/:id", threadHandler.GetThread)
-	threadGroup.Delete("/:id", threadHandler.DeleteThread)
-	threadGroup.Put("/:id", threadHandler.UpdateThread)
 
 }
