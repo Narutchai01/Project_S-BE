@@ -18,7 +18,11 @@ type MockThreadUseCase struct {
 	mock.Mock
 }
 
-// GetThread implements usecases.ThreadUseCase.
+func (m *MockThreadUseCase) GetThreads(token string) ([]entities.Thread, error) {
+	args := m.Called(token)
+	return args.Get(0).([]entities.Thread), args.Error(1)
+}
+
 func (m *MockThreadUseCase) GetThread(thread_id uint, token string) (entities.Thread, error) {
 	args := m.Called(thread_id, token)
 	return args.Get(0).(entities.Thread), args.Error(1)
@@ -122,4 +126,38 @@ func TestGetThread(t *testing.T) {
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 
+}
+func TestGetThreadsHandler(t *testing.T) {
+	app := fiber.New()
+	mockUseCase := new(MockThreadUseCase)
+	repo := adapters.NewHttpThreadRepository(mockUseCase)
+
+	app.Get("/threads", repo.GetThreads)
+
+	t.Run("successful retrieval", func(t *testing.T) {
+		threads := []entities.Thread{
+			{Model: gorm.Model{ID: 1}, Title: "Test Title 1", Caption: "Test Caption 1"},
+			{Model: gorm.Model{ID: 2}, Title: "Test Title 2", Caption: "Test Caption 2"},
+		}
+		mockUseCase.On("GetThreads", "test-token").Return(threads, nil)
+
+		req := httptest.NewRequest("GET", "/threads", nil)
+		req.Header.Set("token", "test-token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		mockUseCase.On("GetThreads", mock.Anything).Return(nil, fiber.ErrUnauthorized)
+
+		req := httptest.NewRequest("GET", "/threads", nil)
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusUnauthorized, resp.StatusCode)
+		mockUseCase.AssertExpectations(t)
+	})
 }

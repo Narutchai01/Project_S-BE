@@ -204,3 +204,53 @@ func TestGormGetThreadImages(t *testing.T) {
 	})
 
 }
+func TestGormGetThreads(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormThreadRepository(gormDB)
+
+	expectData := []entities.Thread{
+		{Model: gorm.Model{ID: 1}, Title: "title1", Caption: "caption1", UserID: 1},
+		{Model: gorm.Model{ID: 2}, Title: "title2", Caption: "caption2", UserID: 2},
+	}
+
+	t.Run("success", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{"id", "title", "caption", "user_id"}).
+			AddRow(expectData[0].ID, expectData[0].Title, expectData[0].Caption, expectData[0].UserID).
+			AddRow(expectData[1].ID, expectData[1].Title, expectData[1].Caption, expectData[1].UserID)
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "threads" WHERE "threads"."deleted_at" IS NULL`)).
+			WillReturnRows(rows)
+
+		threads, err := repo.GetThreads()
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectData[0].ID, threads[0].ID)
+		assert.Equal(t, expectData[0].Title, threads[0].Title)
+		assert.Equal(t, expectData[0].Caption, threads[0].Caption)
+		assert.Equal(t, expectData[0].UserID, threads[0].UserID)
+		assert.Equal(t, expectData[1].ID, threads[1].ID)
+		assert.Equal(t, expectData[1].Title, threads[1].Title)
+		assert.Equal(t, expectData[1].Caption, threads[1].Caption)
+		assert.Equal(t, expectData[1].UserID, threads[1].UserID)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("threads not found", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "threads" WHERE "threads"."deleted_at" IS NULL`)).
+			WillReturnError(gorm.ErrRecordNotFound)
+
+		_, err := repo.GetThreads()
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}
