@@ -336,3 +336,126 @@ func TestCountFavoriteThread(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+func TestFavoriteReviewSkincare(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormFavoriteRepository(gormDB)
+
+	t.Run("success", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectQuery(`INSERT INTO "favorite_review_skincares"`).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+		mock.ExpectCommit()
+
+		_, err := repo.FavoriteReviewSkincare(1, 1)
+
+		assert.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectQuery(`INSERT INTO "favorite_review_skincares"`).WillReturnError(gorm.ErrInvalidData)
+		mock.ExpectRollback()
+
+		_, err := repo.FavoriteReviewSkincare(1, 1)
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}
+
+func TestFindFavoriteReviewSkincare(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormFavoriteRepository(gormDB)
+
+	t.Run("success", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{"id", "review_skincare_id", "user_id"}).AddRow(1, 1, 1)
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "favorite_review_skincares" WHERE (review_skincare_id = $1 AND user_id = $2) AND "favorite_review_skincares"."deleted_at" IS NULL ORDER BY "favorite_review_skincares"."id" LIMIT $3`)).
+			WithArgs(1, 1, 1).
+			WillReturnRows(rows)
+
+		favorite, err := repo.FindFavoriteReviewSkincare(1, 1)
+
+		assert.NoError(t, err)
+		assert.Equal(t, uint(1), favorite.ID)
+		assert.Equal(t, uint(1), favorite.ReviewSkincareID)
+		assert.Equal(t, uint(1), favorite.UserID)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "favorite_review_skincares" WHERE (review_skincare_id = $1 AND user_id = $2) AND "favorite_review_skincares"."deleted_at" IS NULL ORDER BY "favorite_review_skincares"."id" LIMIT $3`)).
+			WithArgs(1, 1, 1).
+			WillReturnError(gorm.ErrRecordNotFound)
+
+		_, err := repo.FindFavoriteReviewSkincare(1, 1)
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}
+func TestCountFavoriteReviewSkincare(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormFavoriteRepository(gormDB)
+
+	t.Run("success", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "favorite_review_skincares" WHERE (review_skincare_id = $1 AND status != false) AND "favorite_review_skincares"."deleted_at" IS NULL`)).
+			WithArgs(1).
+			WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(5))
+
+		count, err := repo.CountFavoriteReviewSkincare(1)
+
+		assert.NoError(t, err)
+		assert.Equal(t, int64(5), count)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "favorite_review_skincares" WHERE (review_skincare_id = $1 AND status != false) AND "favorite_review_skincares"."deleted_at" IS NULL`)).
+			WithArgs(1).
+			WillReturnError(gorm.ErrInvalidData)
+
+		_, err := repo.CountFavoriteReviewSkincare(1)
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}

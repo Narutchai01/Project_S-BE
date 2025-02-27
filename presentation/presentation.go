@@ -74,6 +74,7 @@ type Thread struct {
 	Title         string        `json:"title"`
 	Favorite      bool          `json:"favorite"`
 	FavoriteCount int64         `json:"favorite_count"`
+	Owner         bool          `json:"owner"`
 	Bookmark      bool          `json:"bookmark"`
 	Images        []ThreadImage `json:"images"`
 	Caption       string        `json:"caption"`
@@ -84,6 +85,32 @@ type ThreadImage struct {
 	ID       uint   `json:"id"`
 	ThreadID uint   `json:"thread_id"`
 	Image    string `json:"image"`
+}
+
+type ReviewSkincare struct {
+	ID            uint       `json:"id"`
+	Title         string     `json:"title"`
+	Favortie      bool       `json:"favorite"`
+	FavoriteCount int64      `json:"favorite_count"`
+	Bookmark      bool       `json:"bookmark"`
+	Owner         bool       `json:"owner"`
+	Content       string     `json:"content"`
+	Image         string     `json:"image"`
+	User          User       `json:"user"`
+	Skincare      []Skincare `json:"skincares"`
+	CreateAt      time.Time  `json:"create_at"`
+}
+type BookmarkThread struct {
+	ID       uint `json:"id"`
+	ThreadID uint `json:"thread_id" `
+	UserID   uint `json:"user_id" `
+	Status   bool `json:"status" `
+}
+type BookmarkReviewSkincare struct {
+	ID               uint `json:"id"`
+	ReviewSkincareID uint `json:"review_skincare_id" `
+	UserID           uint `json:"user_id" `
+	Status           bool `json:"status" `
 }
 
 func DeleteResponse(id int) *Responses {

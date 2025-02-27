@@ -276,3 +276,62 @@ func TestGormDeleteskin(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+func TestGormGetSkincareByIds(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormSkincareRepository(gormDB)
+
+	expectData := []entities.Skincare{
+		{
+			Model: gorm.Model{
+				ID: 1,
+			},
+			Image:       "innisfree/image/path",
+			Name:        "innisfree",
+			Description: "green tea seed serum",
+			CreateBY:    1,
+		},
+		{
+			Model: gorm.Model{
+				ID: 2,
+			},
+			Image:       "laneige/image/path",
+			Name:        "laneige",
+			Description: "water sleeping mask",
+			CreateBY:    2,
+		},
+	}
+
+	columns := sqlmock.NewRows([]string{"id", "image", "name", "description", "create_by"}).
+		AddRow(expectData[0].ID, expectData[0].Image, expectData[0].Name, expectData[0].Description, expectData[0].CreateBY).
+		AddRow(expectData[1].ID, expectData[1].Image, expectData[1].Name, expectData[1].Description, expectData[1].CreateBY)
+	expectedSQL := `SELECT \* FROM "skincares" WHERE "skincares"\."id" IN \(\$1,\$2\) AND "skincares"\."deleted_at" IS NULL`
+
+	t.Run("success", func(t *testing.T) {
+		mock.ExpectQuery(expectedSQL).WithArgs(1, 2).WillReturnRows(columns)
+
+		result, err := repo.GetSkincareByIds([]int{1, 2})
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectData, result)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("failure", func(t *testing.T) {
+		mock.ExpectQuery(expectedSQL).WithArgs(1, 2).WillReturnError(errors.New("database error"))
+
+		_, err := repo.GetSkincareByIds([]int{1, 2})
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}

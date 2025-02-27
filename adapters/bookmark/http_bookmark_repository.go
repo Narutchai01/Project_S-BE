@@ -49,5 +49,40 @@ func (handler *HttpBookmarkHandler) BookMarkThread(c *fiber.Ctx) error {
 
 	}
 
-	return c.Status(fiber.StatusOK).JSON(result)
+	return c.Status(fiber.StatusOK).JSON(presentation.ToBookmarkThreadResponse(result))
+}
+
+// BookMarkReviewSkincare godoc
+// @Summary Bookmark a review skincare
+// @Description Bookmark a review skincare
+// @Tags bookmark
+// @Accept json
+// @Produce json
+// @Param id path int true "Review ID"
+// @Param token header string true "Token"
+// @Success 200 {object} presentation.Responses
+// @Failure 400 {object} presentation.Responses
+// @Failure 401 {object} presentation.Responses
+// @Router /bookmark/review/{id} [post]
+func (handler *HttpBookmarkHandler) BookMarkReviewSkincare(c *fiber.Ctx) error {
+	id := c.Params("id")
+	reviewID, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("failed to bookmark review")))
+	}
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
+	}
+
+	result, err := handler.bookMark.BookmarkReviewSkincare(uint(reviewID), token)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid review ID")))
+
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToBookmarkReviewSkincareResponse(result))
 }

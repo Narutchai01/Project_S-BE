@@ -8,6 +8,7 @@ import (
 
 type BookmarkUseCase interface {
 	BookmarkThread(thread_id uint, token string) (entities.BookmarkThread, error)
+	BookmarkReviewSkincare(review_id uint, token string) (entities.BookmarkReviewSkincare, error)
 }
 type bookmarkService struct {
 	repo repositories.BookmarkRepository
@@ -32,4 +33,21 @@ func (service *bookmarkService) BookmarkThread(thread_id uint, token string) (en
 	status := !bookmark.Status
 
 	return service.repo.UpdateBookMarkThread(thread_id, user_id, status)
+}
+
+func (service *bookmarkService) BookmarkReviewSkincare(review_id uint, token string) (entities.BookmarkReviewSkincare, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.BookmarkReviewSkincare{}, err
+	}
+
+	bookmark, err := service.repo.FindBookMarkReviewSkincare(review_id, user_id)
+	if err != nil {
+		return service.repo.BookmarkReviewSkincare(review_id, user_id)
+	}
+
+	status := !bookmark.Status
+
+	return service.repo.UpdateBookMarkReviewSkincare(review_id, user_id, status)
 }
