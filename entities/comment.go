@@ -12,13 +12,13 @@ type CommentThread struct {
 	Text          string `json:"text"`
 }
 
-type FavoriteCommentReview struct {
+type CommentReviewSkicare struct {
 	gorm.Model
 	ReviewSkincareID uint           `json:"review_skincare_id"`
 	ReviewSkincare   ReviewSkincare `json:"review_skincare" gorm:"foreignKey:ReviewSkincareID"`
 	UserID           uint           `json:"user_id"`
 	User             User           `json:"user" gorm:"foreignKey:UserID"`
-	Favorite         bool           `json:"favorite"`
+	Favorite         bool           `json:"favorite" gorm:"-"`
 	FavoriteCount    int            `json:"favorite_count" gorm:"-"`
 	Content          string         `json:"content"`
 }

@@ -15,8 +15,15 @@ func FavoriteRoutes(app fiber.Router, db *gorm.DB) {
 	favoriteHandler := adapters.NewHttpFavoriteHandler(favoriteService)
 
 	favorite := app.Group("/favorite")
-	favorite.Post("/comment/:id", favoriteHandler.HandleFavoriteComment)
 	favorite.Post("/thread/:id", favoriteHandler.HandleFavoriteThread)
-	favorite.Post("/reviewskincare/:id", favoriteHandler.HandleFavoriteReviewSkincare)
+
+	reviewGroup := favorite.Group("/review")
+	reviewGroup.Post("/skincare/:id", favoriteHandler.HandleFavoriteReviewSkincare)
+
+	commentGroup := favorite.Group("/comment")
+	commentGroup.Post("/thread/:id", favoriteHandler.HandleFavoriteCommentThread)
+
+	reviewCommentGroup := commentGroup.Group("/review")
+	reviewCommentGroup.Post("/skincare/:id", favoriteHandler.HandleFavoriteCommentReviewSkincare)
 
 }

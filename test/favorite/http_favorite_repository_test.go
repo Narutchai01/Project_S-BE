@@ -15,7 +15,11 @@ type MockFavoritesUsecase struct {
 	mock.Mock
 }
 
-// FavoriteComment implements usecases.FavoriteUseCase.
+// FavoriteCommnetReviewSkincare implements usecases.FavoriteUseCase.
+func (m *MockFavoritesUsecase) FavoriteCommnetReviewSkincare(comment_id uint, token string) (entities.FavoriteCommentReviewSkincare, error) {
+	args := m.Called(comment_id, token)
+	return args.Get(0).(entities.FavoriteCommentReviewSkincare), args.Error(1)
+}
 
 func (m *MockFavoritesUsecase) FavoriteCommentThread(thread_id uint, token string) (entities.FavoriteCommentThread, error) {
 	args := m.Called(thread_id, token)
@@ -39,7 +43,7 @@ func TestFavoriteCommentThreadHandler(t *testing.T) {
 		httpFavoriteHandler := adapters.NewHttpFavoriteHandler(mockFavoriteUseCase)
 		app := fiber.New()
 
-		app.Post("/favorite/comment/:id", httpFavoriteHandler.HandleFavoriteComment)
+		app.Post("/favorite/comment/thread/:id", httpFavoriteHandler.HandleFavoriteCommentThread)
 
 		return mockFavoriteUseCase, httpFavoriteHandler, app
 	}
@@ -49,7 +53,7 @@ func TestFavoriteCommentThreadHandler(t *testing.T) {
 
 		mockFavortieUseCase.On("FavoriteCommentThread", uint(1), "token").Return(entities.FavoriteCommentThread{}, nil)
 
-		req := httptest.NewRequest(fiber.MethodPost, "/favorite/comment/1", nil)
+		req := httptest.NewRequest(fiber.MethodPost, "/favorite/comment/thread/1", nil)
 		req.Header.Set("token", "token")
 		resp, _ := app.Test(req)
 
@@ -63,7 +67,7 @@ func TestFavoriteCommentThreadHandler(t *testing.T) {
 
 		mockFavoriteUseCase.On("FavoriteComment", uint(1), "token").Return(entities.FavoriteCommentThread{}, nil)
 
-		req := httptest.NewRequest(fiber.MethodPost, "/favorite/comment/1", nil)
+		req := httptest.NewRequest(fiber.MethodPost, "/favorite/comment/thread/1", nil)
 		resp, _ := app.Test(req)
 
 		assert.Equal(t, 401, resp.StatusCode)
@@ -152,6 +156,54 @@ func TestFavoriteReviewSkincareHandler(t *testing.T) {
 		_, _, app := setup()
 
 		req := httptest.NewRequest(fiber.MethodPost, "/favorite/review/skincare/invalid", nil)
+		req.Header.Set("token", "token")
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, 400, resp.StatusCode)
+	})
+}
+func TestFavoriteCommentReviewSkincareHandler(t *testing.T) {
+
+	setup := func() (*MockFavoritesUsecase, *adapters.HttpFavoriteHandler, *fiber.App) {
+		mockFavoriteUseCase := new(MockFavoritesUsecase)
+		httpFavoriteHandler := adapters.NewHttpFavoriteHandler(mockFavoriteUseCase)
+		app := fiber.New()
+
+		app.Post("/favorite/comment/review/skincare/:id", httpFavoriteHandler.HandleFavoriteCommentReviewSkincare)
+
+		return mockFavoriteUseCase, httpFavoriteHandler, app
+	}
+
+	t.Run("FavoriteCommentReviewSkincare", func(t *testing.T) {
+		mockFavoriteUseCase, _, app := setup()
+
+		mockFavoriteUseCase.On("FavoriteCommnetReviewSkincare", uint(1), "token").Return(entities.FavoriteCommentReviewSkincare{}, nil)
+
+		req := httptest.NewRequest(fiber.MethodPost, "/favorite/comment/review/skincare/1", nil)
+		req.Header.Set("token", "token")
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, 200, resp.StatusCode)
+
+		mockFavoriteUseCase.AssertExpectations(t)
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		mockFavoriteUseCase, _, app := setup()
+
+		mockFavoriteUseCase.On("FavoriteCommnetReviewSkincare", uint(1), "token").Return(entities.FavoriteCommentReviewSkincare{}, nil)
+
+		req := httptest.NewRequest(fiber.MethodPost, "/favorite/comment/review/skincare/1", nil)
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, 401, resp.StatusCode)
+
+	})
+
+	t.Run("BadRequest", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest(fiber.MethodPost, "/favorite/comment/review/skincare/invalid", nil)
 		req.Header.Set("token", "token")
 		resp, _ := app.Test(req)
 

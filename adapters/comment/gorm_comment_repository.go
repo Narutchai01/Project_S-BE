@@ -31,9 +31,19 @@ func (repo *GormCommentRepository) GetCommentsThread(thread_id uint) ([]entities
 	return comments, nil
 }
 
-func (repo *GormCommentRepository) CreateCommentReviewSkicnare(comment entities.FavoriteCommentReview) (entities.FavoriteCommentReview, error) {
+func (repo *GormCommentRepository) CreateCommentReviewSkicnare(comment entities.CommentReviewSkicare) (entities.CommentReviewSkicare, error) {
 	if err := repo.db.Create(&comment).Error; err != nil {
-		return entities.FavoriteCommentReview{}, err
+		return entities.CommentReviewSkicare{}, err
 	}
 	return comment, nil
+}
+
+func (repo *GormCommentRepository) GetCommentsReviewSkincare(review_id uint) ([]entities.CommentReviewSkicare, error) {
+	var comments []entities.CommentReviewSkicare
+
+	if err := repo.db.Preload("User").Where("review_skincare_id = ?", review_id).Find(&comments).Error; err != nil {
+		return []entities.CommentReviewSkicare{}, err
+	}
+
+	return comments, nil
 }

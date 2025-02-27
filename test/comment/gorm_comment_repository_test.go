@@ -74,7 +74,7 @@ func TestCreateCommentReviewSkicnare(t *testing.T) {
 
 	repo := adapters.NewGormCommentRepository(gormDB)
 
-	expectData := entities.FavoriteCommentReview{
+	expectData := entities.CommentReviewSkicare{
 		Model:            gorm.Model{ID: 1},
 		ReviewSkincareID: 1,
 		UserID:           1,
@@ -85,7 +85,7 @@ func TestCreateCommentReviewSkicnare(t *testing.T) {
 	t.Run("Create Comment Review Skicnare Success", func(t *testing.T) {
 
 		mock.ExpectBegin()
-		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "favorite_comment_reviews"`)).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "comment_review_skicares"`)).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectCommit()
 
 		review, err := repo.CreateCommentReviewSkicnare(expectData)
@@ -101,10 +101,76 @@ func TestCreateCommentReviewSkicnare(t *testing.T) {
 
 	t.Run("Create Comment Review Skicnare Failure", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectQuery(`INSERT INTO "favorite_comment_reviews"`).WillReturnError(gorm.ErrInvalidData)
+		mock.ExpectQuery(`INSERT INTO "comment_review_skicares"`).WillReturnError(gorm.ErrInvalidData)
 		mock.ExpectRollback()
 
 		_, err := repo.CreateCommentReviewSkicnare(expectData)
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}
+func TestGetCommentsThread(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormCommentRepository(gormDB)
+
+	t.Run("Get Comments Thread Success", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "comment_threads" WHERE thread_id = $1 AND "comment_threads"."deleted_at" IS NULL`)).WithArgs(1).WillReturnRows(sqlmock.NewRows([]string{"id"}))
+
+		_, err := repo.GetCommentsThread(1)
+
+		assert.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("Get Comments Thread Failure", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "comment_threads" WHERE thread_id = $1 AND "comment_threads"."deleted_at" IS NULL`)).WithArgs(1).WillReturnError(errors.New("some error"))
+
+		_, err := repo.GetCommentsThread(1)
+
+		assert.Error(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+}
+func TestGetCommentsReviewSkincare(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+
+	repo := adapters.NewGormCommentRepository(gormDB)
+
+	t.Run("Get Comments Review Skincare Success", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "comment_review_skicares" WHERE review_skincare_id = $1 AND "comment_review_skicares"."deleted_at" IS NULL`)).WithArgs(1).WillReturnRows(sqlmock.NewRows([]string{"id"}))
+
+		_, err := repo.GetCommentsReviewSkincare(1)
+
+		assert.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("Get Comments Review Skincare Failure", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "comment_review_skicares" WHERE review_skincare_id = $1 AND "comment_review_skicares"."deleted_at" IS NULL`)).WithArgs(1).WillReturnError(errors.New("some error"))
+
+		_, err := repo.GetCommentsReviewSkincare(1)
 
 		assert.Error(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())

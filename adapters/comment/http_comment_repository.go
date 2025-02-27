@@ -86,3 +86,48 @@ func (handler *HtppCommentHandler) GetCommentsThread(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToCommentsThread(result))
 
 }
+
+func (handler *HtppCommentHandler) CreateCommentReviewSkicnare(c *fiber.Ctx) error {
+
+	token := c.Get("token")
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
+	}
+
+	var comment entities.CommentReviewSkicare
+	if err := c.BodyParser(&comment); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	result, err := handler.comment.CreateCommentReviewSkicnare(comment, token)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(presentation.ToCommentReviewSkincare(result))
+
+}
+
+func (handler *HtppCommentHandler) HandleGetCommentReviewSkincare(c *fiber.Ctx) error {
+
+	id := c.Params("review_id")
+
+	review_id, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("failed to get comment review skincare")))
+	}
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
+	}
+
+	result, err := handler.comment.GetCommentsReviewSkincare(uint(review_id), token)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToCommentsReviewSkincare(result))
+
+}

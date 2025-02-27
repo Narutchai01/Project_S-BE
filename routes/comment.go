@@ -16,7 +16,15 @@ func CommentRouters(app fiber.Router, db *gorm.DB) {
 	commentService := usecases.NewCommentUseCase(commentRepo, favoriteCommentRepo, userRepo)
 	commentHandler := adapters.NewHttpCommentHandler(commentService)
 
-	comment := app.Group("/comment")
-	comment.Post("/", commentHandler.CreateCommentThread)
-	comment.Get("/:thread_id", commentHandler.GetCommentsThread)
+	commentGroup := app.Group("/comment")
+
+	threadGroup := commentGroup.Group("/thread")
+	threadGroup.Post("/", commentHandler.CreateCommentThread)
+	threadGroup.Get("/:thread_id", commentHandler.GetCommentsThread)
+
+	reviewGroup := commentGroup.Group("/reviews")
+	reviewSkincareGroup := reviewGroup.Group("/skincare")
+	reviewSkincareGroup.Post("/", commentHandler.CreateCommentReviewSkicnare)
+	reviewSkincareGroup.Get("/:review_id", commentHandler.HandleGetCommentReviewSkincare)
+
 }

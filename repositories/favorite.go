@@ -17,4 +17,9 @@ type FavoriteRepository interface {
 	FindFavoriteReviewSkincare(review_skincare_id uint, user_id uint) (entities.FavoriteReviewSkincare, error)
 	UpdateFavoriteReviewSkincare(favorite_review_skincare entities.FavoriteReviewSkincare) (entities.FavoriteReviewSkincare, error)
 	CountFavoriteReviewSkincare(review_skincare_id uint) (int64, error)
+
+	FavoriteCommentReviewSkincare(comment_id uint, user_id uint) (entities.FavoriteCommentReviewSkincare, error)
+	FindFavoriteCommentReviewSkincare(comment_id uint, user_id uint) (entities.FavoriteCommentReviewSkincare, error)
+	UpdateFavoriteCommentReviewSkincare(favorite_comment_review_skincare entities.FavoriteCommentReviewSkincare) (entities.FavoriteCommentReviewSkincare, error)
+	CountFavoriteCommentReviewSkincare(comment_id uint) (int64, error)
 }
