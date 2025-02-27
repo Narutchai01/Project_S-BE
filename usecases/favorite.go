@@ -7,33 +7,40 @@ import (
 )
 
 type FavoriteUseCase interface {
-	FavoriteComment(thread_id uint, token string) (entities.FavoriteComment, error)
+	FavoriteCommentThread(thread_id uint, token string) (entities.FavoriteCommentThread, error)
 	FavoriteThread(thread_id uint, token string) (entities.FavoriteThread, error)
 	FavoriteReviewSkincare(review_id uint, token string) (entities.FavoriteReviewSkincare, error)
+	FavoriteCommnetReviewSkincare(comment_id uint, token string) (entities.FavoriteCommentReviewSkincare, error)
 }
 
 type favoriteService struct {
-	repo repositories.FavoriteRepository
+	repo     repositories.FavoriteRepository
+	userRepo repositories.UserRepository
 }
 
-func NewFavoriteUseCase(repo repositories.FavoriteRepository) FavoriteUseCase {
-	return &favoriteService{repo}
+func NewFavoriteUseCase(repo repositories.FavoriteRepository, userRepo repositories.UserRepository) FavoriteUseCase {
+	return &favoriteService{repo, userRepo}
 }
 
-func (service *favoriteService) FavoriteComment(comment_id uint, token string) (entities.FavoriteComment, error) {
+func (service *favoriteService) FavoriteCommentThread(comment_id uint, token string) (entities.FavoriteCommentThread, error) {
 
 	user_id, err := utils.ExtractToken(token)
 	if err != nil {
-		return entities.FavoriteComment{}, err
+		return entities.FavoriteCommentThread{}, err
 	}
 
-	favorite, err := service.repo.FindFavoriteComment(comment_id, user_id)
+	user, err := service.userRepo.GetUser(user_id)
 	if err != nil {
-		return service.repo.FavoriteComment(comment_id, user_id)
+		return entities.FavoriteCommentThread{}, err
+	}
+
+	favorite, err := service.repo.FindFavoriteCommentThread(comment_id, user.ID)
+	if err != nil {
+		return service.repo.FavoriteCommentThread(comment_id, user.ID)
 	}
 
 	favorite.Status = !favorite.Status
-	return service.repo.UpdateFavoriteComment(favorite)
+	return service.repo.UpdateFavoriteCommentThread(favorite)
 
 }
 
@@ -43,10 +50,13 @@ func (service *favoriteService) FavoriteThread(thread_id uint, token string) (en
 	if err != nil {
 		return entities.FavoriteThread{}, err
 	}
-
-	favorite, err := service.repo.FindFavoriteThread(thread_id, user_id)
+	user, err := service.userRepo.GetUser(user_id)
 	if err != nil {
-		return service.repo.FavoriteThread(thread_id, user_id)
+		return entities.FavoriteThread{}, err
+	}
+	favorite, err := service.repo.FindFavoriteThread(thread_id, user.ID)
+	if err != nil {
+		return service.repo.FavoriteThread(thread_id, user.ID)
 	}
 
 	favorite.Status = !favorite.Status
@@ -60,11 +70,37 @@ func (service *favoriteService) FavoriteReviewSkincare(review_id uint, token str
 		return entities.FavoriteReviewSkincare{}, err
 	}
 
-	favorite, err := service.repo.FindFavoriteReviewSkincare(review_id, user_id)
+	user, err := service.userRepo.GetUser(user_id)
 	if err != nil {
-		return service.repo.FavoriteReviewSkincare(review_id, user_id)
+		return entities.FavoriteReviewSkincare{}, err
+	}
+
+	favorite, err := service.repo.FindFavoriteReviewSkincare(review_id, user.ID)
+	if err != nil {
+		return service.repo.FavoriteReviewSkincare(review_id, user.ID)
 	}
 
 	favorite.Status = !favorite.Status
 	return service.repo.UpdateFavoriteReviewSkincare(favorite)
+}
+
+func (service *favoriteService) FavoriteCommnetReviewSkincare(comment_id uint, token string) (entities.FavoriteCommentReviewSkincare, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.FavoriteCommentReviewSkincare{}, err
+	}
+
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return entities.FavoriteCommentReviewSkincare{}, err
+	}
+
+	favorite, err := service.repo.FindFavoriteCommentReviewSkincare(comment_id, user.ID)
+	if err != nil {
+		return service.repo.FavoriteCommentReviewSkincare(comment_id, user.ID)
+	}
+
+	favorite.Status = !favorite.Status
+	return service.repo.UpdateFavoriteCommentReviewSkincare(favorite)
 }

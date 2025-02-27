@@ -113,6 +113,25 @@ type BookmarkReviewSkincare struct {
 	Status           bool `json:"status" `
 }
 
+type CommentThread struct {
+	ID            uint   `json:"id"`
+	ThreadID      uint   `json:"thread_id"`
+	User          User   `json:"user" gorm:"foreignKey:UserID"`
+	Favorite      bool   `json:"favorite"`
+	FavoriteCount int    `json:"favorite_count" gorm:"-"`
+	Text          string `json:"text"`
+}
+
+type CommentReviewSkicare struct {
+	ID               uint      `json:"id"`
+	ReviewSkincareID uint      `json:"review_skincare_id"`
+	User             User      `json:"user" gorm:"foreignKey:UserID"`
+	Favorite         bool      `json:"favorite" gorm:"-"`
+	FavoriteCount    int       `json:"favorite_count" gorm:"-"`
+	Content          string    `json:"content"`
+	CreateAt         time.Time `json:"create_at"`
+}
+
 func DeleteResponse(id int) *Responses {
 	return &Responses{
 		Status: true,

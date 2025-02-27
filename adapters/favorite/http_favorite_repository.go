@@ -17,7 +17,7 @@ func NewHttpFavoriteHandler(favoriteUcase usecases.FavoriteUseCase) *HttpFavorit
 	return &HttpFavoriteHandler{favoriteUcase}
 }
 
-func (handler *HttpFavoriteHandler) HandleFavoriteComment(c *fiber.Ctx) error {
+func (handler *HttpFavoriteHandler) HandleFavoriteCommentThread(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
@@ -32,7 +32,7 @@ func (handler *HttpFavoriteHandler) HandleFavoriteComment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	result, err := handler.FavoriteUsecases.FavoriteComment(uint(comment_id), token)
+	result, err := handler.FavoriteUsecases.FavoriteCommentThread(uint(comment_id), token)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
@@ -81,6 +81,29 @@ func (handler *HttpFavoriteHandler) HandleFavoriteReviewSkincare(c *fiber.Ctx) e
 	}
 
 	result, err := handler.FavoriteUsecases.FavoriteReviewSkincare(uint(review_id), token)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
+}
+
+func (handler *HttpFavoriteHandler) HandleFavoriteCommentReviewSkincare(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+
+	comment_id, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("failed to favorite comment review skincare")))
+	}
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
+	}
+
+	result, err := handler.FavoriteUsecases.FavoriteCommnetReviewSkincare(uint(comment_id), token)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}

@@ -14,8 +14,8 @@ func NewGormFavoriteRepository(db *gorm.DB) repositories.FavoriteRepository {
 	return &GormFavoriteRepository{db: db}
 }
 
-func (r *GormFavoriteRepository) FavoriteComment(commentID uint, userID uint) (entities.FavoriteComment, error) {
-	favoriteComment := entities.FavoriteComment{
+func (r *GormFavoriteRepository) FavoriteCommentThread(commentID uint, userID uint) (entities.FavoriteCommentThread, error) {
+	favoriteComment := entities.FavoriteCommentThread{
 		CommentID: commentID,
 		UserID:    userID,
 		Status:    true,
@@ -27,28 +27,36 @@ func (r *GormFavoriteRepository) FavoriteComment(commentID uint, userID uint) (e
 		}
 		return nil
 	}); err != nil {
-		return entities.FavoriteComment{}, err
+		return entities.FavoriteCommentThread{}, err
 	}
 
 	return favoriteComment, nil
 }
 
-func (repo *GormFavoriteRepository) FindFavoriteComment(comment_id uint, user_id uint) (entities.FavoriteComment, error) {
-	var favorite entities.FavoriteComment
+func (repo *GormFavoriteRepository) FindFavoriteCommentThread(comment_id uint, user_id uint) (entities.FavoriteCommentThread, error) {
+	var favorite entities.FavoriteCommentThread
 
 	if err := repo.db.Where("comment_id = ? AND user_id = ?", comment_id, user_id).First(&favorite).Error; err != nil {
-		return entities.FavoriteComment{}, err
+		return entities.FavoriteCommentThread{}, err
 	}
 
 	return favorite, nil
 }
 
-func (repo *GormFavoriteRepository) UpdateFavoriteComment(favorite_comment entities.FavoriteComment) (entities.FavoriteComment, error) {
+func (repo *GormFavoriteRepository) UpdateFavoriteCommentThread(favorite_comment entities.FavoriteCommentThread) (entities.FavoriteCommentThread, error) {
 	if err := repo.db.Save(&favorite_comment).Error; err != nil {
-		return entities.FavoriteComment{}, err
+		return entities.FavoriteCommentThread{}, err
 	}
 
 	return favorite_comment, nil
+}
+
+func (repo *GormFavoriteRepository) CountFavoriteCommentThread(comment_id uint) (int64, error) {
+	var count int64
+	if err := repo.db.Model(&entities.FavoriteCommentThread{}).Where("comment_id = ? AND status != false", comment_id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (r *GormFavoriteRepository) FavoriteThread(threadID uint, userID uint) (entities.FavoriteThread, error) {
@@ -137,6 +145,52 @@ func (repo *GormFavoriteRepository) UpdateFavoriteReviewSkincare(favorite_review
 func (repo *GormFavoriteRepository) CountFavoriteReviewSkincare(review_skincare_id uint) (int64, error) {
 	var count int64
 	if err := repo.db.Model(&entities.FavoriteReviewSkincare{}).Where("review_skincare_id = ? AND status != false", review_skincare_id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func (r *GormFavoriteRepository) FavoriteCommentReviewSkincare(commentID uint, userID uint) (entities.FavoriteCommentReviewSkincare, error) {
+	favoriteCommentReviewSkincare := entities.FavoriteCommentReviewSkincare{
+		CommentID: commentID,
+		UserID:    userID,
+		Status:    true,
+	}
+
+	if err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&favoriteCommentReviewSkincare).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return entities.FavoriteCommentReviewSkincare{}, err
+	}
+
+	return favoriteCommentReviewSkincare, nil
+}
+
+func (repo *GormFavoriteRepository) FindFavoriteCommentReviewSkincare(comment_id uint, user_id uint) (entities.FavoriteCommentReviewSkincare, error) {
+	var favorite entities.FavoriteCommentReviewSkincare
+
+	if err := repo.db.Where("comment_id = ? AND user_id = ?", comment_id, user_id).First(&favorite).Error; err != nil {
+		return entities.FavoriteCommentReviewSkincare{}, err
+	}
+
+	return favorite, nil
+}
+
+func (repo *GormFavoriteRepository) UpdateFavoriteCommentReviewSkincare(favorite_comment_review_skincare entities.FavoriteCommentReviewSkincare) (entities.FavoriteCommentReviewSkincare, error) {
+	if err := repo.db.Save(&favorite_comment_review_skincare).Error; err != nil {
+		return entities.FavoriteCommentReviewSkincare{}, err
+	}
+
+	return favorite_comment_review_skincare, nil
+}
+
+func (repo *GormFavoriteRepository) CountFavoriteCommentReviewSkincare(comment_id uint) (int64, error) {
+	var count int64
+	if err := repo.db.Model(&entities.FavoriteCommentReviewSkincare{}).Where("comment_id = ? AND status != false", comment_id).Count(&count).Error; err != nil {
 		return 0, err
 	}
 
