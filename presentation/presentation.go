@@ -113,6 +113,15 @@ type BookmarkReviewSkincare struct {
 	Status           bool `json:"status" `
 }
 
+type CommentThread struct {
+	ID            uint   `json:"id"`
+	ThreadID      uint   `json:"thread_id"`
+	User          User   `json:"user" gorm:"foreignKey:UserID"`
+	Favorite      bool   `json:"favorite"`
+	FavoriteCount int    `json:"favorite_count" gorm:"-"`
+	Text          string `json:"text"`
+}
+
 func DeleteResponse(id int) *Responses {
 	return &Responses{
 		Status: true,

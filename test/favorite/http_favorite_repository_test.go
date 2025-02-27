@@ -15,9 +15,11 @@ type MockFavoritesUsecase struct {
 	mock.Mock
 }
 
-func (m *MockFavoritesUsecase) FavoriteComment(thread_id uint, token string) (entities.FavoriteComment, error) {
+// FavoriteComment implements usecases.FavoriteUseCase.
+
+func (m *MockFavoritesUsecase) FavoriteCommentThread(thread_id uint, token string) (entities.FavoriteCommentThread, error) {
 	args := m.Called(thread_id, token)
-	return args.Get(0).(entities.FavoriteComment), args.Error(1)
+	return args.Get(0).(entities.FavoriteCommentThread), args.Error(1)
 }
 
 func (m *MockFavoritesUsecase) FavoriteThread(thread_id uint, token string) (entities.FavoriteThread, error) {
@@ -30,7 +32,7 @@ func (m *MockFavoritesUsecase) FavoriteReviewSkincare(review_id uint, token stri
 	return args.Get(0).(entities.FavoriteReviewSkincare), args.Error(1)
 }
 
-func TestFavoriteComment(t *testing.T) {
+func TestFavoriteCommentThreadHandler(t *testing.T) {
 
 	setup := func() (*MockFavoritesUsecase, *adapters.HttpFavoriteHandler, *fiber.App) {
 		mockFavoriteUseCase := new(MockFavoritesUsecase)
@@ -45,7 +47,7 @@ func TestFavoriteComment(t *testing.T) {
 	t.Run("FavoriteComment", func(t *testing.T) {
 		mockFavortieUseCase, _, app := setup()
 
-		mockFavortieUseCase.On("FavoriteComment", uint(1), "token").Return(entities.FavoriteComment{}, nil)
+		mockFavortieUseCase.On("FavoriteCommentThread", uint(1), "token").Return(entities.FavoriteCommentThread{}, nil)
 
 		req := httptest.NewRequest(fiber.MethodPost, "/favorite/comment/1", nil)
 		req.Header.Set("token", "token")
@@ -59,7 +61,7 @@ func TestFavoriteComment(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
 		mockFavoriteUseCase, _, app := setup()
 
-		mockFavoriteUseCase.On("FavoriteComment", uint(1), "token").Return(entities.FavoriteComment{}, nil)
+		mockFavoriteUseCase.On("FavoriteComment", uint(1), "token").Return(entities.FavoriteCommentThread{}, nil)
 
 		req := httptest.NewRequest(fiber.MethodPost, "/favorite/comment/1", nil)
 		resp, _ := app.Test(req)

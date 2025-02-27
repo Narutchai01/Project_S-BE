@@ -20,23 +20,23 @@ type MockCommentUsecase struct {
 }
 
 // GetComments implements usecases.CommentUsecase.
-func (m *MockCommentUsecase) GetComments(thread_id uint, token string) ([]entities.Comment, error) {
+func (m *MockCommentUsecase) GetCommentsThread(thread_id uint, token string) ([]entities.CommentThread, error) {
 	args := m.Called(thread_id, token)
-	return args.Get(0).([]entities.Comment), args.Error(1)
+	return args.Get(0).([]entities.CommentThread), args.Error(1)
 }
 
-func (m *MockCommentUsecase) CreateComment(comment entities.Comment, token string) (entities.Comment, error) {
+func (m *MockCommentUsecase) CreateCommentThread(comment entities.CommentThread, token string) (entities.CommentThread, error) {
 	args := m.Called(comment, token)
-	return args.Get(0).(entities.Comment), args.Error(1)
+	return args.Get(0).(entities.CommentThread), args.Error(1)
 }
 
-func TestCreateCommentsuite(t *testing.T) {
+func TestCreateCommentThreadHandler(t *testing.T) {
 	app := fiber.New()
 
 	mockUsecase := new(MockCommentUsecase)
 	handler := adapters.NewHttpCommentHandler(mockUsecase)
 
-	app.Post("/comments", handler.CreateComment)
+	app.Post("/comments", handler.CreateCommentThread)
 
 	t.Run("missing token", func(t *testing.T) {
 		req := httptest.NewRequest("POST", "/comments", nil)
@@ -56,8 +56,8 @@ func TestCreateCommentsuite(t *testing.T) {
 	})
 
 	t.Run("usecase error", func(t *testing.T) {
-		comment := entities.Comment{Text: "test comment"}
-		mockUsecase.On("CreateComment", comment, "valid-token").Return(entities.Comment{}, errors.New("usecase error"))
+		comment := entities.CommentThread{Text: "test comment"}
+		mockUsecase.On("CreateCommentThread", comment, "valid-token").Return(entities.CommentThread{}, errors.New("usecase error"))
 
 		body, _ := json.Marshal(comment)
 		req := httptest.NewRequest("POST", "/comments", bytes.NewReader(body))
@@ -69,8 +69,8 @@ func TestCreateCommentsuite(t *testing.T) {
 	})
 
 	t.Run("successful creation", func(t *testing.T) {
-		comment := entities.Comment{Text: "test comment", ThreadID: 1}
-		mockUsecase.On("CreateComment", comment, "valid-token").Return(comment, nil)
+		comment := entities.CommentThread{Text: "test comment", ThreadID: 1}
+		mockUsecase.On("CreateCommentThread", comment, "valid-token").Return(comment, nil)
 
 		body, _ := json.Marshal(comment)
 		req := httptest.NewRequest("POST", "/comments", bytes.NewReader(body))

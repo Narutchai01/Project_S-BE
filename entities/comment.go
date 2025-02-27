@@ -2,11 +2,23 @@ package entities
 
 import "gorm.io/gorm"
 
-type Comment struct {
+type CommentThread struct {
 	gorm.Model
-	ThreadID uint   `json:"thread_id"`
-	UserID   uint   `json:"user_id"`
-	User     User   `json:"user" gorm:"foreignKey:UserID"`
-	Favorite bool   `json:"favorite"`
-	Text     string `json:"text"`
+	ThreadID      uint   `json:"thread_id"`
+	UserID        uint   `json:"user_id"`
+	User          User   `json:"user" gorm:"foreignKey:UserID"`
+	Favorite      bool   `json:"favorite"`
+	FavoriteCount int    `json:"favorite_count" gorm:"-"`
+	Text          string `json:"text"`
+}
+
+type FavoriteCommentReview struct {
+	gorm.Model
+	ReviewSkincareID uint           `json:"review_skincare_id"`
+	ReviewSkincare   ReviewSkincare `json:"review_skincare" gorm:"foreignKey:ReviewSkincareID"`
+	UserID           uint           `json:"user_id"`
+	User             User           `json:"user" gorm:"foreignKey:UserID"`
+	Favorite         bool           `json:"favorite"`
+	FavoriteCount    int            `json:"favorite_count" gorm:"-"`
+	Content          string         `json:"content"`
 }

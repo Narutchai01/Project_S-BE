@@ -32,7 +32,7 @@ func (handler *HttpFavoriteHandler) HandleFavoriteComment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	result, err := handler.FavoriteUsecases.FavoriteComment(uint(comment_id), token)
+	result, err := handler.FavoriteUsecases.FavoriteCommentThread(uint(comment_id), token)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}

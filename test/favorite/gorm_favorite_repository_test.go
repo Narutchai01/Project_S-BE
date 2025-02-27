@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestFavoriteCommnet(t *testing.T) {
+func TestFavoriteCommentThread(t *testing.T) {
 	db, mock, err := sqlmock.New()
 
 	if err != nil {
@@ -31,10 +31,10 @@ func TestFavoriteCommnet(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectQuery(`INSERT INTO "favorite_comments"`).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+		mock.ExpectQuery(`INSERT INTO "favorite_comment_threads"`).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectCommit()
 
-		_, err := repo.FavoriteComment(1, 1)
+		_, err := repo.FavoriteCommentThread(1, 1)
 
 		assert.NoError(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
@@ -42,10 +42,10 @@ func TestFavoriteCommnet(t *testing.T) {
 
 	t.Run("error", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectQuery(`INSERT INTO "favorite_comments"`).WillReturnError(gorm.ErrInvalidData)
+		mock.ExpectQuery(`INSERT INTO "favorite_comment_threads"`).WillReturnError(gorm.ErrInvalidData)
 		mock.ExpectRollback()
 
-		_, err := repo.FavoriteComment(1, 1)
+		_, err := repo.FavoriteCommentThread(1, 1)
 
 		assert.Error(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
@@ -53,7 +53,7 @@ func TestFavoriteCommnet(t *testing.T) {
 
 }
 
-func TestFindFavoriteComment(t *testing.T) {
+func TestFindFavoriteCommentThread(t *testing.T) {
 	db, mock, err := sqlmock.New()
 
 	if err != nil {
@@ -72,11 +72,11 @@ func TestFindFavoriteComment(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		rows := sqlmock.NewRows([]string{"id", "comment_id", "user_id"}).AddRow(1, 1, 1)
-		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "favorite_comments" WHERE (comment_id = $1 AND user_id = $2) AND "favorite_comments"."deleted_at" IS NULL ORDER BY "favorite_comments"."id" LIMIT $3`)).
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "favorite_comment_threads" WHERE (comment_id = $1 AND user_id = $2) AND "favorite_comment_threads"."deleted_at" IS NULL ORDER BY "favorite_comment_threads"."id" LIMIT $3`)).
 			WithArgs(1, 1, 1).
 			WillReturnRows(rows)
 
-		favorite, err := repo.FindFavoriteComment(1, 1)
+		favorite, err := repo.FindFavoriteCommentThread(1, 1)
 
 		assert.NoError(t, err)
 		assert.Equal(t, uint(1), favorite.ID)
@@ -86,18 +86,18 @@ func TestFindFavoriteComment(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "favorite_comments" WHERE (comment_id = $1 AND user_id = $2) AND "favorite_comments"."deleted_at" IS NULL ORDER BY "favorite_comments"."id" LIMIT $3`)).
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "favorite_comment_threads" WHERE (comment_id = $1 AND user_id = $2) AND "favorite_comment_threads"."deleted_at" IS NULL ORDER BY "favorite_comment_threads"."id" LIMIT $3`)).
 			WithArgs(1, 1, 1).
 			WillReturnError(gorm.ErrRecordNotFound)
 
-		_, err := repo.FindFavoriteComment(1, 1)
+		_, err := repo.FindFavoriteCommentThread(1, 1)
 
 		assert.Error(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
 }
-func TestUpdateFavoriteComments(t *testing.T) {
+func TestUpdateFavoriteCommentsThread(t *testing.T) {
 	db, mock, err := sqlmock.New()
 
 	if err != nil {
@@ -115,7 +115,7 @@ func TestUpdateFavoriteComments(t *testing.T) {
 	repo := adapters.NewGormFavoriteRepository(gormDB)
 
 	t.Run("success", func(t *testing.T) {
-		favoriteComment := entities.FavoriteComment{
+		favoriteComment := entities.FavoriteCommentThread{
 			Model:     gorm.Model{ID: 1},
 			CommentID: 1,
 			UserID:    1,
@@ -123,19 +123,19 @@ func TestUpdateFavoriteComments(t *testing.T) {
 		}
 
 		mock.ExpectBegin()
-		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "favorite_comments" SET "created_at"=$1,"updated_at"=$2,"deleted_at"=$3,"comment_id"=$4,"user_id"=$5,"status"=$6 WHERE "favorite_comments"."deleted_at" IS NULL AND "id" = $7`)).
+		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "favorite_comment_threads" SET "created_at"=$1,"updated_at"=$2,"deleted_at"=$3,"comment_id"=$4,"user_id"=$5,"status"=$6 WHERE "favorite_comment_threads"."deleted_at" IS NULL AND "id" = $7`)).
 			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), favoriteComment.CommentID, favoriteComment.UserID, favoriteComment.Status, favoriteComment.ID).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 		mock.ExpectCommit()
 
-		_, err := repo.UpdateFavoriteComment(favoriteComment)
+		_, err := repo.UpdateFavoriteCommentThread(favoriteComment)
 
 		assert.NoError(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
 	t.Run("error", func(t *testing.T) {
-		favoriteComment := entities.FavoriteComment{
+		favoriteComment := entities.FavoriteCommentThread{
 			Model:     gorm.Model{ID: 1},
 			CommentID: 1,
 			UserID:    1,
@@ -143,12 +143,12 @@ func TestUpdateFavoriteComments(t *testing.T) {
 		}
 
 		mock.ExpectBegin()
-		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "favorite_comments" SET "created_at"=$1,"updated_at"=$2,"deleted_at"=$3,"comment_id"=$4,"user_id"=$5,"status"=$6 WHERE "favorite_comments"."deleted_at" IS NULL AND "id" = $7`)).
+		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "favorite_comment_threads" SET "created_at"=$1,"updated_at"=$2,"deleted_at"=$3,"comment_id"=$4,"user_id"=$5,"status"=$6 WHERE "favorite_comment_threads"."deleted_at" IS NULL AND "id" = $7`)).
 			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), favoriteComment.CommentID, favoriteComment.UserID, favoriteComment.Status, favoriteComment.ID).
 			WillReturnError(gorm.ErrInvalidData)
 		mock.ExpectRollback()
 
-		_, err := repo.UpdateFavoriteComment(favoriteComment)
+		_, err := repo.UpdateFavoriteCommentThread(favoriteComment)
 
 		assert.Error(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
