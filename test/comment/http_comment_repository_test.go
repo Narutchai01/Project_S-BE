@@ -46,23 +46,23 @@ func TestCreateCommentThreadHandler(t *testing.T) {
 	mockUsecase := new(MockCommentUsecase)
 	handler := adapters.NewHttpCommentHandler(mockUsecase)
 
-	app.Post("/comments", handler.CreateCommentThread)
+	app.Post("/comment/thread", handler.CreateCommentThread)
 
 	t.Run("missing token", func(t *testing.T) {
-		req := httptest.NewRequest("POST", "/comments", nil)
+		req := httptest.NewRequest("POST", "/comment/thread", nil)
 		req.Header.Set("Content-Type", "application/json")
 		resp, _ := app.Test(req)
 
-		assert.Equal(t, 400, resp.StatusCode)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 
 	t.Run("invalid body", func(t *testing.T) {
-		req := httptest.NewRequest("POST", "/comments", strings.NewReader("invalid body"))
+		req := httptest.NewRequest("POST", "/comment/thread", strings.NewReader("invalid body"))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("token", "valid-token")
 		resp, _ := app.Test(req)
 
-		assert.Equal(t, 400, resp.StatusCode)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 
 	t.Run("usecase error", func(t *testing.T) {
@@ -70,12 +70,12 @@ func TestCreateCommentThreadHandler(t *testing.T) {
 		mockUsecase.On("CreateCommentThread", comment, "valid-token").Return(entities.CommentThread{}, errors.New("usecase error"))
 
 		body, _ := json.Marshal(comment)
-		req := httptest.NewRequest("POST", "/comments", bytes.NewReader(body))
+		req := httptest.NewRequest("POST", "/comment/thread", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("token", "valid-token")
 		resp, _ := app.Test(req)
 
-		assert.Equal(t, 400, resp.StatusCode)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 
 	t.Run("successful creation", func(t *testing.T) {
@@ -83,12 +83,12 @@ func TestCreateCommentThreadHandler(t *testing.T) {
 		mockUsecase.On("CreateCommentThread", comment, "valid-token").Return(comment, nil)
 
 		body, _ := json.Marshal(comment)
-		req := httptest.NewRequest("POST", "/comments", bytes.NewReader(body))
+		req := httptest.NewRequest("POST", "/comment/thread", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("token", "valid-token")
 		resp, _ := app.Test(req)
 
-		assert.Equal(t, 200, resp.StatusCode)
+		assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
 	})
 }
 func TestHandleGetCommentReviewSkincare(t *testing.T) {
