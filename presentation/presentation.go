@@ -100,6 +100,18 @@ type ReviewSkincare struct {
 	Skincare      []Skincare `json:"skincares"`
 	CreateAt      time.Time  `json:"create_at"`
 }
+type BookmarkThread struct {
+	ID       uint `json:"id"`
+	ThreadID uint `json:"thread_id" `
+	UserID   uint `json:"user_id" `
+	Status   bool `json:"status" `
+}
+type BookmarkReviewSkincare struct {
+	ID               uint `json:"id"`
+	ReviewSkincareID uint `json:"review_skincare_id" `
+	UserID           uint `json:"user_id" `
+	Status           bool `json:"status" `
+}
 
 func DeleteResponse(id int) *Responses {
 	return &Responses{

@@ -49,7 +49,7 @@ func (handler *HttpBookmarkHandler) BookMarkThread(c *fiber.Ctx) error {
 
 	}
 
-	return c.Status(fiber.StatusOK).JSON(result)
+	return c.Status(fiber.StatusOK).JSON(presentation.ToBookmarkThreadResponse(result))
 }
 
 // BookMarkReviewSkincare godoc
@@ -84,5 +84,5 @@ func (handler *HttpBookmarkHandler) BookMarkReviewSkincare(c *fiber.Ctx) error {
 
 	}
 
-	return c.Status(fiber.StatusOK).JSON(result)
+	return c.Status(fiber.StatusOK).JSON(presentation.ToBookmarkReviewSkincareResponse(result))
 }
