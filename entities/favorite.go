@@ -17,3 +17,12 @@ type FavoriteThread struct {
 	User     User   `gorm:"foreignKey:UserID"`
 	Status   bool   `json:"status" gorm:"default:true"`
 }
+
+type FavoriteReviewSkincare struct {
+	gorm.Model
+	ReviewSkincareID uint           `json:"review_skincare_id" gorm:"not null;uniqueIndex:idx_review_skincare_user"`
+	ReviewSkincare   ReviewSkincare `gorm:"foreignKey:ReviewSkincareID"`
+	UserID           uint           `json:"user_id" gorm:"not null;uniqueIndex:idx_review_skincare_user"`
+	User             User           `gorm:"foreignKey:UserID"`
+	Status           bool           `json:"status" gorm:"default:true"`
+}

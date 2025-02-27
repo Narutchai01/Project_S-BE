@@ -9,6 +9,7 @@ import (
 type FavoriteUseCase interface {
 	FavoriteComment(thread_id uint, token string) (entities.FavoriteComment, error)
 	FavoriteThread(thread_id uint, token string) (entities.FavoriteThread, error)
+	FavoriteReviewSkincare(review_id uint, token string) (entities.FavoriteReviewSkincare, error)
 }
 
 type favoriteService struct {
@@ -50,4 +51,20 @@ func (service *favoriteService) FavoriteThread(thread_id uint, token string) (en
 
 	favorite.Status = !favorite.Status
 	return service.repo.UpdateFavoriteThread(favorite)
+}
+
+func (service *favoriteService) FavoriteReviewSkincare(review_id uint, token string) (entities.FavoriteReviewSkincare, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.FavoriteReviewSkincare{}, err
+	}
+
+	favorite, err := service.repo.FindFavoriteReviewSkincare(review_id, user_id)
+	if err != nil {
+		return service.repo.FavoriteReviewSkincare(review_id, user_id)
+	}
+
+	favorite.Status = !favorite.Status
+	return service.repo.UpdateFavoriteReviewSkincare(favorite)
 }

@@ -64,3 +64,26 @@ func (handler *HttpFavoriteHandler) HandleFavoriteThread(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(result)
 
 }
+
+func (handler *HttpFavoriteHandler) HandleFavoriteReviewSkincare(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+
+	review_id, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("failed to favorite review skincare")))
+	}
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
+	}
+
+	result, err := handler.FavoriteUsecases.FavoriteReviewSkincare(uint(review_id), token)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
+}

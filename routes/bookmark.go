@@ -16,5 +16,6 @@ func BookMarkRouters(app fiber.Router, db *gorm.DB) {
 
 	BookmarkGroup := app.Group("/bookmark").Use(middlewares.AuthorizationRequired())
 
-	BookmarkGroup.Post("/:id", bookmarkHandler.BookMarkThread)
+	BookmarkGroup.Post("/thread/:id", bookmarkHandler.BookMarkThread)
+	BookmarkGroup.Post("/review/:id", bookmarkHandler.BookMarkReviewSkincare)
 }

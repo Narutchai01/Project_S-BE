@@ -127,6 +127,12 @@ func (service *threadService) CreateThread(thread entities.Thread, token string,
 		thread.Bookmark = bookmark.Status
 	}
 
+	if user_id != thread.UserID {
+		thread.Owner = false
+	} else {
+		thread.Owner = true
+	}
+
 	return thread, nil
 }
 
@@ -170,6 +176,12 @@ func (service *threadService) GetThread(thread_id uint, token string) (entities.
 		thread.Bookmark = false
 	} else {
 		thread.Bookmark = bookmark.Status
+	}
+
+	if user_id != thread.UserID {
+		thread.Owner = false
+	} else {
+		thread.Owner = true
 	}
 
 	return thread, nil
@@ -217,6 +229,12 @@ func (service *threadService) GetThreads(token string) ([]entities.Thread, error
 			threads[i].Bookmark = false
 		} else {
 			threads[i].Bookmark = bookmark.Status
+		}
+
+		if user_id != thread.UserID {
+			threads[i].Owner = false
+		} else {
+			threads[i].Owner = true
 		}
 	}
 

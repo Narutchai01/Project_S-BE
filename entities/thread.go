@@ -7,6 +7,7 @@ type Thread struct {
 	Title         string        `json:"title"`
 	Caption       string        `json:"caption"`
 	UserID        uint          `json:"user_id"`
+	Owner         bool          `json:"owner" gorm:"-"`
 	User          User          `json:"user"`
 	Favorite      bool          `json:"favorite" gorm:"-"`
 	FavoriteCount int64         `json:"favorite_count" gorm:"-"`

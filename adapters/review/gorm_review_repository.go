@@ -21,3 +21,17 @@ func (repo *GormReviewRepository) CreateReviewSkincare(review entities.ReviewSki
 	}
 	return review, nil
 }
+
+func (repo *GormReviewRepository) GetReviewSkincare(id uint) (entities.ReviewSkincare, error) {
+	var review entities.ReviewSkincare
+	err := repo.db.Preload("User").Where("id = ? ", id).First(&review).Error
+
+	return review, err
+}
+
+func (repo *GormReviewRepository) GetReviewSkincares() ([]entities.ReviewSkincare, error) {
+	var reviews []entities.ReviewSkincare
+	err := repo.db.Preload("User").Find(&reviews).Error
+
+	return reviews, err
+}

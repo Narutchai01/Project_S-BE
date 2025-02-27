@@ -46,3 +46,36 @@ func (repo *GormBookmarkRepository) UpdateBookMarkThread(thread_id uint, user_id
 
 	return bookmark, nil
 }
+
+func (repo *GormBookmarkRepository) BookmarkReviewSkincare(review_id uint, user_id uint) (entities.BookmarkReviewSkincare, error) {
+	bookmark := entities.BookmarkReviewSkincare{
+		ReviewSkincareID: review_id,
+		UserID:           user_id,
+	}
+	if err := repo.db.Create(&bookmark).Error; err != nil {
+		return entities.BookmarkReviewSkincare{}, err
+	}
+	return bookmark, nil
+}
+
+func (repo *GormBookmarkRepository) FindBookMarkReviewSkincare(review_id uint, user_id uint) (entities.BookmarkReviewSkincare, error) {
+	var bookmark entities.BookmarkReviewSkincare
+	if err := repo.db.Where("review_skincare_id = ? AND user_id = ?", review_id, user_id).First(&bookmark).Error; err != nil {
+		return entities.BookmarkReviewSkincare{}, err
+	}
+	return bookmark, nil
+}
+
+func (repo *GormBookmarkRepository) UpdateBookMarkReviewSkincare(review_id uint, user_id uint, status bool) (entities.BookmarkReviewSkincare, error) {
+	var bookmark entities.BookmarkReviewSkincare
+	if err := repo.db.Where("review_skincare_id = ? AND user_id = ?", review_id, user_id).First(&bookmark).Error; err != nil {
+		return entities.BookmarkReviewSkincare{}, err
+	}
+
+	bookmark.Status = status
+	if err := repo.db.Save(&bookmark).Error; err != nil {
+		return entities.BookmarkReviewSkincare{}, err
+	}
+
+	return bookmark, nil
+}

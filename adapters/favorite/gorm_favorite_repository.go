@@ -96,3 +96,49 @@ func (repo *GormFavoriteRepository) CountFavoriteThread(thread_id uint) (int64, 
 
 	return count, nil
 }
+
+func (r *GormFavoriteRepository) FavoriteReviewSkincare(reviewSkincareID uint, userID uint) (entities.FavoriteReviewSkincare, error) {
+	favoriteReviewSkincare := entities.FavoriteReviewSkincare{
+		ReviewSkincareID: reviewSkincareID,
+		UserID:           userID,
+		Status:           true,
+	}
+
+	if err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&favoriteReviewSkincare).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return entities.FavoriteReviewSkincare{}, err
+	}
+
+	return favoriteReviewSkincare, nil
+}
+
+func (repo *GormFavoriteRepository) FindFavoriteReviewSkincare(review_skincare_id uint, user_id uint) (entities.FavoriteReviewSkincare, error) {
+	var favorite entities.FavoriteReviewSkincare
+
+	if err := repo.db.Where("review_skincare_id = ? AND user_id = ?", review_skincare_id, user_id).First(&favorite).Error; err != nil {
+		return entities.FavoriteReviewSkincare{}, err
+	}
+
+	return favorite, nil
+}
+
+func (repo *GormFavoriteRepository) UpdateFavoriteReviewSkincare(favorite_review_skincare entities.FavoriteReviewSkincare) (entities.FavoriteReviewSkincare, error) {
+	if err := repo.db.Save(&favorite_review_skincare).Error; err != nil {
+		return entities.FavoriteReviewSkincare{}, err
+	}
+
+	return favorite_review_skincare, nil
+}
+
+func (repo *GormFavoriteRepository) CountFavoriteReviewSkincare(review_skincare_id uint) (int64, error) {
+	var count int64
+	if err := repo.db.Model(&entities.FavoriteReviewSkincare{}).Where("review_skincare_id = ? AND status != false", review_skincare_id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}

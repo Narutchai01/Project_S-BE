@@ -43,3 +43,11 @@ func (repo *GormSkincareRepository) DeleteSkincareById(id int) (entities.Skincar
 	err := repo.db.Where("id = ?", id).Delete(&entities.Skincare{}).Error
 	return entities.Skincare{}, err
 }
+
+func (repo *GormSkincareRepository) GetSkincareByIds(ids []int) ([]entities.Skincare, error) {
+	var skincares []entities.Skincare
+
+	err := repo.db.Find(&skincares, ids).Error
+
+	return skincares, err
+}

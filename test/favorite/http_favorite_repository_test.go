@@ -25,6 +25,11 @@ func (m *MockFavoritesUsecase) FavoriteThread(thread_id uint, token string) (ent
 	return args.Get(0).(entities.FavoriteThread), args.Error(1)
 }
 
+func (m *MockFavoritesUsecase) FavoriteReviewSkincare(review_id uint, token string) (entities.FavoriteReviewSkincare, error) {
+	args := m.Called(review_id, token)
+	return args.Get(0).(entities.FavoriteReviewSkincare), args.Error(1)
+}
+
 func TestFavoriteComment(t *testing.T) {
 
 	setup := func() (*MockFavoritesUsecase, *adapters.HttpFavoriteHandler, *fiber.App) {
@@ -101,5 +106,53 @@ func TestFavoriteThreads(t *testing.T) {
 
 		assert.Equal(t, 401, resp.StatusCode)
 
+	})
+}
+func TestFavoriteReviewSkincareHandler(t *testing.T) {
+
+	setup := func() (*MockFavoritesUsecase, *adapters.HttpFavoriteHandler, *fiber.App) {
+		mockFavoriteUseCase := new(MockFavoritesUsecase)
+		httpFavoriteHandler := adapters.NewHttpFavoriteHandler(mockFavoriteUseCase)
+		app := fiber.New()
+
+		app.Post("/favorite/review/skincare/:id", httpFavoriteHandler.HandleFavoriteReviewSkincare)
+
+		return mockFavoriteUseCase, httpFavoriteHandler, app
+	}
+
+	t.Run("FavoriteReviewSkincare", func(t *testing.T) {
+		mockFavoriteUseCase, _, app := setup()
+
+		mockFavoriteUseCase.On("FavoriteReviewSkincare", uint(1), "token").Return(entities.FavoriteReviewSkincare{}, nil)
+
+		req := httptest.NewRequest(fiber.MethodPost, "/favorite/review/skincare/1", nil)
+		req.Header.Set("token", "token")
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, 200, resp.StatusCode)
+
+		mockFavoriteUseCase.AssertExpectations(t)
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		mockFavoriteUseCase, _, app := setup()
+
+		mockFavoriteUseCase.On("FavoriteReviewSkincare", uint(1), "token").Return(entities.FavoriteReviewSkincare{}, nil)
+
+		req := httptest.NewRequest(fiber.MethodPost, "/favorite/review/skincare/1", nil)
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, 401, resp.StatusCode)
+
+	})
+
+	t.Run("BadRequest", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest(fiber.MethodPost, "/favorite/review/skincare/invalid", nil)
+		req.Header.Set("token", "token")
+		resp, _ := app.Test(req)
+
+		assert.Equal(t, 400, resp.StatusCode)
 	})
 }

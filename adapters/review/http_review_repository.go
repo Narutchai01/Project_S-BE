@@ -10,10 +10,10 @@ import (
 )
 
 type HtttpReviewRepository struct {
-	reviewUsecase usecases.ReviewThreadUseCase
+	reviewUsecase usecases.ReviewUseCase
 }
 
-func NewHttpReviewRepository(reviewUsecase usecases.ReviewThreadUseCase) *HtttpReviewRepository {
+func NewHttpReviewRepository(reviewUsecase usecases.ReviewUseCase) *HtttpReviewRepository {
 	return &HtttpReviewRepository{reviewUsecase}
 }
 
@@ -42,12 +42,50 @@ func (repo *HtttpReviewRepository) CreateReviewSkincare(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	result, err := repo.reviewUsecase.CreateReviewThread(review, token, *file, c)
+	result, err := repo.reviewUsecase.CreateReviewSkincare(review, token, *file, c)
 
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(result)
+	return c.Status(fiber.StatusOK).JSON(presentation.ToReviewResponse(result))
 
+}
+
+func (repo *HtttpReviewRepository) GetReviewSkincare(c *fiber.Ctx) error {
+
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
+	}
+
+	result, err := repo.reviewUsecase.GetReviewSkincare(uint(id), token)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToReviewResponse(result))
+}
+
+func (repo *HtttpReviewRepository) GetReviewSkincares(c *fiber.Ctx) error {
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
+	}
+
+	results, err := repo.reviewUsecase.GetReviewSkincares(token)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToReviewsResponse(results))
 }
