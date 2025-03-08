@@ -99,21 +99,34 @@ func (service *userService) GetUser(token string) (entities.User, error) {
 }
 
 func (service *userService) UpdateUser(user entities.User, token string, file *multipart.FileHeader, c *fiber.Ctx) (entities.User, error) {
-
 	id, err := utils.ExtractToken(token)
 	if err != nil {
 		return entities.User{}, err
 	}
-	user.ID = uint(id)
 
-	old_value, err := service.repo.GetUser(uint(id))
-
+	oldValue, err := service.repo.GetUser(uint(id))
 	if err != nil {
 		return entities.User{}, err
 	}
 
+	if user.Email != "" {
+		_, err := service.repo.GetUserByEmail(user.Email)
+		if err == nil {
+			return user, fmt.Errorf("email already exists")
+		}
+	}
+
+	if user.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return user, fmt.Errorf("failed to hashed password: %w", err)
+		}
+		user.Password = string(hashedPassword)
+	}
+
 	if file != nil {
 		fileName := uuid.New().String() + ".jpg"
+
 		if err := utils.CheckDirectoryExist(); err != nil {
 			return entities.User{}, err
 		}
@@ -125,24 +138,28 @@ func (service *userService) UpdateUser(user entities.User, token string, file *m
 		imageUrl, err := utils.UploadImage(fileName, "/user")
 
 		if err != nil {
-			return entities.User{}, err
+			return entities.User{}, fmt.Errorf("failed to upload image: %w", err)
 		}
 
 		err = os.Remove("./uploads/" + fileName)
 
 		if err != nil {
-			return entities.User{}, err
+			return entities.User{}, fmt.Errorf("failed to remove image: %w", err)
 		}
-
 		user.Image = imageUrl
 	}
 
-	user.ID = old_value.ID
-	user.Email = utils.CheckEmptyValueBeforeUpdate(user.Email, old_value.Email)
-	user.FullName = utils.CheckEmptyValueBeforeUpdate(user.FullName, old_value.FullName)
-	user.Image = utils.CheckEmptyValueBeforeUpdate(user.Image, old_value.Image)
-	user.Password = utils.CheckEmptyValueBeforeUpdate(user.Password, old_value.Password)
+	user.ID = oldValue.ID
+	user.FullName = utils.CheckEmptyValueBeforeUpdate(user.FullName, oldValue.FullName)
+	user.Email = utils.CheckEmptyValueBeforeUpdate(user.Email, oldValue.Email)
+	user.Image = utils.CheckEmptyValueBeforeUpdate(user.Image, oldValue.Image)
+	user.Password = utils.CheckEmptyValueBeforeUpdate(user.Password, oldValue.Password)
+	if user.SensitiveSkin == nil {
+		user.SensitiveSkin = oldValue.SensitiveSkin
+	}
+	if user.Birthday == nil {
+		user.Birthday = oldValue.Birthday
+	}
 
 	return service.repo.UpdateUser(user)
-
 }
