@@ -58,9 +58,13 @@ func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
 	}
 
-	var files []*multipart.FileHeader
+	files := make([]*multipart.FileHeader, 0)
 	for _, fh := range form.File {
 		files = append(files, fh...)
+	}
+
+	if len(files) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
 	}
 
 	result, err := repo.threadUsecase.CreateThread(thread, token, files, c)
