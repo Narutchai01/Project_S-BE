@@ -63,6 +63,10 @@ func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
 		files = append(files, fh...)
 	}
 
+	if files == nil || len(files) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
 	result, err := repo.threadUsecase.CreateThread(thread, token, files, c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
