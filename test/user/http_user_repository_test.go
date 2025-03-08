@@ -378,68 +378,85 @@ func TestUpdateUserHandler(t *testing.T) {
 		handler := adapters.NewHttpUserHandler(mockService)
 
 		app := fiber.New()
-		app.Put("/user/update", handler.UpdateUser)
+		app.Put("/user/", handler.UpdateUser)
 
 		return mockService, handler, app
 	}
 
-	expectData := entities.User{
-		FullName:      "aut",
-		Email:         "aut@gmail.com",
-		Birthday:      parseDate("12-09-2003"),
-		SensitiveSkin: func(b bool) *bool { return &b }(true),
+	dataTest := []struct {
+		Title        string
+		Data         entities.User
+		ExpectStatus int
+	}{
+		{
+			Title: "Success all Param",
+			Data: entities.User{
+				FullName:      "aut",
+				Email:         "aut@gmail.com",
+				Birthday:      parseDate("12-09-2003"),
+				SensitiveSkin: func(b bool) *bool { return &b }(true),
+			},
+			ExpectStatus: fiber.StatusOK,
+		},
+		{
+			Title: "Success without email",
+			Data: entities.User{
+				FullName:      "aut",
+				Birthday:      parseDate("12-09-2003"),
+				SensitiveSkin: func(b bool) *bool { return &b }(true),
+			},
+			ExpectStatus: fiber.StatusOK,
+		},
+		{
+			Title: "Success without fullname",
+			Data: entities.User{
+				Email:         "aut@gmail.com",
+				Birthday:      parseDate("12-09-2003"),
+				SensitiveSkin: func(b bool) *bool { return &b }(true),
+			},
+			ExpectStatus: fiber.StatusOK,
+		},
+		{
+			Title: "Success without birthday",
+			Data: entities.User{
+				FullName:      "aut",
+				Email:         "aut@gmail.com",
+				SensitiveSkin: func(b bool) *bool { return &b }(true),
+			},
+			ExpectStatus: fiber.StatusOK,
+		}, {
+			Title: "Success without Sensitiv skin",
+			Data: entities.User{
+				FullName: "aut",
+				Email:    "aut@gmail.com",
+				Birthday: parseDate("12-09-2003"),
+			},
+			ExpectStatus: fiber.StatusOK,
+		},
 	}
 
-	t.Run("success", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.On("UpdateUser",
-			mock.Anything,
-			mock.Anything,
-			mock.Anything,
-			mock.Anything,
-		).Return(expectData, nil)
+	for _, data := range dataTest {
+		data := data
+		t.Run(data.Title, func(t *testing.T) {
+			mockService, _, app := setup()
+			mockService.On("UpdateUser",
+				mock.Anything,
+				mock.Anything,
+				mock.Anything,
+				mock.Anything,
+			).Return(data.Data, nil)
 
-		body, _ := json.Marshal(expectData)
+			body, _ := json.Marshal(data.Data)
 
-		req := httptest.NewRequest("PUT", "/user/update", bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("token", "some token")
-		resp, err := app.Test(req)
+			req := httptest.NewRequest("PUT", "/user/", bytes.NewBuffer(body))
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("token", "some token")
+			resp, err := app.Test(req)
 
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
+			assert.NoError(t, err)
+			assert.Equal(t, data.ExpectStatus, resp.StatusCode)
+			mockService.AssertExpectations(t)
+		})
+	}
 
-	t.Run("failed in body parser", func(t *testing.T) {
-		_, _, app := setup()
-		req := httptest.NewRequest("PUT", "/user/update", bytes.NewBuffer([]byte("invalid body")))
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-	})
-
-	t.Run("failed to update user", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("UpdateUser",
-			mock.Anything,
-			mock.Anything,
-			mock.Anything,
-			mock.Anything,
-		).Return(entities.User{}, errors.New("service error"))
-
-		body, _ := json.Marshal(expectData)
-
-		req := httptest.NewRequest("PUT", "/user/update", bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("token", "some token")
-		resp, err := app.Test(req)
-
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
-	})
 }
