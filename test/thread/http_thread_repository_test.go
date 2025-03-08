@@ -42,12 +42,16 @@ func TestCreateThread(t *testing.T) {
 
 	t.Run("successful creation", func(t *testing.T) {
 		thread := entities.Thread{Title: "Test Title", Caption: "Test Caption"}
-		mockUseCase.On("CreateThread", thread, "test-token", mock.Anything, mock.Anything).Return(thread, nil)
+		mockUseCase.On("CreateThread", thread, "test-token", mock.AnythingOfType("[]*multipart.FileHeader"), mock.AnythingOfType("*fiber.Ctx")).Return(thread, nil)
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		writer.WriteField("title", "Test Title")
 		writer.WriteField("caption", "Test Caption")
+		part, err := writer.CreateFormFile("files", "test_image.jpg")
+		assert.NoError(t, err)
+		part.Write([]byte("fake image content"))
+
 		writer.Close()
 
 		req := httptest.NewRequest("POST", "/threads", body)
