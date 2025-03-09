@@ -264,7 +264,9 @@ func TestGoogleSignInHandler(t *testing.T) {
 	}
 
 	expectData := entities.User{
-		Email: "aut@gmail.com",
+		Email:    "aut@gmail.com",
+		FullName: "Aut",
+		Image:    "dasdasdasd.png",
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -312,6 +314,7 @@ func TestGoogleSignInHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 }
+
 func (m *MockUserService) GetUser(token string) (entities.User, error) {
 	args := m.Called(token)
 	return args.Get(0).(entities.User), args.Error(1)
