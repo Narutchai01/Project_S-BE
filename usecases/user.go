@@ -82,7 +82,7 @@ func (service *userService) GoogleSignIn(user entities.User) (string, error) {
 	if err != nil {
 		newUser, err := service.repo.CreateUser(user)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to create user: %w", err)
 		}
 		return utils.GenerateToken(int(newUser.ID))
 	}

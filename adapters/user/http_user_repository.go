@@ -118,6 +118,9 @@ func (handler *HttpUserHandler) GoogleSignIn(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
+	if user.Email == "" || user.FullName == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
 	result, err := handler.userUcase.GoogleSignIn(user)
 
 	if err != nil {
