@@ -52,6 +52,10 @@ func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
 
 	token := c.Get("token")
 
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
+	}
+
 	form, err := c.MultipartForm()
 
 	if err != nil {
