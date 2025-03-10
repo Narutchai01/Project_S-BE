@@ -66,7 +66,7 @@ func TestCreateReviewSkincare(t *testing.T) {
 
 		resp, err := app.Test(req)
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
 	})
 
 	t.Run("CreateReviewSkincare_Unauthorized", func(t *testing.T) {
