@@ -155,6 +155,10 @@ func (handler *HttpResultHandler) GetResultByIDs(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
+	if len(ids.IDs) <= 1 || ids.IDs == nil || len(ids.IDs) > 3 {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
 	results, err := handler.resultUsecase.GetResultByIDs(ids.IDs)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
