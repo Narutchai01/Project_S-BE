@@ -94,6 +94,13 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 		return admin, fmt.Errorf("failed to extract token: %w", err)
 	}
 
+	if admin.Email != "" {
+		_, err := service.repo.GetAdminByEmail(admin.Email)
+		if err == nil {
+			return entities.Admin{}, fmt.Errorf("email already exists")
+		}
+	}
+
 	oldamin, err := service.repo.GetAdmin(int(id))
 	if err != nil {
 		return entities.Admin{}, err
@@ -126,8 +133,14 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 
 	admin.ID = oldamin.ID
 
+	if admin.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(admin.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return entities.Admin{}, fmt.Errorf("failed to hash password: %w", err)
+		}
+		admin.Password = utils.CheckEmptyValueBeforeUpdate(string(hashedPassword), oldamin.Password)
+	}
 	admin.Image = utils.CheckEmptyValueBeforeUpdate(admin.Image, oldamin.Image)
-	admin.Password = utils.CheckEmptyValueBeforeUpdate(admin.Password, oldamin.Password)
 	admin.FullName = utils.CheckEmptyValueBeforeUpdate(admin.FullName, oldamin.FullName)
 	admin.Email = utils.CheckEmptyValueBeforeUpdate(admin.Email, oldamin.Email)
 
