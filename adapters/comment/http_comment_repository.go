@@ -42,6 +42,10 @@ func (handler *HtppCommentHandler) CreateCommentThread(c *fiber.Ctx) error {
 		return c.Status(400).JSON(presentation.ErrorResponse(err))
 	}
 
+	if comment.Text == "" || comment.ThreadID == 0 {
+		return c.Status(400).JSON(presentation.ErrorResponse(errors.New("text and thread_id is required")))
+	}
+
 	result, err := handler.comment.CreateCommentThread(comment, token)
 	if err != nil {
 		return c.Status(400).JSON(presentation.ErrorResponse(err))
@@ -97,6 +101,10 @@ func (handler *HtppCommentHandler) CreateCommentReviewSkicnare(c *fiber.Ctx) err
 	var comment entities.CommentReviewSkicare
 	if err := c.BodyParser(&comment); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	if comment.Content == "" || comment.ReviewSkincareID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("content and review_id is required")))
 	}
 
 	result, err := handler.comment.CreateCommentReviewSkicnare(comment, token)

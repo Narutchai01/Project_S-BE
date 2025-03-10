@@ -24,6 +24,10 @@ func (repo *HtttpReviewRepository) CreateReviewSkincare(c *fiber.Ctx) error {
 	review.Title = c.FormValue("title")
 	review.Content = c.FormValue("content")
 
+	if review.Title == "" || review.Content == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
 	if err := json.Unmarshal([]byte(c.FormValue("skincare_id")), &skincare_id); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
@@ -48,7 +52,7 @@ func (repo *HtttpReviewRepository) CreateReviewSkincare(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(presentation.ToReviewResponse(result))
+	return c.Status(fiber.StatusCreated).JSON(presentation.ToReviewResponse(result))
 
 }
 

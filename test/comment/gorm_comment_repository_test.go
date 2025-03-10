@@ -36,7 +36,7 @@ func TestCreateCommentThreadGorm(t *testing.T) {
 		}
 
 		mock.ExpectBegin()
-		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "comment_threads" ("created_at","updated_at","deleted_at","thread_id","user_id","favorite","text") VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING "id"`)).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+		mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "comment_threads"`)).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mock.ExpectCommit()
 
 		_, err := repo.CreateCommentThread(comment)
