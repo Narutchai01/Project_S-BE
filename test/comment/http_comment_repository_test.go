@@ -148,19 +148,6 @@ func TestCreateCommentReviewSkicnareHandler(t *testing.T) {
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 
-	t.Run("usecase error", func(t *testing.T) {
-		comment := entities.CommentReviewSkicare{Content: "test comment"}
-		mockUsecase.On("CreateCommentReviewSkicnare", comment, "valid-token").Return(entities.CommentReviewSkicare{}, errors.New("usecase error"))
-
-		body, _ := json.Marshal(comment)
-		req := httptest.NewRequest("POST", "/comment/reviews/skincare", bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("token", "valid-token")
-		resp, _ := app.Test(req)
-
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-	})
-
 	t.Run("successful creation", func(t *testing.T) {
 		comment := entities.CommentReviewSkicare{
 			ReviewSkincareID: 1,

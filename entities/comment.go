@@ -7,7 +7,7 @@ type CommentThread struct {
 	ThreadID      uint   `json:"thread_id"`
 	UserID        uint   `json:"user_id"`
 	User          User   `json:"user" gorm:"foreignKey:UserID"`
-	Favorite      bool   `json:"favorite"`
+	Favorite      bool   `json:"favorite" gorm:"-"`
 	FavoriteCount int    `json:"favorite_count" gorm:"-"`
 	Text          string `json:"text"`
 }
