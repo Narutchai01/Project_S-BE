@@ -46,6 +46,10 @@ func (handler *HttpAcneHandler) CreateAcne(c *fiber.Ctx) error {
 
 	create_by_token := c.Get("token")
 
+	if acne.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
 	result, err := handler.acneUsecase.CreateAcne(acne, *file, c, create_by_token)
 
 	if err != nil {
@@ -139,6 +143,9 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 
 	result, err := handler.acneUsecase.UpdateAcne(intID, acne, file, c)
 	if err != nil {
+		if err.Error() == "acne not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
@@ -167,7 +174,11 @@ func (handler *HttpAcneHandler) DeleteAcne(c *fiber.Ctx) error {
 	err = handler.acneUsecase.DeleteAcne(intID)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "acne not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(intID))
