@@ -256,7 +256,7 @@ func TestGetSkinHandler(t *testing.T) {
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
+		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 }
