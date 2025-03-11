@@ -72,7 +72,7 @@ func (repo *HtttpReviewRepository) GetReviewSkincare(c *fiber.Ctx) error {
 	result, err := repo.reviewUsecase.GetReviewSkincare(uint(id), token)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToReviewResponse(result))

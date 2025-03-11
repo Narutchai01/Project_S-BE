@@ -47,3 +47,23 @@ func (repo *GormCommentRepository) GetCommentsReviewSkincare(review_id uint) ([]
 
 	return comments, nil
 }
+
+func (repo *GormCommentRepository) GetCommentThread(comment_id uint) (entities.CommentThread, error) {
+	var comment entities.CommentThread
+
+	if err := repo.db.Preload("User").Where("id = ?", comment_id).First(&comment).Error; err != nil {
+		return entities.CommentThread{}, err
+	}
+
+	return comment, nil
+}
+
+func (repo *GormCommentRepository) GetCommentReviewSkincare(comment_id uint) (entities.CommentReviewSkicare, error) {
+	var comment entities.CommentReviewSkicare
+
+	if err := repo.db.Preload("User").Where("id = ?", comment_id).First(&comment).Error; err != nil {
+		return entities.CommentReviewSkicare{}, err
+	}
+
+	return comment, nil
+}

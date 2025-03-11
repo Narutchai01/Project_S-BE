@@ -105,7 +105,7 @@ func (repo *HttpThreadRepository) GetThread(c *fiber.Ctx) error {
 	result, err := repo.threadUsecase.GetThread(uint(id), token)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadResponse(result))

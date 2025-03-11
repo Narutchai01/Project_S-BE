@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"errors"
+
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
 	"github.com/Narutchai01/Project_S-BE/utils"
@@ -14,12 +16,15 @@ type FavoriteUseCase interface {
 }
 
 type favoriteService struct {
-	repo     repositories.FavoriteRepository
-	userRepo repositories.UserRepository
+	repo        repositories.FavoriteRepository
+	userRepo    repositories.UserRepository
+	threadRepo  repositories.ThreadRepository
+	reviewRepo  repositories.ReviewRepository
+	commentRepo repositories.CommentRepository
 }
 
-func NewFavoriteUseCase(repo repositories.FavoriteRepository, userRepo repositories.UserRepository) FavoriteUseCase {
-	return &favoriteService{repo, userRepo}
+func NewFavoriteUseCase(repo repositories.FavoriteRepository, userRepo repositories.UserRepository, threadRepo repositories.ThreadRepository, reviewRepo repositories.ReviewRepository, commemntRepo repositories.CommentRepository) FavoriteUseCase {
+	return &favoriteService{repo, userRepo, threadRepo, reviewRepo, commemntRepo}
 }
 
 func (service *favoriteService) FavoriteCommentThread(comment_id uint, token string) (entities.FavoriteCommentThread, error) {
@@ -31,10 +36,15 @@ func (service *favoriteService) FavoriteCommentThread(comment_id uint, token str
 
 	user, err := service.userRepo.GetUser(user_id)
 	if err != nil {
-		return entities.FavoriteCommentThread{}, err
+		return entities.FavoriteCommentThread{}, errors.New("user not found")
 	}
 
-	favorite, err := service.repo.FindFavoriteCommentThread(comment_id, user.ID)
+	comment, err := service.commentRepo.GetCommentThread(comment_id)
+	if err != nil {
+		return entities.FavoriteCommentThread{}, errors.New("comment not found")
+	}
+
+	favorite, err := service.repo.FindFavoriteCommentThread(comment.ID, user.ID)
 	if err != nil {
 		return service.repo.FavoriteCommentThread(comment_id, user.ID)
 	}
@@ -52,8 +62,14 @@ func (service *favoriteService) FavoriteThread(thread_id uint, token string) (en
 	}
 	user, err := service.userRepo.GetUser(user_id)
 	if err != nil {
-		return entities.FavoriteThread{}, err
+		return entities.FavoriteThread{}, errors.New("user not found")
 	}
+
+	_, err = service.threadRepo.GetThread(thread_id)
+	if err != nil {
+		return entities.FavoriteThread{}, errors.New("thread not found")
+	}
+
 	favorite, err := service.repo.FindFavoriteThread(thread_id, user.ID)
 	if err != nil {
 		return service.repo.FavoriteThread(thread_id, user.ID)
@@ -72,7 +88,12 @@ func (service *favoriteService) FavoriteReviewSkincare(review_id uint, token str
 
 	user, err := service.userRepo.GetUser(user_id)
 	if err != nil {
-		return entities.FavoriteReviewSkincare{}, err
+		return entities.FavoriteReviewSkincare{}, errors.New("user not found")
+	}
+
+	_, err = service.reviewRepo.GetReviewSkincare(review_id)
+	if err != nil {
+		return entities.FavoriteReviewSkincare{}, errors.New("review not found")
 	}
 
 	favorite, err := service.repo.FindFavoriteReviewSkincare(review_id, user.ID)
@@ -93,10 +114,15 @@ func (service *favoriteService) FavoriteCommnetReviewSkincare(comment_id uint, t
 
 	user, err := service.userRepo.GetUser(user_id)
 	if err != nil {
-		return entities.FavoriteCommentReviewSkincare{}, err
+		return entities.FavoriteCommentReviewSkincare{}, errors.New("user not found")
 	}
 
-	favorite, err := service.repo.FindFavoriteCommentReviewSkincare(comment_id, user.ID)
+	comment, err := service.commentRepo.GetCommentThread(comment_id)
+	if err != nil {
+		return entities.FavoriteCommentReviewSkincare{}, errors.New("comment not found")
+	}
+
+	favorite, err := service.repo.FindFavoriteCommentReviewSkincare(comment.ID, user.ID)
 	if err != nil {
 		return service.repo.FavoriteCommentReviewSkincare(comment_id, user.ID)
 	}
