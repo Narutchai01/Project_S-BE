@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
@@ -46,6 +47,10 @@ func (handler *HttpSkinHandler) CreateSkin(c *fiber.Ctx) error {
 	}
 
 	create_by_token := c.Get("token")
+
+	if skin.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fmt.Errorf("name is required")))
+	}
 
 	result, err := handler.skinUsecase.CreateSkin(skin, *file, c, create_by_token)
 
@@ -139,7 +144,11 @@ func (handler *HttpSkinHandler) UpdateSkin(c *fiber.Ctx) error {
 
 	result, err := handler.skinUsecase.UpdateSkin(intID, skin, file, c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "facial not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToSkinResponse(result))
@@ -168,7 +177,12 @@ func (handler *HttpSkinHandler) DeleteSkin(c *fiber.Ctx) error {
 	err = handler.skinUsecase.DeleteSkin(intID)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "facial not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(intID))
