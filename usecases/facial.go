@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"os"
@@ -82,7 +83,7 @@ func (service *facialService) GetFacial(id int) (entities.Facial, error) {
 func (service *facialService) UpdateFacial(id int, facial entities.Facial, file *multipart.FileHeader, c *fiber.Ctx) (entities.Facial, error) {
 	oldValue, err := service.repo.GetFacial(id)
 	if err != nil {
-		return entities.Facial{}, fmt.Errorf("failed to get facial: %w", err)
+		return entities.Facial{}, errors.New("facial not found")
 	}
 
 	if file != nil {
@@ -121,5 +122,11 @@ func (service *facialService) UpdateFacial(id int, facial entities.Facial, file 
 }
 
 func (service *facialService) DeleteFacial(id int) error {
+
+	_, err := service.repo.GetFacial(id)
+	if err != nil {
+		return errors.New("facial not found")
+	}
+
 	return service.repo.DeleteFacial(id)
 }

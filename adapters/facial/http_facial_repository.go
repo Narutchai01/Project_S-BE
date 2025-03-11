@@ -43,6 +43,10 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 
 	create_by_token := c.Get("token")
 
+	if facial.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
 	result, err := handler.facialUsecase.CreateFacial(facial, *file, c, create_by_token)
 
 	if err != nil {
@@ -123,6 +127,10 @@ func (handler *HttpFacialHandler) UpdateFacial(c *fiber.Ctx) error {
 
 	result, err := handler.facialUsecase.UpdateFacial(intID, facial, file, c)
 	if err != nil {
+		if err.Error() == "facial not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		}
+
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
@@ -148,6 +156,9 @@ func (handler *HttpFacialHandler) DeleteFacial(c *fiber.Ctx) error {
 	err = handler.facialUsecase.DeleteFacial(intID)
 
 	if err != nil {
+		if err.Error() == "facial not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
