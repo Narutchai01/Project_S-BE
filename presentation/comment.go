@@ -10,6 +10,7 @@ func PublicCommentThread(data entities.CommentThread) CommentThread {
 		Favorite:      data.Favorite,
 		FavoriteCount: data.FavoriteCount,
 		Text:          data.Text,
+		CreateAt:      data.CreatedAt,
 	}
 	return commment
 }

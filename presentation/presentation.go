@@ -114,12 +114,13 @@ type BookmarkReviewSkincare struct {
 }
 
 type CommentThread struct {
-	ID            uint   `json:"id"`
-	ThreadID      uint   `json:"thread_id"`
-	User          User   `json:"user" gorm:"foreignKey:UserID"`
-	Favorite      bool   `json:"favorite"`
-	FavoriteCount int    `json:"favorite_count" gorm:"-"`
-	Text          string `json:"text"`
+	ID            uint      `json:"id"`
+	ThreadID      uint      `json:"thread_id"`
+	User          User      `json:"user" gorm:"foreignKey:UserID"`
+	Favorite      bool      `json:"favorite"`
+	FavoriteCount int       `json:"favorite_count" gorm:"-"`
+	Text          string    `json:"content"`
+	CreateAt      time.Time `json:"create_at"`
 }
 
 type CommentReviewSkicare struct {
