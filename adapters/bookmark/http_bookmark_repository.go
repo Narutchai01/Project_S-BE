@@ -45,8 +45,10 @@ func (handler *HttpBookmarkHandler) BookMarkThread(c *fiber.Ctx) error {
 	result, err := handler.bookMark.BookmarkThread(uint(threadID), token)
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid thread ID")))
-
+		if err.Error() == "thread not found" || err.Error() == "user not found" {
+			return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToBookmarkThreadResponse(result))
@@ -78,10 +80,11 @@ func (handler *HttpBookmarkHandler) BookMarkReviewSkincare(c *fiber.Ctx) error {
 	}
 
 	result, err := handler.bookMark.BookmarkReviewSkincare(uint(reviewID), token)
-
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid review ID")))
-
+		if err.Error() == "review not found" || err.Error() == "user not found" {
+			return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToBookmarkReviewSkincareResponse(result))

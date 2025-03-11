@@ -34,7 +34,11 @@ func (handler *HttpFavoriteHandler) HandleFavoriteCommentThread(c *fiber.Ctx) er
 
 	result, err := handler.FavoriteUsecases.FavoriteCommentThread(uint(comment_id), token)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "comment not found" || err.Error() == "user not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(result)
@@ -58,7 +62,11 @@ func (handler *HttpFavoriteHandler) HandleFavoriteThread(c *fiber.Ctx) error {
 
 	result, err := handler.FavoriteUsecases.FavoriteThread(uint(thread_id), token)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "thread not found" || err.Error() == "user not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(result)
@@ -82,7 +90,11 @@ func (handler *HttpFavoriteHandler) HandleFavoriteReviewSkincare(c *fiber.Ctx) e
 
 	result, err := handler.FavoriteUsecases.FavoriteReviewSkincare(uint(review_id), token)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "review not found" || err.Error() == "user not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(result)
@@ -105,7 +117,11 @@ func (handler *HttpFavoriteHandler) HandleFavoriteCommentReviewSkincare(c *fiber
 
 	result, err := handler.FavoriteUsecases.FavoriteCommnetReviewSkincare(uint(comment_id), token)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "comment not found" || err.Error() == "user not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(result)

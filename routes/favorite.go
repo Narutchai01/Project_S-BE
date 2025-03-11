@@ -1,7 +1,10 @@
 package routes
 
 import (
+	adaptersComment "github.com/Narutchai01/Project_S-BE/adapters/comment"
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/favorite"
+	adaptersReview "github.com/Narutchai01/Project_S-BE/adapters/review"
+	adaptersThread "github.com/Narutchai01/Project_S-BE/adapters/thread"
 	adaptersUser "github.com/Narutchai01/Project_S-BE/adapters/user"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
@@ -11,7 +14,10 @@ import (
 func FavoriteRoutes(app fiber.Router, db *gorm.DB) {
 	favoriteRepo := adapters.NewGormFavoriteRepository(db)
 	userRepo := adaptersUser.NewGormUserRepository(db)
-	favoriteService := usecases.NewFavoriteUseCase(favoriteRepo, userRepo)
+	threadRepo := adaptersThread.NewGormThreadRepository(db)
+	reviewRepo := adaptersReview.NewGormReviewRepository(db)
+	commentRepo := adaptersComment.NewGormCommentRepository(db)
+	favoriteService := usecases.NewFavoriteUseCase(favoriteRepo, userRepo, threadRepo, reviewRepo, commentRepo)
 	favoriteHandler := adapters.NewHttpFavoriteHandler(favoriteService)
 
 	favorite := app.Group("/favorite")
