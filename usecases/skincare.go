@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"os"
@@ -81,7 +82,7 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 
 	old_skincare, err := service.repo.GetSkincareById(id)
 	if err != nil {
-		return entities.Skincare{}, err
+		return entities.Skincare{}, errors.New("skincare not found")
 	}
 
 	if file != nil {
@@ -120,10 +121,9 @@ func (service *skincareService) UpdateSkincareById(id int, skincare entities.Ski
 }
 
 func (service *skincareService) DeleteSkincareById(id int) (entities.Skincare, error) {
-
 	old_skincare, err := service.repo.GetSkincareById(id)
 	if err != nil {
-		return entities.Skincare{}, err
+		return entities.Skincare{}, errors.New("skincare not found")
 	}
 
 	oldImage := path.Base(old_skincare.Image)

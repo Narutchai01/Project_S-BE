@@ -1,6 +1,8 @@
 package adapters
 
 import (
+	"fmt"
+
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/usecases"
@@ -38,6 +40,14 @@ func (handler *HttpSkincareHandler) CreateSkincare(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 	create_by_token := c.Get("token")
+
+	if create_by_token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fmt.Errorf("miss jwt token")))
+	}
+
+	if skincare.Name == "" || skincare.Description == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fmt.Errorf("name and description is require")))
+	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -116,8 +126,8 @@ func (handler *HttpSkincareHandler) GetSkincareById(c *fiber.Ctx) error {
 //	@Failure		404			{object}	presentation.Responses
 //	@Router			/admin/skincare/{id} [put]
 func (handler *HttpSkincareHandler) UpdateSkincareById(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
 
+	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
@@ -135,7 +145,12 @@ func (handler *HttpSkincareHandler) UpdateSkincareById(c *fiber.Ctx) error {
 
 	result, err := handler.skincarenUcase.UpdateSkincareById(id, skincare, file, c)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "skincare not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		}
+
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.SkincareResponse(result))
@@ -155,7 +170,6 @@ func (handler *HttpSkincareHandler) UpdateSkincareById(c *fiber.Ctx) error {
 //	@Router			/admin/skincare/{id} [delete]
 func (handler *HttpSkincareHandler) DeleteSkincareById(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
-
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
@@ -163,7 +177,12 @@ func (handler *HttpSkincareHandler) DeleteSkincareById(c *fiber.Ctx) error {
 	_, err = handler.skincarenUcase.DeleteSkincareById(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "skincare not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))

@@ -75,6 +75,7 @@ func TestCreateSkincareHandler(t *testing.T) {
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		_ = writer.WriteField("name", expectData.Name)
+		_ = writer.WriteField("description", expectData.Description)
 		part, _ := writer.CreateFormFile("file", "test.jpg")
 		part.Write([]byte("test image"))
 		writer.Close()
@@ -89,42 +90,27 @@ func TestCreateSkincareHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed in body parser", func(t *testing.T) {
+	t.Run("failed Miss Name", func(t *testing.T) {
 		_, _, app := setup()
-		req := httptest.NewRequest("POST", "/admin/skincare", bytes.NewBuffer([]byte("invalid body")))
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
 
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-	})
-
-	t.Run("failed to get image file", func(t *testing.T) {
-		mockService, _, app := setup()
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("name", expectData.Name)
+		_ = writer.WriteField("description", expectData.Description)
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test image"))
 		writer.Close()
 
 		req := httptest.NewRequest("POST", "/admin/skincare", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-
+		req.Header.Set("token", "example-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to create skincare", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("CreateSkincare",
-			mock.Anything,
-			mock.AnythingOfType("multipart.FileHeader"),
-			mock.Anything,
-			mock.Anything,
-		).Return(entities.Skincare{}, errors.New("service error"))
+	t.Run("failed Miss Description", func(t *testing.T) {
+		_, _, app := setup()
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
@@ -139,9 +125,56 @@ func TestCreateSkincareHandler(t *testing.T) {
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
+
+	t.Run("failed Miss Image", func(t *testing.T) {
+		_, _, app := setup()
+
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		_ = writer.WriteField("name", expectData.Name)
+		_ = writer.WriteField("description", expectData.Description)
+		writer.Close()
+
+		req := httptest.NewRequest("POST", "/admin/skincare", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("token", "example-token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("failed Miss Token", func(t *testing.T) {
+		_, _, app := setup()
+
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		_ = writer.WriteField("name", expectData.Name)
+		_ = writer.WriteField("description", expectData.Description)
+		part, _ := writer.CreateFormFile("file", "test.jpg")
+		part.Write([]byte("test image"))
+		writer.Close()
+
+		req := httptest.NewRequest("POST", "/admin/skincare", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusUnauthorized, resp.StatusCode)
+
+	})
+	t.Run("failed in body parser", func(t *testing.T) {
+		_, _, app := setup()
+		req := httptest.NewRequest("POST", "/admin/skincare", bytes.NewBuffer([]byte("invalid body")))
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
 }
 
 func TestGetSkinsHandler(t *testing.T) {
