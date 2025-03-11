@@ -3,6 +3,7 @@ package routes
 import (
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/facial"
 	"github.com/Narutchai01/Project_S-BE/middlewares"
+	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -17,7 +18,13 @@ func FacialRouters(app fiber.Router, admin fiber.Router, db *gorm.DB) {
 	facialAdmin := admin.Group("/facial")
 	facialAdmin.Use(middlewares.AuthorizationRequired())
 	facialAdmin.Post("/", facialHandler.CreateFacial)
+	facialAdmin.Delete("/", func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(fiber.ErrNotFound))
+	})
 	facialAdmin.Delete("/:id", facialHandler.DeleteFacial)
+	facialAdmin.Put("/", func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(fiber.ErrNotFound))
+	})
 	facialAdmin.Put("/:id", facialHandler.UpdateFacial)
 
 	facialUser := app.Group("/facial")
