@@ -84,7 +84,7 @@ func (service *skinService) UpdateSkin(id int, skin entities.Skin, file *multipa
 
 	oldValue, err := service.repo.GetSkin(id)
 	if err != nil {
-		return entities.Skin{}, fmt.Errorf("facial not found")
+		return entities.Skin{}, fmt.Errorf("failed to get skin: %w", err)
 	}
 
 	if file != nil {
@@ -122,7 +122,7 @@ func (service *skinService) UpdateSkin(id int, skin entities.Skin, file *multipa
 func (service *skinService) DeleteSkin(id int) error {
 	oldSkin, err := service.repo.GetSkin(id)
 	if err != nil {
-		return fmt.Errorf("facial not found")
+		return fmt.Errorf("failed to get this skin type: %w", err)
 	}
 
 	oldImage := path.Base(oldSkin.Image)
