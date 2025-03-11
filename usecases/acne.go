@@ -84,7 +84,7 @@ func (service *acneService) UpdateAcne(id int, acne entities.Acne, file *multipa
 
 	oldvalue, err := service.repo.GetAcne(id)
 	if err != nil {
-		return entities.Acne{}, fmt.Errorf("failed to get acne: %w", err)
+		return entities.Acne{}, fmt.Errorf("acne not found")
 	}
 
 	if file != nil {
@@ -120,5 +120,11 @@ func (service *acneService) UpdateAcne(id int, acne entities.Acne, file *multipa
 }
 
 func (service *acneService) DeleteAcne(id int) error {
+
+	_, err := service.repo.GetAcne(id)
+	if err != nil {
+		return fmt.Errorf("acne not found")
+	}
+
 	return service.repo.DeleteAcne(id)
 }
