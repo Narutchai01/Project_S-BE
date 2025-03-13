@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"os"
@@ -103,7 +104,7 @@ func (service *adminService) UpdateAdmin(token string, admin entities.Admin, fil
 
 	oldamin, err := service.repo.GetAdmin(int(id))
 	if err != nil {
-		return entities.Admin{}, err
+		return entities.Admin{}, errors.New("admin not found")
 	}
 
 	if file != nil {
@@ -151,7 +152,7 @@ func (service *adminService) DeleteAdmin(id int) (entities.Admin, error) {
 
 	old_admin, err := service.repo.GetAdmin(id)
 	if err != nil {
-		return entities.Admin{}, err
+		return entities.Admin{}, errors.New("admin not found")
 	}
 
 	oldImage := path.Base(old_admin.Image)

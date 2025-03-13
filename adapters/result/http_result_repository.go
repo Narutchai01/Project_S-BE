@@ -161,7 +161,11 @@ func (handler *HttpResultHandler) GetResultByIDs(c *fiber.Ctx) error {
 
 	results, err := handler.resultUsecase.GetResultByIDs(ids.IDs)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "results not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToResultsResponse(results))

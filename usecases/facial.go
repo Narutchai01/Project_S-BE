@@ -44,25 +44,19 @@ func (service *facialService) CreateFacial(facial entities.Facial, file multipar
 	imageUrl, err := utils.UploadImage(fileName, "/facial")
 
 	if err != nil {
-		return facial, c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return entities.Facial{}, err
 	}
 
 	err = os.Remove("./uploads/" + fileName)
 
 	if err != nil {
-		return facial, c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return entities.Facial{}, err
 	}
 
 	create_by, err := utils.ExtractToken(token)
 
 	if err != nil {
-		return facial, c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return entities.Facial{}, err
 	}
 
 	facial.CreateBY = create_by
