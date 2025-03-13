@@ -2,6 +2,7 @@ package adapters
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/presentation"
@@ -32,6 +33,10 @@ func (repo *HtttpReviewRepository) CreateReviewSkincare(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
+	if len(skincare_id) < 1 || len(skincare_id) > 10 {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
 	token := c.Get("token")
 
 	if token == "" {
@@ -60,7 +65,7 @@ func (repo *HtttpReviewRepository) GetReviewSkincare(c *fiber.Ctx) error {
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid ID")))
 	}
 
 	token := c.Get("token")

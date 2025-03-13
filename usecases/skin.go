@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mime/multipart"
 	"os"
-	"path"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
@@ -84,7 +83,7 @@ func (service *skinService) UpdateSkin(id int, skin entities.Skin, file *multipa
 
 	oldValue, err := service.repo.GetSkin(id)
 	if err != nil {
-		return entities.Skin{}, fmt.Errorf("failed to get skin: %w", err)
+		return entities.Skin{}, fmt.Errorf("skin not found")
 	}
 
 	if file != nil {
@@ -120,14 +119,10 @@ func (service *skinService) UpdateSkin(id int, skin entities.Skin, file *multipa
 }
 
 func (service *skinService) DeleteSkin(id int) error {
-	oldSkin, err := service.repo.GetSkin(id)
+	_, err := service.repo.GetSkin(id)
 	if err != nil {
-		return fmt.Errorf("failed to get this skin type: %w", err)
+		return fmt.Errorf("skin not found")
 	}
 
-	oldImage := path.Base(oldSkin.Image)
-	if err := utils.DeleteImage(oldImage, "skin"); err != nil {
-		return fmt.Errorf("failed to update existing image: %w", err)
-	}
 	return service.repo.DeleteSkin(id)
 }

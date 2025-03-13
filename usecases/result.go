@@ -125,5 +125,17 @@ func (service *resultService) GetResult(id uint) (entities.Result, error) {
 }
 
 func (service *resultService) GetResultByIDs(ids []uint) ([]entities.Result, error) {
-	return service.repo.GetResultByIDs(ids)
+
+	var results []entities.Result
+
+	results, err := service.repo.GetResultByIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(results) < len(ids) {
+		return nil, fmt.Errorf("results not found")
+	}
+
+	return results, nil
 }

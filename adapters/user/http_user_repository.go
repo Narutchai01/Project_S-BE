@@ -45,7 +45,7 @@ func (handler *HttpUserHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if err := validateUser(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
 	}
 
 	result, err := handler.userUcase.Register(user, c)

@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
@@ -44,7 +45,7 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 	create_by_token := c.Get("token")
 
 	if facial.Name == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("name is required")))
 	}
 
 	result, err := handler.facialUsecase.CreateFacial(facial, *file, c, create_by_token)
@@ -53,7 +54,7 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(presentation.ToFacialResponse(result))
+	return c.Status(fiber.StatusCreated).JSON(result)
 }
 
 // GetFacials godoc
