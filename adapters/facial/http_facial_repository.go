@@ -54,7 +54,7 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(result)
+	return c.Status(fiber.StatusCreated).JSON(presentation.ToFacialResponse(result))
 }
 
 // GetFacials godoc
