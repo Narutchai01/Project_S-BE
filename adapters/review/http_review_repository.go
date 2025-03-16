@@ -3,6 +3,7 @@ package adapters
 import (
 	"encoding/json"
 	"errors"
+	"mime/multipart"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/presentation"
@@ -11,21 +12,22 @@ import (
 )
 
 type HtttpReviewRepository struct {
-	reviewUsecase usecases.ReviewUseCase
+	reviewUsecase     usecases.ReviewUseCase
+	communityUseccase usecases.CommunityUseCase
 }
 
-func NewHttpReviewRepository(reviewUsecase usecases.ReviewUseCase) *HtttpReviewRepository {
-	return &HtttpReviewRepository{reviewUsecase}
+func NewHttpReviewRepository(reviewUsecase usecases.ReviewUseCase, communityUsecase usecases.CommunityUseCase) *HtttpReviewRepository {
+	return &HtttpReviewRepository{reviewUsecase, communityUsecase}
 }
 
 func (repo *HtttpReviewRepository) CreateReviewSkincare(c *fiber.Ctx) error {
-	var review entities.ReviewSkincare
+	var review entities.Community
 	var skincare_id []int
 
 	review.Title = c.FormValue("title")
-	review.Content = c.FormValue("content")
+	review.Caption = c.FormValue("content")
 
-	if review.Title == "" || review.Content == "" {
+	if review.Title == "" || review.Caption == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
 	}
 
@@ -46,12 +48,13 @@ func (repo *HtttpReviewRepository) CreateReviewSkincare(c *fiber.Ctx) error {
 	review.SkincareID = skincare_id
 
 	file, err := c.FormFile("file")
-
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	result, err := repo.reviewUsecase.CreateReviewSkincare(review, token, *file, c)
+	files := []*multipart.FileHeader{file}
+
+	result, err := repo.communityUseccase.CreateCommunityThread(review, token, files, c, "Review")
 
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(err))
@@ -74,10 +77,10 @@ func (repo *HtttpReviewRepository) GetReviewSkincare(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
 	}
 
-	result, err := repo.reviewUsecase.GetReviewSkincare(uint(id), token)
+	result, err := repo.communityUseccase.GetCommunity(uint(id), "Review", token)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(errors.New("review not found")))
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToReviewResponse(result))
@@ -91,7 +94,7 @@ func (repo *HtttpReviewRepository) GetReviewSkincares(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
 	}
 
-	results, err := repo.reviewUsecase.GetReviewSkincares(token)
+	results, err := repo.communityUseccase.GetCommunities("Review", token)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
