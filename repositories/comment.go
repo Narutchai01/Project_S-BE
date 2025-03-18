@@ -10,4 +10,8 @@ type CommentRepository interface {
 	CreateCommentReviewSkicnare(comment entities.CommentReviewSkicare) (entities.CommentReviewSkicare, error)
 	GetCommentsReviewSkincare(review_id uint) ([]entities.CommentReviewSkicare, error)
 	GetCommentReviewSkincare(comment_id uint) (entities.CommentReviewSkicare, error)
+
+	CreateComment(comment entities.Comment) (entities.Comment, error)
+	GetComment(id uint) (entities.Comment, error)
+	GetComments(community_id uint) ([]entities.Comment, error)
 }

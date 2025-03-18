@@ -18,18 +18,6 @@ func NewHttpCommentHandler(commentUsecase usecases.CommentUsecase) *HtppCommentH
 	return &HtppCommentHandler{commentUsecase}
 }
 
-// create swwager for CreateComment
-// CreateComment godoc
-// @Summary Create a comment
-// @Description Create a comment
-// @Tags comment
-// @Accept json
-// @Produce json
-// @Param token header string true "Token"
-// @Param comment body object{thread_id=uint,text=string} true "Comment"
-// @Success 200 {object} presentation.Responses
-// @Failure fiber.StatusBadRequest {object} presentation.Responses
-// @Router /comment [post]
 func (handler *HtppCommentHandler) CreateCommentThread(c *fiber.Ctx) error {
 
 	token := c.Get("token")
@@ -46,7 +34,12 @@ func (handler *HtppCommentHandler) CreateCommentThread(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("text and thread_id is required")))
 	}
 
-	result, err := handler.comment.CreateCommentThread(comment, token)
+	newComment := entities.Comment{
+		CommunityID: comment.ThreadID,
+		Content:     comment.Text,
+	}
+
+	result, err := handler.comment.CreateComment(newComment, token, "thread")
 	if err != nil {
 		if err.Error() == "thread not found" || err.Error() == "user not found" {
 			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
@@ -58,19 +51,6 @@ func (handler *HtppCommentHandler) CreateCommentThread(c *fiber.Ctx) error {
 
 }
 
-// create swwager for GetComment
-// GetComment godoc
-// @Summary Get a comment
-// @Description Get a comment
-// @Tags comment
-// @Accept json
-// @Produce json
-// @Param thread_id path int true "Thread ID"
-// @Param token header string true "Token"
-// @Success 200 {object} presentation.Responses
-// @Failure fiber.StatusBadRequest {object} presentation.Responses
-// @Failure 401 {object} presentation.Responses
-// @Router /comment/{thread_id} [get]
 func (handler *HtppCommentHandler) GetCommentsThread(c *fiber.Ctx) error {
 	id := c.Params("thread_id")
 
@@ -85,7 +65,8 @@ func (handler *HtppCommentHandler) GetCommentsThread(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	result, err := handler.comment.GetCommentsThread(uint(thread_id), token)
+	result, err := handler.comment.GetComments(uint(thread_id), "thread")
+
 	if err != nil {
 		if err.Error() == "thread not found" {
 			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
@@ -113,7 +94,12 @@ func (handler *HtppCommentHandler) CreateCommentReviewSkicnare(c *fiber.Ctx) err
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("content and review_id is required")))
 	}
 
-	result, err := handler.comment.CreateCommentReviewSkicnare(comment, token)
+	newComment := entities.Comment{
+		CommunityID: comment.ReviewSkincareID,
+		Content:     comment.Content,
+	}
+
+	result, err := handler.comment.CreateComment(newComment, token, "review")
 	if err != nil {
 		if err.Error() == "review not found" || err.Error() == "user not found" {
 			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
@@ -140,7 +126,7 @@ func (handler *HtppCommentHandler) HandleGetCommentReviewSkincare(c *fiber.Ctx) 
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	result, err := handler.comment.GetCommentsReviewSkincare(uint(review_id), token)
+	result, err := handler.comment.GetComments(uint(review_id), "review")
 	if err != nil {
 		if err.Error() == "review not found" {
 			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
@@ -149,5 +135,4 @@ func (handler *HtppCommentHandler) HandleGetCommentReviewSkincare(c *fiber.Ctx) 
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToCommentsReviewSkincare(result))
-
 }

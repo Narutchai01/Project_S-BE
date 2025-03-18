@@ -22,3 +22,12 @@ type CommentReviewSkicare struct {
 	FavoriteCount    int            `json:"favorite_count" gorm:"-"`
 	Content          string         `json:"content"`
 }
+
+type Comment struct {
+	gorm.Model
+	CommunityID uint      `json:"community_id"`
+	Community   Community `gorm:"foreignKey:CommunityID"`
+	UserID      uint      `json:"user_id"`
+	User        User      `gorm:"foreignKey:UserID"`
+	Content     string    `json:"content"`
+}

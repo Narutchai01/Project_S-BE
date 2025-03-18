@@ -67,3 +67,28 @@ func (repo *GormCommentRepository) GetCommentReviewSkincare(comment_id uint) (en
 
 	return comment, nil
 }
+
+func (repo *GormCommentRepository) CreateComment(comment entities.Comment) (entities.Comment, error) {
+	if err := repo.db.Create(&comment).Error; err != nil {
+		return entities.Comment{}, err
+	}
+	return comment, nil
+}
+
+func (repo *GormCommentRepository) GetComment(id uint) (entities.Comment, error) {
+	var comment entities.Comment
+	if err := repo.db.Preload("User").Where("id = ?", id).First(&comment).Error; err != nil {
+		return entities.Comment{}, err
+	}
+	return comment, nil
+}
+
+func (repo *GormCommentRepository) GetComments(community_id uint) ([]entities.Comment, error) {
+	var comments []entities.Comment
+
+	if err := repo.db.Preload("User").Where("community_id = ?", community_id).Find(&comments).Error; err != nil {
+		return []entities.Comment{}, err
+	}
+
+	return comments, nil
+}

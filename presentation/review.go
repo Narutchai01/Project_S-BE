@@ -8,7 +8,7 @@ func PublicReviewSkincare(data entities.Community) ReviewSkincare {
 
 	var skincares []entities.Skincare
 	for _, skincare := range data.Skincares {
-		skincares = append(skincares, *&skincare.Skincare)
+		skincares = append(skincares, skincare.Skincare)
 	}
 
 	return ReviewSkincare{

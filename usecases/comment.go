@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
@@ -13,18 +14,21 @@ type CommentUsecase interface {
 	GetCommentsThread(thread_id uint, token string) ([]entities.CommentThread, error)
 	CreateCommentReviewSkicnare(comment entities.CommentReviewSkicare, token string) (entities.CommentReviewSkicare, error)
 	GetCommentsReviewSkincare(review_id uint, token string) ([]entities.CommentReviewSkicare, error)
+	CreateComment(comment entities.Comment, token string, type_community string) (entities.Comment, error)
+	GetComments(community_id uint, type_community string) ([]entities.Comment, error)
 }
 
 type commentService struct {
-	repo         repositories.CommentRepository
-	favoriteRepo repositories.FavoriteRepository
-	userRepo     repositories.UserRepository
-	threadRepo   repositories.ThreadRepository
-	reviewRepo   repositories.ReviewRepository
+	repo          repositories.CommentRepository
+	favoriteRepo  repositories.FavoriteRepository
+	userRepo      repositories.UserRepository
+	threadRepo    repositories.ThreadRepository
+	reviewRepo    repositories.ReviewRepository
+	communityRepo repositories.CommunityRepository
 }
 
-func NewCommentUseCase(repo repositories.CommentRepository, favoriteRepo repositories.FavoriteRepository, userRepo repositories.UserRepository, threadRepo repositories.ThreadRepository, reviewRepo repositories.ReviewRepository) CommentUsecase {
-	return &commentService{repo, favoriteRepo, userRepo, threadRepo, reviewRepo}
+func NewCommentUseCase(repo repositories.CommentRepository, favoriteRepo repositories.FavoriteRepository, userRepo repositories.UserRepository, threadRepo repositories.ThreadRepository, reviewRepo repositories.ReviewRepository, communityRepo repositories.CommunityRepository) CommentUsecase {
+	return &commentService{repo, favoriteRepo, userRepo, threadRepo, reviewRepo, communityRepo}
 }
 
 func (service *commentService) CreateCommentThread(comment entities.CommentThread, token string) (entities.CommentThread, error) {
@@ -153,4 +157,62 @@ func (service *commentService) GetCommentsReviewSkincare(review_id uint, token s
 	}
 
 	return result, nil
+}
+
+func (service *commentService) CreateComment(comment entities.Comment, token string, type_community string) (entities.Comment, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.Comment{}, err
+	}
+
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return entities.Comment{}, err
+	}
+
+	community_type, err := service.communityRepo.GetCommunityType(strings.ToLower(type_community))
+	if err != nil {
+		return entities.Comment{}, err
+	}
+
+	community, err := service.communityRepo.GetCommunity(comment.CommunityID, uint64(community_type.ID))
+	if err != nil {
+		return entities.Comment{}, err
+	}
+
+	comment.CommunityID = community.ID
+	comment.UserID = user.ID
+
+	comment, err = service.repo.CreateComment(comment)
+	if err != nil {
+		return entities.Comment{}, err
+	}
+
+	comment, err = service.repo.GetComment(comment.ID)
+	if err != nil {
+		return entities.Comment{}, err
+	}
+
+	return comment, nil
+}
+
+func (service *commentService) GetComments(community_id uint, type_community string) ([]entities.Comment, error) {
+
+	community_type, err := service.communityRepo.GetCommunityType(strings.ToLower(type_community))
+	if err != nil {
+		return []entities.Comment{}, err
+	}
+
+	community, err := service.communityRepo.GetCommunity(community_id, uint64(community_type.ID))
+	if err != nil {
+		return []entities.Comment{}, err
+	}
+
+	comments, err := service.repo.GetComments(community.ID)
+	if err != nil {
+		return []entities.Comment{}, err
+	}
+
+	return comments, nil
 }
