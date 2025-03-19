@@ -1,6 +1,9 @@
 package adapters
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
 	"gorm.io/gorm"
@@ -195,4 +198,41 @@ func (repo *GormFavoriteRepository) CountFavoriteCommentReviewSkincare(comment_i
 	}
 
 	return count, nil
+}
+
+func (r *GormFavoriteRepository) Favorite(favorite entities.Favorite) (entities.Favorite, error) {
+	if err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&favorite).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return entities.Favorite{}, err
+	}
+
+	return favorite, nil
+}
+
+func (r *GormFavoriteRepository) FindFavorite(id uint, column string, user_id uint) (bool, uint, error) {
+	var favorite entities.Favorite
+
+	query := fmt.Sprintf("%s = ? and user_id = ?", column)
+	if err := r.db.Where(query, id, user_id).First(&favorite).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, 0, nil
+		}
+		return false, 0, err
+	}
+
+	return true, favorite.ID, nil
+}
+
+func (r *GormFavoriteRepository) DeleteFavorite(id uint) (entities.Favorite, error) {
+	var favorite entities.Favorite
+
+	if err := r.db.Where("id = ?", id).Delete(&favorite).Error; err != nil {
+		return entities.Favorite{}, err
+	}
+
+	return favorite, nil
 }

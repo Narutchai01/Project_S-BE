@@ -22,4 +22,8 @@ type FavoriteRepository interface {
 	FindFavoriteCommentReviewSkincare(comment_id uint, user_id uint) (entities.FavoriteCommentReviewSkincare, error)
 	UpdateFavoriteCommentReviewSkincare(favorite_comment_review_skincare entities.FavoriteCommentReviewSkincare) (entities.FavoriteCommentReviewSkincare, error)
 	CountFavoriteCommentReviewSkincare(comment_id uint) (int64, error)
+
+	Favorite(favorite entities.Favorite) (entities.Favorite, error)
+	FindFavorite(id uint, colums string, user_id uint) (bool, uint, error)
+	DeleteFavorite(id uint) (entities.Favorite, error)
 }
