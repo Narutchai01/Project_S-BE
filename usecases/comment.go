@@ -15,7 +15,7 @@ type CommentUsecase interface {
 	CreateCommentReviewSkicnare(comment entities.CommentReviewSkicare, token string) (entities.CommentReviewSkicare, error)
 	GetCommentsReviewSkincare(review_id uint, token string) ([]entities.CommentReviewSkicare, error)
 	CreateComment(comment entities.Comment, token string, type_community string) (entities.Comment, error)
-	GetComments(community_id uint, type_community string) ([]entities.Comment, error)
+	GetComments(community_id uint, type_community string, token string) ([]entities.Comment, error)
 }
 
 type commentService struct {
@@ -197,7 +197,17 @@ func (service *commentService) CreateComment(comment entities.Comment, token str
 	return comment, nil
 }
 
-func (service *commentService) GetComments(community_id uint, type_community string) ([]entities.Comment, error) {
+func (service *commentService) GetComments(community_id uint, type_community string, token string) ([]entities.Comment, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return []entities.Comment{}, err
+	}
+
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return []entities.Comment{}, err
+	}
 
 	community_type, err := service.communityRepo.GetCommunityType(strings.ToLower(type_community))
 	if err != nil {
@@ -212,6 +222,15 @@ func (service *commentService) GetComments(community_id uint, type_community str
 	comments, err := service.repo.GetComments(community.ID)
 	if err != nil {
 		return []entities.Comment{}, err
+	}
+
+	for i, comment := range comments {
+		isFavorite, _, err := service.favoriteRepo.FindFavorite(comment.ID, "comment_id", user.ID)
+		if err != nil {
+			return []entities.Comment{}, err
+		}
+		comments[i].Favorite = isFavorite
+		comments[i].FavoriteCount = int(service.favoriteRepo.CountFavorite(comment.ID, "comment_id"))
 	}
 
 	return comments, nil

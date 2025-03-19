@@ -22,10 +22,12 @@ type CommunityUseCase interface {
 type communityService struct {
 	communityRepo repositories.CommunityRepository
 	userRepo      repositories.UserRepository
+	favoriteRepo  repositories.FavoriteRepository
+	bookmarkRepo  repositories.BookmarkRepository
 }
 
-func NewCommunityUseCase(communityRepo repositories.CommunityRepository, userRepo repositories.UserRepository) CommunityUseCase {
-	return &communityService{communityRepo, userRepo}
+func NewCommunityUseCase(communityRepo repositories.CommunityRepository, userRepo repositories.UserRepository, favoriteRepo repositories.FavoriteRepository, bookmarkRepo repositories.BookmarkRepository) CommunityUseCase {
+	return &communityService{communityRepo, userRepo, favoriteRepo, bookmarkRepo}
 }
 
 func (service *communityService) CreateCommunityThread(community entities.Community, token string, files []*multipart.FileHeader, c *fiber.Ctx, community_type string) (entities.Community, error) {
@@ -110,6 +112,22 @@ func (service *communityService) CreateCommunityThread(community entities.Commun
 	}
 	community.Owner = (user.ID == community.User.ID)
 
+	isFavorted, _, err := service.favoriteRepo.FindFavorite(uint(community.ID), "community_id", user.ID)
+	if err != nil {
+		return entities.Community{}, err
+	}
+
+	community.Favorite = isFavorted
+
+	community.Likes = uint64(service.favoriteRepo.CountFavorite(community.ID, "community_id"))
+
+	isBookmark, _, err := service.bookmarkRepo.FindBookmark(community.ID, user.ID)
+	if err != nil {
+		return entities.Community{}, err
+	}
+
+	community.Bookmark = isBookmark
+
 	return community, nil
 }
 
@@ -137,6 +155,15 @@ func (service *communityService) GetCommunity(id uint, type_community string, to
 
 	community.Owner = (user.ID == community.User.ID)
 
+	isFavorted, _, err := service.favoriteRepo.FindFavorite(uint(community.ID), "community_id", user.ID)
+	if err != nil {
+		return entities.Community{}, err
+	}
+
+	community.Favorite = isFavorted
+
+	community.Likes = uint64(service.favoriteRepo.CountFavorite(community.ID, "community_id"))
+
 	return community, nil
 }
 
@@ -162,6 +189,15 @@ func (service *communityService) GetCommunities(type_community string, token str
 
 	for i, community := range communities {
 		communities[i].Owner = (user.ID == community.User.ID)
+
+		isFavorted, _, err := service.favoriteRepo.FindFavorite(uint(community.ID), "community_id", user.ID)
+		if err != nil {
+			return []entities.Community{}, err
+		}
+
+		communities[i].Favorite = isFavorted
+
+		communities[i].Likes = uint64(service.favoriteRepo.CountFavorite(community.ID, "community_id"))
 	}
 
 	return communities, nil

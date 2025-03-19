@@ -26,4 +26,5 @@ type FavoriteRepository interface {
 	Favorite(favorite entities.Favorite) (entities.Favorite, error)
 	FindFavorite(id uint, colums string, user_id uint) (bool, uint, error)
 	DeleteFavorite(id uint) (entities.Favorite, error)
+	CountFavorite(id uint, colum string) int64
 }

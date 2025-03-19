@@ -2,6 +2,7 @@ package routes
 
 import (
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/bookmark"
+	adaptersCommunity "github.com/Narutchai01/Project_S-BE/adapters/community"
 	adaptersReview "github.com/Narutchai01/Project_S-BE/adapters/review"
 	adaptersThread "github.com/Narutchai01/Project_S-BE/adapters/thread"
 	adaptersUser "github.com/Narutchai01/Project_S-BE/adapters/user"
@@ -17,7 +18,8 @@ func BookMarkRouters(app fiber.Router, db *gorm.DB) {
 	threadRepo := adaptersThread.NewGormThreadRepository(db)
 	reviewRepo := adaptersReview.NewGormReviewRepository(db)
 	userRepo := adaptersUser.NewGormUserRepository(db)
-	bookmarkService := usecases.NewBookmarkUseCase(bookmarkRepo, threadRepo, reviewRepo, userRepo)
+	communityRepo := adaptersCommunity.NewGormCommunityRepository(db)
+	bookmarkService := usecases.NewBookmarkUseCase(bookmarkRepo, threadRepo, reviewRepo, userRepo, communityRepo)
 	bookmarkHandler := adapters.NewHttpBookmarkHandler(bookmarkService)
 
 	BookmarkGroup := app.Group("/bookmark").Use(middlewares.AuthorizationRequired())

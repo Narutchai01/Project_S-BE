@@ -65,7 +65,7 @@ func (handler *HtppCommentHandler) GetCommentsThread(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	result, err := handler.comment.GetComments(uint(thread_id), "thread")
+	result, err := handler.comment.GetComments(uint(thread_id), "thread", token)
 
 	if err != nil {
 		if err.Error() == "thread not found" {
@@ -126,7 +126,7 @@ func (handler *HtppCommentHandler) HandleGetCommentReviewSkincare(c *fiber.Ctx) 
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	result, err := handler.comment.GetComments(uint(review_id), "review")
+	result, err := handler.comment.GetComments(uint(review_id), "review", token)
 	if err != nil {
 		if err.Error() == "review not found" {
 			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))

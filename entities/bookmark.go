@@ -16,3 +16,12 @@ type BookmarkReviewSkincare struct {
 	ReviewSkincare   ReviewSkincare `gorm:"foreignKey:ReviewSkincareID"`
 	Status           bool           `json:"status" gorm:"default:true"`
 }
+
+type Bookmark struct {
+	gorm.Model  `swaggerignore:"true"`
+	CommunityID uint      `json:"community_id" gorm:"not null"`
+	UserID      uint      `json:"user_id" gorm:"not null"`
+	User        User      `gorm:"foreignKey:UserID"`
+	Community   Community `gorm:"foreignKey:CommunityID"`
+	Status      bool      `json:"status" gorm:"-"`
+}

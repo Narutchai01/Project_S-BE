@@ -13,6 +13,8 @@ type Community struct {
 	Caption    string              `json:"caption"`
 	Owner      bool                `json:"owner" gorm:"-"`
 	Likes      uint64              `json:"likes" gorm:"default:0"`
+	Favorite   bool                `json:"favorite" gorm:"-"`
+	Bookmark   bool                `json:"bookmark" gorm:"-"`
 	TypeID     uint64              `json:"type_id" gorm:"not null"`
 	Type       CommunityType       `json:"type" gorm:"foreignKey:TypeID"`
 	UserID     uint64              `json:"user_id" gorm:"not null"`

@@ -12,17 +12,17 @@ func PublicReviewSkincare(data entities.Community) ReviewSkincare {
 	}
 
 	return ReviewSkincare{
-		ID:      data.ID,
-		Title:   data.Title,
-		Content: data.Caption,
-		// Favortie:      data.Favorite,
+		ID:            data.ID,
+		Title:         data.Title,
+		Content:       data.Caption,
+		Favortie:      data.Favorite,
 		FavoriteCount: int64(data.Likes),
-		// Bookmark:      data.Bookmark,
-		Owner:    data.Owner,
-		Image:    data.Images[0].Image,
-		User:     *PublicUser(data.User),
-		Skincare: MapPubliceSkincare(skincares),
-		CreateAt: data.CreatedAt,
+		Bookmark:      data.Bookmark,
+		Owner:         data.Owner,
+		Image:         data.Images[0].Image,
+		User:          *PublicUser(data.User),
+		Skincare:      MapPubliceSkincare(skincares),
+		CreateAt:      data.CreatedAt,
 	}
 }
 

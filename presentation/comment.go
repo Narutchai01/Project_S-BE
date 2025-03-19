@@ -4,13 +4,13 @@ import "github.com/Narutchai01/Project_S-BE/entities"
 
 func PublicCommentThread(data entities.Comment) CommentThread {
 	var commment = CommentThread{
-		ID:       data.ID,
-		ThreadID: data.CommunityID,
-		User:     *PublicUser(data.User),
-		// Favorite:      data.Favorite,
-		// FavoriteCount: data.FavoriteCount,
-		Text:     data.Content,
-		CreateAt: data.CreatedAt,
+		ID:            data.ID,
+		ThreadID:      data.CommunityID,
+		User:          *PublicUser(data.User),
+		Favorite:      data.Favorite,
+		FavoriteCount: data.FavoriteCount,
+		Text:          data.Content,
+		CreateAt:      data.CreatedAt,
 	}
 	return commment
 }

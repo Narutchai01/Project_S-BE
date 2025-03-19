@@ -21,7 +21,7 @@ func ReviewRoutes(app fiber.Router, db *gorm.DB) {
 	bookmarkRepo := adaptersBookmark.NewGormBookmarkRepository(db)
 	communityRepo := adaptersCommunity.NewGormCommunityRepository(db)
 	reviewService := usecases.NewReviewUseCase(reviewRepo, userRepo, skincareRepo, favoriteRepo, bookmarkRepo)
-	communityService := usecases.NewCommunityUseCase(communityRepo, userRepo)
+	communityService := usecases.NewCommunityUseCase(communityRepo, userRepo, favoriteRepo, bookmarkRepo)
 	reviewHandler := adaptersReview.NewHttpReviewRepository(reviewService, communityService)
 
 	reviewGroup := app.Group("/reviews").Use(middlewares.AuthorizationRequired())
