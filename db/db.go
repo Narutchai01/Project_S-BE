@@ -46,7 +46,7 @@ func ConnectDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(entities.CommunityType{}, entities.Community{}, entities.CommunityImage{}, entities.User{}, entities.Skincare{}, entities.Admin{}, entities.SkincareCommunity{}, entities.Comment{}, entities.Favorite{}, entities.Bookmark{})
+	db.AutoMigrate(entities.CommunityType{}, entities.Community{}, entities.CommunityImage{}, entities.User{}, entities.Skincare{}, entities.Admin{}, entities.SkincareCommunity{}, entities.Comment{}, entities.Favorite{}, entities.Bookmark{}, entities.FaceProblemType{}, entities.FaceProblem{})
 
 	return db, nil
 }
@@ -58,11 +58,26 @@ func Seeds(db *gorm.DB) {
 		{Type: "comment"},
 	}
 
+	type_face_problem := []entities.FaceProblemType{
+		{Name: "acne"},
+		{Name: "facial"},
+		{Name: "skin"},
+	}
+
 	for _, communityType := range type_community {
 		var existing entities.CommunityType
 		if err := db.Where("type = ?", communityType.Type).First(&existing).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				db.Create(&communityType)
+			}
+		}
+	}
+
+	for _, faceProblemType := range type_face_problem {
+		var existing entities.FaceProblemType
+		if err := db.Where("name = ?", faceProblemType.Name).First(&existing).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				db.Create(&faceProblemType)
 			}
 		}
 	}

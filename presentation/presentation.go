@@ -39,7 +39,12 @@ type Skincare struct {
 	Image       string `json:"image"`
 	CreateBY    uint   `json:"create_by"`
 }
-
+type Skin struct {
+	ID       uint   `json:"id"`
+	Name     string `json:"name"`
+	Image    string `json:"image"`
+	CreateBY uint   `json:"create_by"`
+}
 type User struct {
 	ID            uint       `json:"id"`
 	FullName      string     `json:"full_name"`
