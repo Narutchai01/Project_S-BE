@@ -39,7 +39,12 @@ type Skincare struct {
 	Image       string `json:"image"`
 	CreateBY    uint   `json:"create_by"`
 }
-
+type Skin struct {
+	ID       uint   `json:"id"`
+	Name     string `json:"name"`
+	Image    string `json:"image"`
+	CreateBY uint   `json:"create_by"`
+}
 type User struct {
 	ID            uint       `json:"id"`
 	FullName      string     `json:"full_name"`
@@ -69,22 +74,22 @@ type Result struct {
 }
 
 type Thread struct {
-	ID            uint          `json:"id"`
-	User          User          `json:"user"`
-	Title         string        `json:"title"`
-	Favorite      bool          `json:"favorite"`
-	FavoriteCount int64         `json:"favorite_count"`
-	Owner         bool          `json:"owner"`
-	Bookmark      bool          `json:"bookmark"`
-	Images        []ThreadImage `json:"images"`
-	Caption       string        `json:"caption"`
-	CreateAt      time.Time     `json:"create_at"`
+	ID            uint             `json:"id"`
+	User          User             `json:"user"`
+	Title         string           `json:"title"`
+	Favorite      bool             `json:"favorite"`
+	FavoriteCount int64            `json:"favorite_count"`
+	Owner         bool             `json:"owner"`
+	Bookmark      bool             `json:"bookmark"`
+	Images        []CommunityImage `json:"images"`
+	Caption       string           `json:"caption"`
+	CreateAt      time.Time        `json:"create_at"`
 }
 
-type ThreadImage struct {
-	ID       uint   `json:"id"`
-	ThreadID uint   `json:"thread_id"`
-	Image    string `json:"image"`
+type CommunityImage struct {
+	ID          uint   `json:"id"`
+	CommunityID uint   `json:"thread_id"`
+	Image       string `json:"image"`
 }
 
 type ReviewSkincare struct {

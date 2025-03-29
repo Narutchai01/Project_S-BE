@@ -31,7 +31,7 @@ func ConnectDB() (*gorm.DB, error) {
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
 			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level
+			LogLevel:                  logger.Warn, // Log level
 			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
 			ParameterizedQueries:      true,        // Don't include params in the SQL log
 			Colorful:                  false,       // Disable color
@@ -46,7 +46,39 @@ func ConnectDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&entities.Admin{}, &entities.Skincare{}, &entities.User{}, &entities.Recovery{}, &entities.Facial{}, &entities.Acne{}, &entities.Skin{}, &entities.Result{}, entities.Thread{}, entities.ThreadImage{}, entities.FavoriteThread{}, entities.BookmarkThread{}, entities.ReviewSkincare{}, entities.FavoriteReviewSkincare{}, entities.BookmarkReviewSkincare{}, entities.FavoriteCommentThread{}, entities.CommentThread{}, entities.CommentReviewSkicare{}, entities.FavoriteCommentReviewSkincare{})
+	db.AutoMigrate(entities.CommunityType{}, entities.Community{}, entities.CommunityImage{}, entities.User{}, entities.Skincare{}, entities.Admin{}, entities.SkincareCommunity{}, entities.Comment{}, entities.Favorite{}, entities.Bookmark{}, entities.FaceProblemType{}, entities.FaceProblem{})
 
 	return db, nil
+}
+
+func Seeds(db *gorm.DB) {
+	type_community := []entities.CommunityType{
+		{Type: "thread"},
+		{Type: "review"},
+		{Type: "comment"},
+	}
+
+	type_face_problem := []entities.FaceProblemType{
+		{Name: "acne"},
+		{Name: "facial"},
+		{Name: "skin"},
+	}
+
+	for _, communityType := range type_community {
+		var existing entities.CommunityType
+		if err := db.Where("type = ?", communityType.Type).First(&existing).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				db.Create(&communityType)
+			}
+		}
+	}
+
+	for _, faceProblemType := range type_face_problem {
+		var existing entities.FaceProblemType
+		if err := db.Where("name = ?", faceProblemType.Name).First(&existing).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				db.Create(&faceProblemType)
+			}
+		}
+	}
 }

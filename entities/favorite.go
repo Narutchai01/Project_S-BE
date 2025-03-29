@@ -34,3 +34,13 @@ type FavoriteCommentReviewSkincare struct {
 	UserID           uint `json:"user_id" gorm:"not null;uniqueIndex:idx_comment_user"`
 	Status           bool `json:"status" gorm:"default:true"`
 }
+
+type Favorite struct {
+	gorm.Model
+	UserID      uint      `json:"user_id" gorm:"not null"`
+	User        User      `gorm:"foreignKey:UserID"`
+	CommunityID uint      `json:"community_id" gorm:"default:null"`
+	Community   Community `gorm:"foreignKey:CommunityID"`
+	CommentID   uint      `json:"comment_id" gorm:"default:null"`
+	Comment     Comment   `gorm:"foreignKey:CommentID"`
+}

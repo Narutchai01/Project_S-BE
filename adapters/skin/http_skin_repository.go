@@ -2,7 +2,6 @@ package adapters
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/presentation"
@@ -11,11 +10,11 @@ import (
 )
 
 type HttpSkinHandler struct {
-	skinUsecase usecases.SkinUsecases
+	faceProblemsUsecase usecases.FaceProblemUseCase
 }
 
-func NewHttpSkinHandler(skinUcase usecases.SkinUsecases) *HttpSkinHandler {
-	return &HttpSkinHandler{skinUcase}
+func NewHttpSkinHandler(faceProblemsUsecase usecases.FaceProblemUseCase) *HttpSkinHandler {
+	return &HttpSkinHandler{faceProblemsUsecase}
 }
 
 // CreateSkin godoc
@@ -34,7 +33,7 @@ func NewHttpSkinHandler(skinUcase usecases.SkinUsecases) *HttpSkinHandler {
 //
 //	@Router			/admin/skin [post]
 func (handler *HttpSkinHandler) CreateSkin(c *fiber.Ctx) error {
-	var skin entities.Skin
+	var skin entities.FaceProblem
 
 	if err := c.BodyParser(&skin); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
@@ -55,7 +54,7 @@ func (handler *HttpSkinHandler) CreateSkin(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("name is required")))
 	}
 
-	result, err := handler.skinUsecase.CreateSkin(skin, *file, c, create_by_token)
+	result, err := handler.faceProblemsUsecase.CreateProblem(skin, *file, c, create_by_token, "skin")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
@@ -76,7 +75,7 @@ func (handler *HttpSkinHandler) CreateSkin(c *fiber.Ctx) error {
 //
 //	@Router			/skin [get]
 func (handler *HttpSkinHandler) GetSkins(c *fiber.Ctx) error {
-	skins, err := handler.skinUsecase.GetSkins()
+	skins, err := handler.faceProblemsUsecase.GetProblems("skin")
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
@@ -99,13 +98,12 @@ func (handler *HttpSkinHandler) GetSkins(c *fiber.Ctx) error {
 //
 //	@Router			/skin/{id} [get]
 func (handler *HttpSkinHandler) GetSkin(c *fiber.Ctx) error {
-	id := c.Params("id")
-	intID, err := strconv.Atoi(id)
+	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	skin, err := handler.skinUsecase.GetSkin(intID)
+	skin, err := handler.faceProblemsUsecase.GetProblem(uint64(id))
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
@@ -130,13 +128,12 @@ func (handler *HttpSkinHandler) GetSkin(c *fiber.Ctx) error {
 //
 //	@Router			/admin/skin/{id} [put]
 func (handler *HttpSkinHandler) UpdateSkin(c *fiber.Ctx) error {
-	id := c.Params("id")
-	intID, err := strconv.Atoi(id)
+	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	var skin entities.Skin
+	var skin entities.FaceProblem
 
 	if err := c.BodyParser(&skin); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
@@ -144,7 +141,7 @@ func (handler *HttpSkinHandler) UpdateSkin(c *fiber.Ctx) error {
 
 	file, _ := c.FormFile("file")
 
-	result, err := handler.skinUsecase.UpdateSkin(intID, skin, file, c)
+	result, err := handler.faceProblemsUsecase.UpdateFaceProblems(id, skin, file, c)
 	if err != nil {
 		if err.Error() == "skin not found" {
 			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
@@ -169,13 +166,12 @@ func (handler *HttpSkinHandler) UpdateSkin(c *fiber.Ctx) error {
 //
 //	@Router			/admin/skin/{id} [delete]
 func (handler *HttpSkinHandler) DeleteSkin(c *fiber.Ctx) error {
-	id := c.Params("id")
-	intID, err := strconv.Atoi(id)
+	id, err := c.ParamsInt("id")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrNotFound))
 	}
 
-	err = handler.skinUsecase.DeleteSkin(intID)
+	err = handler.faceProblemsUsecase.DeleteFaceProblem(id)
 
 	if err != nil {
 		if err.Error() == "skin not found" {
@@ -184,5 +180,5 @@ func (handler *HttpSkinHandler) DeleteSkin(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(intID))
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))
 }

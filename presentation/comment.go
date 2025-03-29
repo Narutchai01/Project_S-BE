@@ -2,20 +2,20 @@ package presentation
 
 import "github.com/Narutchai01/Project_S-BE/entities"
 
-func PublicCommentThread(data entities.CommentThread) CommentThread {
+func PublicCommentThread(data entities.Comment) CommentThread {
 	var commment = CommentThread{
 		ID:            data.ID,
-		ThreadID:      data.ThreadID,
+		ThreadID:      data.CommunityID,
 		User:          *PublicUser(data.User),
 		Favorite:      data.Favorite,
 		FavoriteCount: data.FavoriteCount,
-		Text:          data.Text,
+		Text:          data.Content,
 		CreateAt:      data.CreatedAt,
 	}
 	return commment
 }
 
-func PublicCommentsThread(datas []entities.CommentThread) []CommentThread {
+func PublicCommentsThread(datas []entities.Comment) []CommentThread {
 	var comments []CommentThread
 
 	for _, comment := range datas {
@@ -25,7 +25,7 @@ func PublicCommentsThread(datas []entities.CommentThread) []CommentThread {
 	return comments
 }
 
-func ToCommentThread(data entities.CommentThread) *Responses {
+func ToCommentThread(data entities.Comment) *Responses {
 
 	comment := PublicCommentThread(data)
 	return &Responses{
@@ -35,7 +35,7 @@ func ToCommentThread(data entities.CommentThread) *Responses {
 	}
 }
 
-func ToCommentsThread(datas []entities.CommentThread) *Responses {
+func ToCommentsThread(datas []entities.Comment) *Responses {
 	comments := PublicCommentsThread(datas)
 
 	return &Responses{
@@ -45,20 +45,20 @@ func ToCommentsThread(datas []entities.CommentThread) *Responses {
 	}
 }
 
-func PublicCommentReviewSkincare(data entities.CommentReviewSkicare) CommentReviewSkicare {
+func PublicCommentReviewSkincare(data entities.Comment) CommentReviewSkicare {
 	var commment = CommentReviewSkicare{
 		ID:               data.ID,
-		ReviewSkincareID: data.ReviewSkincareID,
+		ReviewSkincareID: data.CommunityID,
 		User:             *PublicUser(data.User),
-		Favorite:         data.Favorite,
-		FavoriteCount:    data.FavoriteCount,
-		Content:          data.Content,
-		CreateAt:         data.CreatedAt,
+		// Favorite:         data.Favorite,
+		// FavoriteCount:    data.FavoriteCount,
+		Content:  data.Content,
+		CreateAt: data.CreatedAt,
 	}
 	return commment
 }
 
-func PublicCommentsReviewSkincare(datas []entities.CommentReviewSkicare) []CommentReviewSkicare {
+func PublicCommentsReviewSkincare(datas []entities.Comment) []CommentReviewSkicare {
 	var comments []CommentReviewSkicare
 
 	for _, comment := range datas {
@@ -68,7 +68,7 @@ func PublicCommentsReviewSkincare(datas []entities.CommentReviewSkicare) []Comme
 	return comments
 }
 
-func ToCommentReviewSkincare(data entities.CommentReviewSkicare) *Responses {
+func ToCommentReviewSkincare(data entities.Comment) *Responses {
 
 	comment := PublicCommentReviewSkincare(data)
 	return &Responses{
@@ -78,7 +78,7 @@ func ToCommentReviewSkincare(data entities.CommentReviewSkicare) *Responses {
 	}
 }
 
-func ToCommentsReviewSkincare(datas []entities.CommentReviewSkicare) *Responses {
+func ToCommentsReviewSkincare(datas []entities.Comment) *Responses {
 
 	comments := PublicCommentsReviewSkincare(datas)
 

@@ -2,27 +2,26 @@ package presentation
 
 import "github.com/Narutchai01/Project_S-BE/entities"
 
-func PublicThreadImage(threadImages []entities.ThreadImage) []ThreadImage {
-	var images []ThreadImage
+func PublicThreadImage(threadImages []entities.CommunityImage) []CommunityImage {
+	var images []CommunityImage
 	for _, image := range threadImages {
-		images = append(images, ThreadImage{
-			ID:       image.ID,
-			ThreadID: image.ThreadID,
-			Image:    image.Image,
+		images = append(images, CommunityImage{
+			ID:          image.ID,
+			CommunityID: uint(image.CommunityID),
+			Image:       image.Image,
 		})
 	}
 
 	return images
 }
 
-func PublicThread(thread entities.Thread) Thread {
+func PublicThread(thread entities.Community) Thread {
 	return Thread{
 		ID:            thread.ID,
 		Title:         thread.Title,
-		Favorite:      thread.Favorite,
-		FavoriteCount: thread.FavoriteCount,
 		Owner:         thread.Owner,
-		Bookmark:      thread.Bookmark,
+		Favorite:      thread.Favorite,
+		FavoriteCount: int64(thread.Likes),
 		User:          *PublicUser(thread.User),
 		Caption:       thread.Caption,
 		Images:        PublicThreadImage(thread.Images),
@@ -30,7 +29,7 @@ func PublicThread(thread entities.Thread) Thread {
 	}
 }
 
-func ToThreadResponse(data entities.Thread) *Responses {
+func ToThreadResponse(data entities.Community) *Responses {
 	return &Responses{
 		Status: true,
 		Data:   PublicThread(data),
@@ -38,7 +37,7 @@ func ToThreadResponse(data entities.Thread) *Responses {
 	}
 }
 
-func ToThreadsResponse(data []entities.Thread) *Responses {
+func ToThreadsResponse(data []entities.Community) *Responses {
 	var threads []Thread
 	for _, thread := range data {
 		threads = append(threads, PublicThread(thread))

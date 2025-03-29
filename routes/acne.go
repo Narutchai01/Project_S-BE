@@ -2,6 +2,7 @@ package routes
 
 import (
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/acne"
+	adaptersFaceProblems "github.com/Narutchai01/Project_S-BE/adapters/face_problems"
 	"github.com/Narutchai01/Project_S-BE/middlewares"
 	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/usecases"
@@ -11,9 +12,9 @@ import (
 
 func AcneRouters(app fiber.Router, admin fiber.Router, db *gorm.DB) {
 
-	acneRepo := adapters.NewGormAcneRepository(db)
-	acneService := usecases.NewAcneUseCase(acneRepo)
-	acneHandler := adapters.NewHttpAcneHandler(acneService)
+	faceProblemRepo := adaptersFaceProblems.NewGormFaceProblemRepository(db)
+	faceProblemService := usecases.NewFaceProblemUseCase(faceProblemRepo)
+	acneHandler := adapters.NewHttpAcneHandler(faceProblemService)
 
 	acneUser := app.Group("/acne")
 	acneUser.Get("/", acneHandler.GetAcnes)

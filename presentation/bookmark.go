@@ -2,25 +2,25 @@ package presentation
 
 import "github.com/Narutchai01/Project_S-BE/entities"
 
-func PublicBookmarkThread(bookmark entities.BookmarkThread) BookmarkThread {
+func PublicBookmarkThread(bookmark entities.Bookmark) BookmarkThread {
 	return BookmarkThread{
 		ID:       bookmark.ID,
-		ThreadID: bookmark.ThreadID,
+		ThreadID: bookmark.CommunityID,
 		UserID:   bookmark.UserID,
 		Status:   bookmark.Status,
 	}
 }
 
-func PublicBookmarkReviewSkincare(bookmark entities.BookmarkReviewSkincare) BookmarkReviewSkincare {
+func PublicBookmarkReviewSkincare(bookmark entities.Bookmark) BookmarkReviewSkincare {
 	return BookmarkReviewSkincare{
 		ID:               bookmark.ID,
-		ReviewSkincareID: bookmark.ReviewSkincareID,
+		ReviewSkincareID: bookmark.CommunityID,
 		UserID:           bookmark.UserID,
 		Status:           bookmark.Status,
 	}
 }
 
-func ToBookmarkThreadResponse(data entities.BookmarkThread) *Responses {
+func ToBookmarkThreadResponse(data entities.Bookmark) *Responses {
 	return &Responses{
 		Status: true,
 		Data:   PublicBookmarkThread(data),
@@ -28,7 +28,7 @@ func ToBookmarkThreadResponse(data entities.BookmarkThread) *Responses {
 	}
 }
 
-func ToBookmarkReviewSkincareResponse(data entities.BookmarkReviewSkincare) *Responses {
+func ToBookmarkReviewSkincareResponse(data entities.Bookmark) *Responses {
 	return &Responses{
 		Status: true,
 		Data:   PublicBookmarkReviewSkincare(data),

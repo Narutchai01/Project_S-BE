@@ -42,7 +42,7 @@ func (handler *HttpBookmarkHandler) BookMarkThread(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	result, err := handler.bookMark.BookmarkThread(uint(threadID), token)
+	result, err := handler.bookMark.BookmarkCommunity(uint(threadID), token, "thread")
 
 	if err != nil {
 		if err.Error() == "thread not found" || err.Error() == "user not found" {
@@ -79,7 +79,7 @@ func (handler *HttpBookmarkHandler) BookMarkReviewSkincare(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(errors.New("token is required")))
 	}
 
-	result, err := handler.bookMark.BookmarkReviewSkincare(uint(reviewID), token)
+	result, err := handler.bookMark.BookmarkCommunity(uint(reviewID), token, "review")
 	if err != nil {
 		if err.Error() == "review not found" || err.Error() == "user not found" {
 			return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))

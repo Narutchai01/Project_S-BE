@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"errors"
 	"mime/multipart"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
@@ -10,18 +11,11 @@ import (
 )
 
 type HttpThreadRepository struct {
-	threadUsecase usecases.ThreadUseCase
+	communityUseccase usecases.CommunityUseCase
 }
 
-func NewHttpThreadRepository(threadUsecase usecases.ThreadUseCase) *HttpThreadRepository {
-	return &HttpThreadRepository{threadUsecase}
-}
-
-func validateThread(thread entities.Thread) error {
-	if thread.Title == "" || thread.Caption == "" {
-		return fiber.ErrBadRequest
-	}
-	return nil
+func NewHttpThreadRepository(communityUsecase usecases.CommunityUseCase) *HttpThreadRepository {
+	return &HttpThreadRepository{communityUsecase}
 }
 
 // CreateThread godoc
@@ -40,13 +34,11 @@ func validateThread(thread entities.Thread) error {
 //	@Failure		500		{object}	presentation.Responses
 //	@Router			/thread/ [post]
 func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
-	var thread entities.Thread
+	var thread entities.Community
+
+	const communityType = "Thread"
 
 	if err := c.BodyParser(&thread); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
-	}
-
-	if err := validateThread(thread); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
 	}
 
@@ -71,7 +63,7 @@ func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
 	}
 
-	result, err := repo.threadUsecase.CreateThread(thread, token, files, c)
+	result, err := repo.communityUseccase.CreateCommunityThread(thread, token, files, c, communityType)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
@@ -93,7 +85,7 @@ func (repo *HttpThreadRepository) CreateThread(c *fiber.Ctx) error {
 //	@Failure		500		{object}	presentation.Responses
 //	@Router			/thread/{id} [get]
 func (repo *HttpThreadRepository) GetThread(c *fiber.Ctx) error {
-
+	const communityType = "Thread"
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
@@ -102,10 +94,11 @@ func (repo *HttpThreadRepository) GetThread(c *fiber.Ctx) error {
 
 	token := c.Get("token")
 
-	result, err := repo.threadUsecase.GetThread(uint(id), token)
-
+	result, err := repo.communityUseccase.GetCommunity(uint(id), communityType, token)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "community not found" || err.Error() == "user not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(errors.New("thread not found")))
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadResponse(result))
@@ -131,7 +124,7 @@ func (repo *HttpThreadRepository) GetThreads(c *fiber.Ctx) error {
 
 	}
 
-	result, err := repo.threadUsecase.GetThreads(token)
+	result, err := repo.communityUseccase.GetCommunities("Thread", token)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
