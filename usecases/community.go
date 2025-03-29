@@ -112,21 +112,15 @@ func (service *communityService) CreateCommunityThread(community entities.Commun
 	}
 	community.Owner = (user.ID == community.User.ID)
 
-	isFavorted, _, err := service.favoriteRepo.FindFavorite(uint(community.ID), "community_id", user.ID)
-	if err != nil {
-		return entities.Community{}, err
-	}
+	// isFavorted, _, _ := service.favoriteRepo.FindFavorite(uint(community.ID), "community_id", user.ID)
 
-	community.Favorite = isFavorted
+	// community.Favorite = isFavorted
 
-	community.Likes = uint64(service.favoriteRepo.CountFavorite(community.ID, "community_id"))
+	// community.Likes = uint64(service.favoriteRepo.CountFavorite(community.ID, "community_id"))
 
-	isBookmark, _, err := service.bookmarkRepo.FindBookmark(community.ID, user.ID)
-	if err != nil {
-		return entities.Community{}, err
-	}
+	// isBookmark, _, _ := service.bookmarkRepo.FindBookmark(community.ID, user.ID)
 
-	community.Bookmark = isBookmark
+	// community.Bookmark = isBookmark
 
 	return community, nil
 }

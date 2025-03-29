@@ -11,19 +11,11 @@ import (
 )
 
 type HttpThreadRepository struct {
-	threadUsecase     usecases.ThreadUseCase
 	communityUseccase usecases.CommunityUseCase
 }
 
-func NewHttpThreadRepository(threadUsecase usecases.ThreadUseCase, communityUsecase usecases.CommunityUseCase) *HttpThreadRepository {
-	return &HttpThreadRepository{threadUsecase, communityUsecase}
-}
-
-func validateThread(thread entities.Thread) error {
-	if thread.Title == "" || thread.Caption == "" {
-		return fiber.ErrBadRequest
-	}
-	return nil
+func NewHttpThreadRepository(communityUsecase usecases.CommunityUseCase) *HttpThreadRepository {
+	return &HttpThreadRepository{communityUsecase}
 }
 
 // CreateThread godoc

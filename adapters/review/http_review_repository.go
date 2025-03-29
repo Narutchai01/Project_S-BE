@@ -12,12 +12,11 @@ import (
 )
 
 type HtttpReviewRepository struct {
-	reviewUsecase     usecases.ReviewUseCase
 	communityUseccase usecases.CommunityUseCase
 }
 
-func NewHttpReviewRepository(reviewUsecase usecases.ReviewUseCase, communityUsecase usecases.CommunityUseCase) *HtttpReviewRepository {
-	return &HtttpReviewRepository{reviewUsecase, communityUsecase}
+func NewHttpReviewRepository(communityUsecase usecases.CommunityUseCase) *HtttpReviewRepository {
+	return &HtttpReviewRepository{communityUsecase}
 }
 
 func (repo *HtttpReviewRepository) CreateReviewSkincare(c *fiber.Ctx) error {
@@ -57,7 +56,7 @@ func (repo *HtttpReviewRepository) CreateReviewSkincare(c *fiber.Ctx) error {
 	result, err := repo.communityUseccase.CreateCommunityThread(review, token, files, c, "Review")
 
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToReviewResponse(result))

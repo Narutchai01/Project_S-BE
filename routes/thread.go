@@ -12,15 +12,12 @@ import (
 )
 
 func ThreadRouters(app fiber.Router, db *gorm.DB) {
-
-	threadRepo := adapters.NewGormThreadRepository(db)
 	communityRepo := adaptersCommunity.NewGormCommunityRepository(db)
 	userRepo := adaptersUser.NewGormUserRepository(db)
 	favoriteRepo := adaptersFav.NewGormFavoriteRepository(db)
 	bookmarkRepo := adaptersBookmark.NewGormBookmarkRepository(db)
-	threadService := usecases.NewThreadUseCase(threadRepo, userRepo, favoriteRepo, bookmarkRepo)
 	communityService := usecases.NewCommunityUseCase(communityRepo, userRepo, favoriteRepo, bookmarkRepo)
-	threadHandler := adapters.NewHttpThreadRepository(threadService, communityService)
+	threadHandler := adapters.NewHttpThreadRepository(communityService)
 
 	threadGroup := app.Group("/thread")
 	threadGroup.Post("/", threadHandler.CreateThread)
