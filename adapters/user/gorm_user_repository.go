@@ -42,3 +42,30 @@ func (repo *GormUserRepository) UpdateUser(user entities.User) (entities.User, e
 	err := repo.db.Save(&user).Error
 	return user, err
 }
+
+func (repo *GormUserRepository) Follower(follow_id uint, user_id uint) (entities.Follower, error) {
+	var follower entities.Follower
+	err := repo.db.Create(&entities.Follower{FollowerID: follow_id, UserID: user_id}).Error
+	if err != nil {
+		return follower, err
+	}
+	return follower, nil
+}
+
+func (repo *GormUserRepository) FindFollower(follow_id uint, user_id uint) (entities.Follower, error) {
+	var follower entities.Follower
+	err := repo.db.Where("follower_id = ? AND user_id = ?", follow_id, user_id).First(&follower).Error
+	if err != nil {
+		return follower, err
+	}
+	return follower, nil
+}
+
+func (repo *GormUserRepository) DeleteFollower(id uint) (entities.Follower, error) {
+	var follower entities.Follower
+	err := repo.db.Where("id = ?", id).Delete(&follower).Error
+	if err != nil {
+		return follower, err
+	}
+	return follower, nil
+}

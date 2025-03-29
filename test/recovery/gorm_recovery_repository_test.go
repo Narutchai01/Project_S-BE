@@ -28,7 +28,7 @@ func TestGormCreateRecovery(t *testing.T) {
 
 	expectData := entities.Recovery{
 		OTP:    "123456",
-		UserId: 1,
+		UserID: 1,
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -74,7 +74,7 @@ func TestGormDeleteRecoveryById(t *testing.T) {
 			ID: 1,
 		},
 		OTP:    "123456",
-		UserId: 1,
+		UserID: 1,
 	}
 
 	expectedSQL := `UPDATE "recoveries" SET "deleted_at"=\$1 WHERE id = \$2 AND "recoveries"."deleted_at" IS NULL`
@@ -127,11 +127,11 @@ func TestGormGetRecoveries(t *testing.T) {
 			ID: 1,
 		},
 		OTP:    "123456",
-		UserId: 1,
+		UserID: 1,
 	}
 
 	columns := sqlmock.NewRows([]string{"id", "otp", "user_id"}).
-		AddRow(expectData.ID, expectData.OTP, expectData.UserId)
+		AddRow(expectData.ID, expectData.OTP, expectData.UserID)
 	expectedSQL := `SELECT (.+) FROM "recoveries"`
 
 	t.Run("success", func(t *testing.T) {
@@ -172,12 +172,12 @@ func TestGormGetRecoveryById(t *testing.T) {
 			ID: 1,
 		},
 		OTP:    "123456",
-		UserId: 1,
+		UserID: 1,
 	}
 
 	expectedSQL := `SELECT \* FROM "recoveries" WHERE "recoveries"\."id" = \$1 AND "recoveries"\."deleted_at" IS NULL ORDER BY "recoveries"\."id" LIMIT \$2`
 	rows := sqlmock.NewRows([]string{"id", "otp", "user_id"}).
-		AddRow(expectData.ID, expectData.OTP, expectData.UserId)
+		AddRow(expectData.ID, expectData.OTP, expectData.UserID)
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectQuery(expectedSQL).
 			WithArgs(int(expectData.ID), 1).
@@ -221,12 +221,12 @@ func TestGormGetRecoveryByUserId(t *testing.T) {
 			ID: 1,
 		},
 		OTP:    "123456",
-		UserId: 1,
+		UserID: 1,
 	}
 
 	expectedSQL := `SELECT \* FROM "recoveries" WHERE user_id = \$1 AND "recoveries"\."deleted_at" IS NULL ORDER BY "recoveries"\."id" LIMIT \$2`
 	rows := sqlmock.NewRows([]string{"id", "otp", "user_id"}).
-		AddRow(expectData.ID, expectData.OTP, expectData.UserId)
+		AddRow(expectData.ID, expectData.OTP, expectData.UserID)
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectQuery(expectedSQL).
 			WithArgs(int(expectData.ID), 1).
@@ -270,12 +270,12 @@ func TestGormUpdateRecoveryOtpById(t *testing.T) {
 			ID: 1,
 		},
 		OTP:    "123456",
-		UserId: 1,
+		UserID: 1,
 	}
 
 	expectedSQL := `UPDATE "recoveries" SET "otp"=\$1,"updated_at"=\$2 WHERE id = \$3 AND "recoveries"."deleted_at" IS NULL RETURNING *`
 	rows := sqlmock.NewRows([]string{"id", "otp", "user_id"}).
-		AddRow(expectData.ID, expectData.OTP, expectData.UserId)
+		AddRow(expectData.ID, expectData.OTP, expectData.UserID)
 
 	t.Run("success", func(t *testing.T) {
 		mock.ExpectBegin()

@@ -83,7 +83,7 @@ func TestCreateRecovery(t *testing.T) {
 			ID: 1,
 		},
 		OTP:    "123456",
-		UserId: 1,
+		UserID: 1,
 	}
 
 	t.Run("success create recovery", func(t *testing.T) {
@@ -110,7 +110,7 @@ func TestCreateRecovery(t *testing.T) {
 	t.Run("success update recovery", func(t *testing.T) {
 		mockService, _, app := setup()
 
-		mockService.On("GetRecoveryByUserId", int(expectData.UserId)).Return(expectData, nil)
+		mockService.On("GetRecoveryByUserId", int(expectData.UserID)).Return(expectData, nil)
 		mockService.On("UpdateRecoveryOtpById",
 			mock.Anything,
 			mock.Anything,
@@ -141,7 +141,7 @@ func TestCreateRecovery(t *testing.T) {
 	t.Run("failed to update recovery", func(t *testing.T) {
 		mockService, _, app := setup()
 
-		mockService.On("GetRecoveryByUserId", int(expectData.UserId)).Return(expectData, nil)
+		mockService.On("GetRecoveryByUserId", int(expectData.UserID)).Return(expectData, nil)
 		mockService.On("UpdateRecoveryOtpById",
 			mock.Anything,
 			mock.Anything,
@@ -161,7 +161,7 @@ func TestCreateRecovery(t *testing.T) {
 	t.Run("failed to create recovery", func(t *testing.T) {
 		mockService, _, app := setup()
 
-		mockService.On("GetRecoveryByUserId", int(expectData.UserId)).Return(entities.Recovery{}, errors.New("service error"))
+		mockService.On("GetRecoveryByUserId", int(expectData.UserID)).Return(entities.Recovery{}, errors.New("service error"))
 		mockService.On("CreateRecovery",
 			mock.Anything,
 			mock.Anything,
@@ -197,7 +197,7 @@ func TestDeleteRecoveryByIdHandler(t *testing.T) {
 			ID: 1,
 		},
 		OTP:    "123456",
-		UserId: 1,
+		UserID: 1,
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -256,7 +256,7 @@ func TestGetRecoveriesHandler(t *testing.T) {
 				ID: 1,
 			},
 			OTP:    "123456",
-			UserId: 1,
+			UserID: 1,
 		},
 	}
 
@@ -304,13 +304,13 @@ func TestOtpValidationHandler(t *testing.T) {
 			ID: 1,
 		},
 		OTP:    "123456",
-		UserId: 1,
+		UserID: 1,
 	}
 
 	t.Run("success create recovery", func(t *testing.T) {
 		mockService, _, app := setup()
 
-		mockService.On("OtpValidation", int(expectData.UserId), expectData.OTP).Return(true, nil)
+		mockService.On("OtpValidation", int(expectData.UserID), expectData.OTP).Return(true, nil)
 		mockService.On("DeleteRecoveryById",
 			mock.Anything,
 		).Return(expectData, nil)
@@ -340,7 +340,7 @@ func TestOtpValidationHandler(t *testing.T) {
 	t.Run("failed in otpvalidation", func(t *testing.T) {
 		mockService, _, app := setup()
 
-		mockService.On("OtpValidation", int(expectData.UserId), expectData.OTP).Return(false, errors.New("service error"))
+		mockService.On("OtpValidation", int(expectData.UserID), expectData.OTP).Return(false, errors.New("service error"))
 
 		body, _ := json.Marshal(expectData)
 
@@ -356,7 +356,7 @@ func TestOtpValidationHandler(t *testing.T) {
 	t.Run("failed to delete recovery", func(t *testing.T) {
 		mockService, _, app := setup()
 		mockService.ExpectedCalls = nil
-		mockService.On("OtpValidation", int(expectData.UserId), expectData.OTP).Return(true, nil)
+		mockService.On("OtpValidation", int(expectData.UserID), expectData.OTP).Return(true, nil)
 		mockService.On("DeleteRecoveryById", int(expectData.ID)).Return(entities.Recovery{}, errors.New("service error"))
 
 		body, _ := json.Marshal(expectData)

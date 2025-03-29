@@ -203,3 +203,18 @@ func (handler *HttpUserHandler) UpdateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
 	// return c.Status(fiber.StatusOK).JSON(user)
 }
+
+func (handler *HttpUserHandler) Follower(c *fiber.Ctx) error {
+	token := c.Get("token")
+	folllow_id, err := c.ParamsInt("follow_id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	result, err := handler.userUcase.Follower(uint(folllow_id), token)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
+}

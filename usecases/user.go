@@ -20,6 +20,7 @@ type UserUsecases interface {
 	GoogleSignIn(user entities.User) (string, error)
 	GetUser(token string) (entities.User, error)
 	UpdateUser(user entities.User, token string, file *multipart.FileHeader, c *fiber.Ctx) (entities.User, error)
+	Follower(follow_id uint, token string) (entities.Follower, error)
 }
 
 type userService struct {
@@ -162,4 +163,29 @@ func (service *userService) UpdateUser(user entities.User, token string, file *m
 	}
 
 	return service.repo.UpdateUser(user)
+}
+
+func (service *userService) Follower(follow_id uint, token string) (entities.Follower, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.Follower{}, err
+	}
+
+	follower, err := service.repo.GetUser(follow_id)
+	if err != nil {
+		return entities.Follower{}, err
+	}
+
+	user, err := service.repo.GetUser(user_id)
+	if err != nil {
+		return entities.Follower{}, err
+	}
+
+	follower_Response, err := service.repo.FindFollower(follower.ID, user.ID)
+	if err == nil {
+		return service.repo.DeleteFollower(follower_Response.ID)
+	}
+
+	return service.repo.Follower(follower.ID, user.ID)
 }

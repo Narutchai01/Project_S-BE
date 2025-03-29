@@ -15,3 +15,11 @@ type User struct {
 	Password      string     `json:"password"`
 	Image         string     `json:"image" swaggerignore:"true"`
 }
+
+type Follower struct {
+	gorm.Model `swaggerignore:"true"`
+	FollowerID uint `json:"follower_id" gorm:"not null"`
+	UserID     uint `json:"user_id" gorm:"not null"`
+	Follower   User `json:"follower" gorm:"foreignKey:FollowerID"`
+	User       User `json:"user" gorm:"foreignKey:UserID"`
+}
