@@ -5,7 +5,6 @@ import (
 	"errors"
 	"mime/multipart"
 	"net/http/httptest"
-
 	"testing"
 
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/facial"
@@ -16,39 +15,38 @@ import (
 	"gorm.io/gorm"
 )
 
-type MockFacialService struct {
+type MockFaceProblemUseCase struct {
 	mock.Mock
 }
 
-func (m *MockFacialService) CreateFacial(facial entities.Facial, file multipart.FileHeader, c *fiber.Ctx, token string) (entities.Facial, error) {
-	args := m.Called(facial, file, c, token)
-	return args.Get(0).(entities.Facial), args.Error(1)
+func (m *MockFaceProblemUseCase) CreateProblem(problem entities.FaceProblem, file multipart.FileHeader, c *fiber.Ctx, token string, type_problem string) (entities.FaceProblem, error) {
+	args := m.Called(problem, file, c, token, type_problem)
+	return args.Get(0).(entities.FaceProblem), args.Error(1)
 }
 
-func (m *MockFacialService) GetFacials() ([]entities.Facial, error) {
-	args := m.Called()
-	return args.Get(0).([]entities.Facial), args.Error(1)
-}
-
-func (m *MockFacialService) GetFacial(id int) (entities.Facial, error) {
-	args := m.Called(id)
-	return args.Get(0).(entities.Facial), args.Error(1)
-}
-
-func (m *MockFacialService) UpdateFacial(id int, facial entities.Facial, file *multipart.FileHeader, c *fiber.Ctx) (entities.Facial, error) {
-	args := m.Called(id, facial, file, c)
-	return args.Get(0).(entities.Facial), args.Error(1)
-}
-
-func (m *MockFacialService) DeleteFacial(id int) error {
+func (m *MockFaceProblemUseCase) DeleteFaceProblem(id int) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
 
-// Test
+func (m *MockFaceProblemUseCase) GetProblem(id uint64) (entities.FaceProblem, error) {
+	args := m.Called(id)
+	return args.Get(0).(entities.FaceProblem), args.Error(1)
+}
+
+func (m *MockFaceProblemUseCase) GetProblems(type_problem string) ([]entities.FaceProblem, error) {
+	args := m.Called(type_problem)
+	return args.Get(0).([]entities.FaceProblem), args.Error(1)
+}
+
+func (m *MockFaceProblemUseCase) UpdateFaceProblems(id int, problem entities.FaceProblem, file *multipart.FileHeader, c *fiber.Ctx) (entities.FaceProblem, error) {
+	args := m.Called(id, problem, file, c)
+	return args.Get(0).(entities.FaceProblem), args.Error(1)
+}
+
 func TestCreateFacialHandler(t *testing.T) {
-	setup := func() (*MockFacialService, *adapters.HttpFacialHandler, *fiber.App) {
-		mockService := new(MockFacialService)
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpFacialHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpFacialHandler(mockService)
 
 		app := fiber.New()
@@ -57,17 +55,18 @@ func TestCreateFacialHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Facial{
-		Name:     "facial_type1",
-		Image:    "facial/type1/path",
-		CreateBY: 1,
+	expectData := entities.FaceProblem{
+		Name:      "facial_type1",
+		Image:     "facial/type1/path",
+		CreatedBy: 1,
 	}
 
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("CreateFacial",
+		mockService.On("CreateProblem",
 			mock.Anything,
 			mock.AnythingOfType("multipart.FileHeader"),
+			mock.Anything,
 			mock.Anything,
 			mock.Anything,
 		).Return(expectData, nil)
@@ -88,19 +87,9 @@ func TestCreateFacialHandler(t *testing.T) {
 		assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
-
-	t.Run("failed in body parser", func(t *testing.T) {
+	t.Run("bad_request_missing_file", func(t *testing.T) {
 		_, _, app := setup()
-		req := httptest.NewRequest("POST", "/admin/facial", bytes.NewBuffer([]byte("invalid body")))
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
 
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-	})
-
-	t.Run("failed to get image file", func(t *testing.T) {
-		mockService, _, app := setup()
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		_ = writer.WriteField("name", expectData.Name)
@@ -108,27 +97,19 @@ func TestCreateFacialHandler(t *testing.T) {
 
 		req := httptest.NewRequest("POST", "/admin/facial", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-
+		req.Header.Set("token", "example-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to create facial", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("CreateFacial",
-			mock.Anything,
-			mock.AnythingOfType("multipart.FileHeader"),
-			mock.Anything,
-			mock.Anything,
-		).Return(entities.Facial{}, errors.New("service error"))
+	t.Run("bad_request_empty_name", func(t *testing.T) {
+		_, _, app := setup()
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("name", expectData.Name)
+		_ = writer.WriteField("name", "")
 		part, _ := writer.CreateFormFile("file", "test.jpg")
 		part.Write([]byte("test image"))
 		writer.Close()
@@ -139,14 +120,25 @@ func TestCreateFacialHandler(t *testing.T) {
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("bad_request_invalid_body", func(t *testing.T) {
+		_, _, app := setup()
+
+		// Invalid JSON body
+		req := httptest.NewRequest("POST", "/admin/facial", bytes.NewBuffer([]byte("invalid json")))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "example-token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 }
-
 func TestGetFacialsHandler(t *testing.T) {
-	setup := func() (*MockFacialService, *adapters.HttpFacialHandler, *fiber.App) {
-		mockService := new(MockFacialService)
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpFacialHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpFacialHandler(mockService)
 
 		app := fiber.New()
@@ -155,31 +147,27 @@ func TestGetFacialsHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := []entities.Facial{
-		{
-			Model: gorm.Model{
-				ID: 1,
-			},
-			Name:     "facial_type1",
-			Image:    "facial/type1/path",
-			CreateBY: 1,
-		},
-		{
-			Model: gorm.Model{
-				ID: 2,
-			},
-			Name:     "facial_type2",
-			Image:    "facial/type2/path",
-			CreateBY: 1,
-		},
-	}
-
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("GetFacials").Return(expectData, nil)
+
+		facials := []entities.FaceProblem{
+			{
+				Model:     gorm.Model{ID: 1},
+				Name:      "facial_type1",
+				Image:     "facial/type1/path",
+				CreatedBy: 1,
+			},
+			{
+				Model:     gorm.Model{ID: 2},
+				Name:      "facial_type2",
+				Image:     "facial/type2/path",
+				CreatedBy: 1,
+			},
+		}
+
+		mockService.On("GetProblems", "facial").Return(facials, nil)
 
 		req := httptest.NewRequest("GET", "/facial", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -187,13 +175,12 @@ func TestGetFacialsHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to get facials", func(t *testing.T) {
+	t.Run("internal_server_error", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("GetFacials").Return([]entities.Facial{}, errors.New("service error"))
+
+		mockService.On("GetProblems", "facial").Return([]entities.FaceProblem{}, errors.New("database error"))
 
 		req := httptest.NewRequest("GET", "/facial", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -201,10 +188,9 @@ func TestGetFacialsHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 }
-
 func TestGetFacialHandler(t *testing.T) {
-	setup := func() (*MockFacialService, *adapters.HttpFacialHandler, *fiber.App) {
-		mockService := new(MockFacialService)
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpFacialHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpFacialHandler(mockService)
 
 		app := fiber.New()
@@ -213,21 +199,19 @@ func TestGetFacialHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Facial{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Name:     "facial_type1",
-		Image:    "facial/type1/path",
-		CreateBY: 1,
-	}
-
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("GetFacial", int(expectData.ID)).Return(expectData, nil)
+
+		facial := entities.FaceProblem{
+			Model:     gorm.Model{ID: 1},
+			Name:      "facial_type1",
+			Image:     "facial/type1/path",
+			CreatedBy: 1,
+		}
+
+		mockService.On("GetProblem", uint64(1)).Return(facial, nil)
 
 		req := httptest.NewRequest("GET", "/facial/1", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -235,24 +219,22 @@ func TestGetFacialHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to convert id to int", func(t *testing.T) {
-		mockService, _, app := setup()
-		req := httptest.NewRequest("GET", "/facial/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
+	t.Run("invalid_id_param", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest("GET", "/facial/invalid", nil)
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
+		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode)
 	})
 
-	t.Run("failed to get facial", func(t *testing.T) {
+	t.Run("facial_not_found", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("GetFacial", 1).Return(entities.Facial{}, errors.New("service error"))
 
-		req := httptest.NewRequest("GET", "/facial/1", nil)
-		req.Header.Set("Content-Type", "application/json")
+		mockService.On("GetProblem", uint64(999)).Return(entities.FaceProblem{}, errors.New("facial not found"))
+
+		req := httptest.NewRequest("GET", "/facial/999", nil)
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -260,10 +242,9 @@ func TestGetFacialHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 }
-
 func TestUpdateFacialHandler(t *testing.T) {
-	setup := func() (*MockFacialService, *adapters.HttpFacialHandler, *fiber.App) {
-		mockService := new(MockFacialService)
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpFacialHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpFacialHandler(mockService)
 
 		app := fiber.New()
@@ -272,21 +253,20 @@ func TestUpdateFacialHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Facial{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Name:     "facial_type1",
-		Image:    "facial/type1/path",
-		CreateBY: 1,
+	expectData := entities.FaceProblem{
+		Model:     gorm.Model{ID: 1},
+		Name:      "updated_facial_type",
+		Image:     "facial/updated/path",
+		CreatedBy: 1,
 	}
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("success_with_file", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("UpdateFacial",
+
+		mockService.On("UpdateFaceProblems",
+			1,
 			mock.Anything,
 			mock.Anything,
-			mock.AnythingOfType("*multipart.FileHeader"),
 			mock.Anything,
 		).Return(expectData, nil)
 
@@ -299,7 +279,6 @@ func TestUpdateFacialHandler(t *testing.T) {
 
 		req := httptest.NewRequest("PUT", "/admin/facial/1", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "example-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -307,19 +286,50 @@ func TestUpdateFacialHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to convert id to int", func(t *testing.T) {
+	t.Run("success_without_file", func(t *testing.T) {
 		mockService, _, app := setup()
-		req := httptest.NewRequest("PUT", "/admin/facial/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
+
+		mockService.On("UpdateFaceProblems",
+			1,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+		).Return(expectData, nil)
+
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		_ = writer.WriteField("name", expectData.Name)
+		writer.Close()
+
+		req := httptest.NewRequest("PUT", "/admin/facial/1", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("invalid_id_param", func(t *testing.T) {
+		_, _, app := setup()
+
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		_ = writer.WriteField("name", expectData.Name)
+		writer.Close()
+
+		req := httptest.NewRequest("PUT", "/admin/facial/invalid", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed in body parser", func(t *testing.T) {
+	t.Run("bad_request_invalid_body", func(t *testing.T) {
 		_, _, app := setup()
+
+		// Invalid body
 		req := httptest.NewRequest("PUT", "/admin/facial/1", bytes.NewBuffer([]byte("invalid body")))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
@@ -328,16 +338,15 @@ func TestUpdateFacialHandler(t *testing.T) {
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 
-	t.Run("can upload if not provide image", func(t *testing.T) {
+	t.Run("facial_not_found", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("UpdateFacial",
+
+		mockService.On("UpdateFaceProblems",
+			1,
 			mock.Anything,
 			mock.Anything,
-			mock.MatchedBy(func(file *multipart.FileHeader) bool {
-				return file == nil
-			}),
 			mock.Anything,
-		).Return(expectData, nil)
+		).Return(entities.FaceProblem{}, errors.New("facial not found"))
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
@@ -346,34 +355,30 @@ func TestUpdateFacialHandler(t *testing.T) {
 
 		req := httptest.NewRequest("PUT", "/admin/facial/1", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "test-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to update admin", func(t *testing.T) {
+	t.Run("internal_server_error", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("UpdateFacial",
+
+		mockService.On("UpdateFaceProblems",
+			1,
 			mock.Anything,
 			mock.Anything,
-			mock.AnythingOfType("*multipart.FileHeader"),
 			mock.Anything,
-		).Return(entities.Facial{}, errors.New("service error"))
+		).Return(entities.FaceProblem{}, errors.New("database error"))
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		_ = writer.WriteField("name", expectData.Name)
-		part, _ := writer.CreateFormFile("file", "test.jpg")
-		part.Write([]byte("test image"))
 		writer.Close()
 
 		req := httptest.NewRequest("PUT", "/admin/facial/1", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "test-token")
-
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -381,10 +386,9 @@ func TestUpdateFacialHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 }
-
-func TestDeleteAdminHandler(t *testing.T) {
-	setup := func() (*MockFacialService, *adapters.HttpFacialHandler, *fiber.App) {
-		mockService := new(MockFacialService)
+func TestDeleteFacialHandler(t *testing.T) {
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpFacialHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpFacialHandler(mockService)
 
 		app := fiber.New()
@@ -393,18 +397,12 @@ func TestDeleteAdminHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Facial{
-		Model: gorm.Model{
-			ID: 1,
-		},
-	}
-
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("DeleteFacial", int(expectData.ID)).Return(nil)
+
+		mockService.On("DeleteFaceProblem", 1).Return(nil)
 
 		req := httptest.NewRequest("DELETE", "/admin/facial/1", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -412,24 +410,35 @@ func TestDeleteAdminHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to convert id to int", func(t *testing.T) {
-		mockService, _, app := setup()
-		req := httptest.NewRequest("DELETE", "/admin/facial/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
+	t.Run("invalid_id_param", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest("DELETE", "/admin/facial/invalid", nil)
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("facial_not_found", func(t *testing.T) {
+		mockService, _, app := setup()
+
+		mockService.On("DeleteFaceProblem", 999).Return(errors.New("facial not found"))
+
+		req := httptest.NewRequest("DELETE", "/admin/facial/999", nil)
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to delete facial", func(t *testing.T) {
+	t.Run("internal_server_error", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("DeleteFacial", int(expectData.ID)).Return(errors.New("service error"))
+
+		mockService.On("DeleteFaceProblem", 1).Return(errors.New("database error"))
 
 		req := httptest.NewRequest("DELETE", "/admin/facial/1", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)

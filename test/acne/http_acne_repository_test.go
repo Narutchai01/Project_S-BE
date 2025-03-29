@@ -19,31 +19,26 @@ type MockFaceProblemUseCase struct {
 	mock.Mock
 }
 
-// CreateProblem implements usecases.FaceProblemUseCase.
 func (m *MockFaceProblemUseCase) CreateProblem(problem entities.FaceProblem, file multipart.FileHeader, c *fiber.Ctx, token string, type_problem string) (entities.FaceProblem, error) {
 	args := m.Called(problem, file, c, token, type_problem)
 	return args.Get(0).(entities.FaceProblem), args.Error(1)
 }
 
-// DeleteFaceProblem implements usecases.FaceProblemUseCase.
 func (m *MockFaceProblemUseCase) DeleteFaceProblem(id int) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
 
-// GetProblem implements usecases.FaceProblemUseCase.
 func (m *MockFaceProblemUseCase) GetProblem(id uint64) (entities.FaceProblem, error) {
 	args := m.Called(id)
 	return args.Get(0).(entities.FaceProblem), args.Error(1)
 }
 
-// GetProblems implements usecases.FaceProblemUseCase.
 func (m *MockFaceProblemUseCase) GetProblems(type_problem string) ([]entities.FaceProblem, error) {
 	args := m.Called(type_problem)
 	return args.Get(0).([]entities.FaceProblem), args.Error(1)
 }
 
-// UpdateFaceProblems implements usecases.FaceProblemUseCase.
 func (m *MockFaceProblemUseCase) UpdateFaceProblems(id int, problem entities.FaceProblem, file *multipart.FileHeader, c *fiber.Ctx) (entities.FaceProblem, error) {
 	args := m.Called(id, problem, file, c)
 	return args.Get(0).(entities.FaceProblem), args.Error(1)
