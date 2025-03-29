@@ -5,7 +5,6 @@ import (
 	"errors"
 	"mime/multipart"
 	"net/http/httptest"
-
 	"testing"
 
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/skin"
@@ -16,39 +15,38 @@ import (
 	"gorm.io/gorm"
 )
 
-type MockSkinService struct {
+type MockFaceProblemUseCase struct {
 	mock.Mock
 }
 
-func (m *MockSkinService) CreateSkin(skin entities.Skin, file multipart.FileHeader, c *fiber.Ctx, token string) (entities.Skin, error) {
-	args := m.Called(skin, file, c, token)
-	return args.Get(0).(entities.Skin), args.Error(1)
+func (m *MockFaceProblemUseCase) CreateProblem(problem entities.FaceProblem, file multipart.FileHeader, c *fiber.Ctx, token string, type_problem string) (entities.FaceProblem, error) {
+	args := m.Called(problem, file, c, token, type_problem)
+	return args.Get(0).(entities.FaceProblem), args.Error(1)
 }
 
-func (m *MockSkinService) GetSkins() ([]entities.Skin, error) {
-	args := m.Called()
-	return args.Get(0).([]entities.Skin), args.Error(1)
-}
-
-func (m *MockSkinService) GetSkin(id int) (entities.Skin, error) {
-	args := m.Called(id)
-	return args.Get(0).(entities.Skin), args.Error(1)
-}
-
-func (m *MockSkinService) UpdateSkin(id int, skin entities.Skin, file *multipart.FileHeader, c *fiber.Ctx) (entities.Skin, error) {
-	args := m.Called(id, skin, file, c)
-	return args.Get(0).(entities.Skin), args.Error(1)
-}
-
-func (m *MockSkinService) DeleteSkin(id int) error {
+func (m *MockFaceProblemUseCase) DeleteFaceProblem(id int) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
 
-// Test
-func TestCreateSkinHandler(t *testing.T) {
-	setup := func() (*MockSkinService, *adapters.HttpSkinHandler, *fiber.App) {
-		mockService := new(MockSkinService)
+func (m *MockFaceProblemUseCase) GetProblem(id uint64) (entities.FaceProblem, error) {
+	args := m.Called(id)
+	return args.Get(0).(entities.FaceProblem), args.Error(1)
+}
+
+func (m *MockFaceProblemUseCase) GetProblems(type_problem string) ([]entities.FaceProblem, error) {
+	args := m.Called(type_problem)
+	return args.Get(0).([]entities.FaceProblem), args.Error(1)
+}
+
+func (m *MockFaceProblemUseCase) UpdateFaceProblems(id int, problem entities.FaceProblem, file *multipart.FileHeader, c *fiber.Ctx) (entities.FaceProblem, error) {
+	args := m.Called(id, problem, file, c)
+	return args.Get(0).(entities.FaceProblem), args.Error(1)
+}
+
+func TestCreateSkin(t *testing.T) {
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpSkinHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpSkinHandler(mockService)
 
 		app := fiber.New()
@@ -57,17 +55,18 @@ func TestCreateSkinHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Skin{
-		Name:     "skintype1",
-		Image:    "skin/type1/path",
-		CreateBY: 1,
+	expectData := entities.FaceProblem{
+		Name:      "skin_type1",
+		Image:     "skin/type1/path",
+		CreatedBy: 1,
 	}
 
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("CreateSkin",
+		mockService.On("CreateProblem",
 			mock.Anything,
 			mock.AnythingOfType("multipart.FileHeader"),
+			mock.Anything,
 			mock.Anything,
 			mock.Anything,
 		).Return(expectData, nil)
@@ -89,18 +88,9 @@ func TestCreateSkinHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed in body parser", func(t *testing.T) {
+	t.Run("bad_request_missing_file", func(t *testing.T) {
 		_, _, app := setup()
-		req := httptest.NewRequest("POST", "/admin/skin", bytes.NewBuffer([]byte("invalid body")))
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := app.Test(req)
 
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-	})
-
-	t.Run("failed to get image file", func(t *testing.T) {
-		mockService, _, app := setup()
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		_ = writer.WriteField("name", expectData.Name)
@@ -108,27 +98,19 @@ func TestCreateSkinHandler(t *testing.T) {
 
 		req := httptest.NewRequest("POST", "/admin/skin", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-
+		req.Header.Set("token", "example-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to create skin", func(t *testing.T) {
-		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("CreateSkin",
-			mock.Anything,
-			mock.AnythingOfType("multipart.FileHeader"),
-			mock.Anything,
-			mock.Anything,
-		).Return(entities.Skin{}, errors.New("service error"))
+	t.Run("bad_request_empty_name", func(t *testing.T) {
+		_, _, app := setup()
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("name", expectData.Name)
+		_ = writer.WriteField("name", "")
 		part, _ := writer.CreateFormFile("file", "test.jpg")
 		part.Write([]byte("test image"))
 		writer.Close()
@@ -139,14 +121,25 @@ func TestCreateSkinHandler(t *testing.T) {
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
-		mockService.AssertExpectations(t)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("bad_request_invalid_body", func(t *testing.T) {
+		_, _, app := setup()
+
+		// Invalid JSON body
+		req := httptest.NewRequest("POST", "/admin/skin", bytes.NewBuffer([]byte("invalid json")))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("token", "example-token")
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 }
-
-func TestGetSkinsHandler(t *testing.T) {
-	setup := func() (*MockSkinService, *adapters.HttpSkinHandler, *fiber.App) {
-		mockService := new(MockSkinService)
+func TestGetSkins(t *testing.T) {
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpSkinHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpSkinHandler(mockService)
 
 		app := fiber.New()
@@ -155,31 +148,17 @@ func TestGetSkinsHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := []entities.Skin{
-		{
-			Model: gorm.Model{
-				ID: 1,
-			},
-			Name:     "skintype1",
-			Image:    "skin/type1/path",
-			CreateBY: 1,
-		},
-		{
-			Model: gorm.Model{
-				ID: 2,
-			},
-			Name:     "skintype2",
-			Image:    "skin/type2/path",
-			CreateBY: 1,
-		},
-	}
-
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("GetSkins").Return(expectData, nil)
+
+		expectedSkins := []entities.FaceProblem{
+			{Model: gorm.Model{ID: 1}, Name: "skin_type1", Image: "skin/type1/path"},
+			{Model: gorm.Model{ID: 2}, Name: "skin_type2", Image: "skin/type2/path"},
+		}
+
+		mockService.On("GetProblems", "skin").Return(expectedSkins, nil)
 
 		req := httptest.NewRequest("GET", "/skin", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -187,13 +166,12 @@ func TestGetSkinsHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to get skins", func(t *testing.T) {
+	t.Run("error", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("GetSkins").Return([]entities.Skin{}, errors.New("service error"))
+
+		mockService.On("GetProblems", "skin").Return([]entities.FaceProblem{}, errors.New("database error"))
 
 		req := httptest.NewRequest("GET", "/skin", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -201,10 +179,9 @@ func TestGetSkinsHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 }
-
-func TestGetSkinHandler(t *testing.T) {
-	setup := func() (*MockSkinService, *adapters.HttpSkinHandler, *fiber.App) {
-		mockService := new(MockSkinService)
+func TestGetSkin(t *testing.T) {
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpSkinHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpSkinHandler(mockService)
 
 		app := fiber.New()
@@ -213,21 +190,18 @@ func TestGetSkinHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Skin{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Name:     "skintype1",
-		Image:    "skin/type1/path",
-		CreateBY: 1,
-	}
-
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("GetSkin", int(expectData.ID)).Return(expectData, nil)
+
+		expectedSkin := entities.FaceProblem{
+			Model: gorm.Model{ID: 1},
+			Name:  "skin_type1",
+			Image: "skin/type1/path",
+		}
+
+		mockService.On("GetProblem", uint64(1)).Return(expectedSkin, nil)
 
 		req := httptest.NewRequest("GET", "/skin/1", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -235,24 +209,22 @@ func TestGetSkinHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to convert id to int", func(t *testing.T) {
-		mockService, _, app := setup()
-		req := httptest.NewRequest("GET", "/skin/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
+	t.Run("invalid_id", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest("GET", "/skin/invalid", nil)
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to get skin", func(t *testing.T) {
+	t.Run("not_found", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("GetSkin", int(expectData.ID)).Return(entities.Skin{}, errors.New("service error"))
 
-		req := httptest.NewRequest("GET", "/skin/1", nil)
-		req.Header.Set("Content-Type", "application/json")
+		mockService.On("GetProblem", uint64(999)).Return(entities.FaceProblem{}, errors.New("skin not found"))
+
+		req := httptest.NewRequest("GET", "/skin/999", nil)
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -260,10 +232,9 @@ func TestGetSkinHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 }
-
-func TestUpdateSkinHandler(t *testing.T) {
-	setup := func() (*MockSkinService, *adapters.HttpSkinHandler, *fiber.App) {
-		mockService := new(MockSkinService)
+func TestUpdateSkin(t *testing.T) {
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpSkinHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpSkinHandler(mockService)
 
 		app := fiber.New()
@@ -272,34 +243,31 @@ func TestUpdateSkinHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Skin{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Name:     "skintype1",
-		Image:    "skin/type1/path",
-		CreateBY: 1,
-	}
-
-	t.Run("success", func(t *testing.T) {
+	t.Run("success_with_file", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("UpdateSkin",
-			mock.Anything,
+
+		updatedSkin := entities.FaceProblem{
+			Model: gorm.Model{ID: 1},
+			Name:  "updated_skin_type",
+			Image: "skin/updated/path",
+		}
+
+		mockService.On("UpdateFaceProblems",
+			1,
 			mock.Anything,
 			mock.AnythingOfType("*multipart.FileHeader"),
 			mock.Anything,
-		).Return(expectData, nil)
+		).Return(updatedSkin, nil)
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("name", expectData.Name)
+		_ = writer.WriteField("name", updatedSkin.Name)
 		part, _ := writer.CreateFormFile("file", "test.jpg")
 		part.Write([]byte("test image"))
 		writer.Close()
 
 		req := httptest.NewRequest("PUT", "/admin/skin/1", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "example-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -307,20 +275,56 @@ func TestUpdateSkinHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to convert id to int", func(t *testing.T) {
+	t.Run("success_without_file", func(t *testing.T) {
 		mockService, _, app := setup()
-		req := httptest.NewRequest("PUT", "/admin/skin/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
+
+		updatedSkin := entities.FaceProblem{
+			Model: gorm.Model{ID: 1},
+			Name:  "updated_skin_type",
+			Image: "skin/updated/path",
+		}
+
+		mockService.On("UpdateFaceProblems",
+			1,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+		).Return(updatedSkin, nil)
+
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		_ = writer.WriteField("name", updatedSkin.Name)
+		writer.Close()
+
+		req := httptest.NewRequest("PUT", "/admin/skin/1", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed in body parser", func(t *testing.T) {
+	t.Run("invalid_id", func(t *testing.T) {
 		_, _, app := setup()
-		req := httptest.NewRequest("PUT", "/admin/skin/1", bytes.NewBuffer([]byte("invalid body")))
+
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		writer.Close()
+
+		req := httptest.NewRequest("PUT", "/admin/skin/invalid", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("invalid_body", func(t *testing.T) {
+		_, _, app := setup()
+
+		// Invalid JSON body
+		req := httptest.NewRequest("PUT", "/admin/skin/1", bytes.NewBuffer([]byte("invalid json")))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
@@ -328,52 +332,47 @@ func TestUpdateSkinHandler(t *testing.T) {
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	})
 
-	t.Run("can upload if not provide image", func(t *testing.T) {
+	t.Run("skin_not_found", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("UpdateSkin",
+
+		mockService.On("UpdateFaceProblems",
+			999,
 			mock.Anything,
 			mock.Anything,
-			mock.MatchedBy(func(file *multipart.FileHeader) bool {
-				return file == nil
-			}),
 			mock.Anything,
-		).Return(expectData, nil)
+		).Return(entities.FaceProblem{}, errors.New("skin not found"))
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("name", expectData.Name)
+		_ = writer.WriteField("name", "any_name")
 		writer.Close()
 
-		req := httptest.NewRequest("PUT", "/admin/skin/1", body)
+		req := httptest.NewRequest("PUT", "/admin/skin/999", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "test-token")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to update skin", func(t *testing.T) {
+	t.Run("server_error", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("UpdateSkin",
+
+		mockService.On("UpdateFaceProblems",
+			1,
 			mock.Anything,
 			mock.Anything,
-			mock.AnythingOfType("*multipart.FileHeader"),
 			mock.Anything,
-		).Return(entities.Skin{}, errors.New("service error"))
+		).Return(entities.FaceProblem{}, errors.New("database error"))
 
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("name", expectData.Name)
-		part, _ := writer.CreateFormFile("file", "test.jpg")
-		part.Write([]byte("test image"))
+		_ = writer.WriteField("name", "any_name")
 		writer.Close()
 
 		req := httptest.NewRequest("PUT", "/admin/skin/1", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		req.Header.Set("token", "test-token")
-
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -381,10 +380,9 @@ func TestUpdateSkinHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 }
-
-func TestDeleteAdminHandler(t *testing.T) {
-	setup := func() (*MockSkinService, *adapters.HttpSkinHandler, *fiber.App) {
-		mockService := new(MockSkinService)
+func TestDeleteSkin(t *testing.T) {
+	setup := func() (*MockFaceProblemUseCase, *adapters.HttpSkinHandler, *fiber.App) {
+		mockService := new(MockFaceProblemUseCase)
 		handler := adapters.NewHttpSkinHandler(mockService)
 
 		app := fiber.New()
@@ -393,21 +391,12 @@ func TestDeleteAdminHandler(t *testing.T) {
 		return mockService, handler, app
 	}
 
-	expectData := entities.Skin{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Name:     "skintype1",
-		Image:    "skin/type1/path",
-		CreateBY: 1,
-	}
-
 	t.Run("success", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.On("DeleteSkin", int(expectData.ID)).Return(nil)
+
+		mockService.On("DeleteFaceProblem", 1).Return(nil)
 
 		req := httptest.NewRequest("DELETE", "/admin/skin/1", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
@@ -415,24 +404,35 @@ func TestDeleteAdminHandler(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to convert id to int", func(t *testing.T) {
-		mockService, _, app := setup()
-		req := httptest.NewRequest("DELETE", "/admin/skin/error-id", nil)
-		req.Header.Set("Content-Type", "application/json")
+	t.Run("invalid_id", func(t *testing.T) {
+		_, _, app := setup()
+
+		req := httptest.NewRequest("DELETE", "/admin/skin/invalid", nil)
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("skin_not_found", func(t *testing.T) {
+		mockService, _, app := setup()
+
+		mockService.On("DeleteFaceProblem", 999).Return(errors.New("skin not found"))
+
+		req := httptest.NewRequest("DELETE", "/admin/skin/999", nil)
+		resp, err := app.Test(req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode)
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("failed to delete skin", func(t *testing.T) {
+	t.Run("server_error", func(t *testing.T) {
 		mockService, _, app := setup()
-		mockService.ExpectedCalls = nil
-		mockService.On("DeleteSkin", int(expectData.ID)).Return(errors.New("service error"))
+
+		mockService.On("DeleteFaceProblem", 1).Return(errors.New("database error"))
 
 		req := httptest.NewRequest("DELETE", "/admin/skin/1", nil)
-		req.Header.Set("Content-Type", "application/json")
 		resp, err := app.Test(req)
 
 		assert.NoError(t, err)
