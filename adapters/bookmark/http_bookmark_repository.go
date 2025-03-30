@@ -89,3 +89,19 @@ func (handler *HttpBookmarkHandler) BookMarkReviewSkincare(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToBookmarkReviewSkincareResponse(result))
 }
+
+func (handler *HttpBookmarkHandler) GetCommunitiesBookmark(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("user_id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	token := c.Get("token")
+
+	results, err := handler.bookMark.GetCommunitiesBookmark(uint(id), token)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToCommunityBookmarkResponse(results))
+}

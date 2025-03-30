@@ -52,3 +52,13 @@ func (repo *GormBookmarkRepository) DeleteBookmark(community_id uint, user_id ui
 
 	return bookmark, nil
 }
+
+func (repo *GormBookmarkRepository) GetCommunitiesBookmark(user_id int) ([]entities.Bookmark, error) {
+	var bookmarks []entities.Bookmark
+	if err := repo.db.Preload("Community.Images").Preload("Community.User").Preload("Community.Type").Where("user_id = ?", user_id).Find(&bookmarks).Error; err != nil {
+
+		return []entities.Bookmark{}, err
+	}
+
+	return bookmarks, nil
+}

@@ -41,3 +41,25 @@ func MiniProfileUserResponse(data entities.User) *Responses {
 		Error:  nil,
 	}
 }
+
+func PublicFollower(data entities.Follower) Follower {
+	follow := Follower{
+		ID:         uint64(data.ID),
+		FollowerID: data.FollowerID,
+		Follower:   *PublicUser(data.Follower),
+		UserID:     data.UserID,
+		User:       *PublicUser(data.User),
+	}
+
+	return follow
+}
+
+func ToFollowerResponse(data entities.Follower) *Responses {
+	follow := PublicFollower(data)
+
+	return &Responses{
+		Status: true,
+		Data:   follow,
+		Error:  nil,
+	}
+}

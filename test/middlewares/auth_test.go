@@ -28,7 +28,7 @@ func TestAuthMiddleware(t *testing.T) {
 	t.Run("Token is provided", func(t *testing.T) {
 		token, _ := utils.GenerateToken(1)
 		req := httptest.NewRequest("POST", "/admin/skincare", nil)
-		req.Header.Set("token", "Bearer " + token)
+		req.Header.Set("token", "Bearer "+token)
 
 		resp, err := app.Test(req)
 

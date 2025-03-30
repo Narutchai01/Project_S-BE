@@ -33,6 +33,12 @@ type MockUserService struct {
 	mock.Mock
 }
 
+// Follower implements usecases.UserUsecases.
+func (m *MockUserService) Follower(follow_id uint, token string) (entities.Follower, error) {
+	args := m.Called(follow_id, token)
+	return args.Get(0).(entities.Follower), args.Error(1)
+}
+
 func (m *MockUserService) Register(user entities.User, c *fiber.Ctx) (entities.User, error) {
 	args := m.Called(user, c)
 	return args.Get(0).(entities.User), args.Error(1)
