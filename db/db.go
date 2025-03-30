@@ -52,6 +52,13 @@ func ConnectDB() (*gorm.DB, error) {
 }
 
 func Seeds(db *gorm.DB) {
+
+	// initialize the database vactor
+	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS vector").Error; err != nil {
+		log.Printf("Error creating vector extension: %v", err)
+		// Decide whether to panic or continue
+	}
+
 	type_community := []entities.CommunityType{
 		{Type: "thread"},
 		{Type: "review"},
