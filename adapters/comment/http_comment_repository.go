@@ -14,11 +14,11 @@ type HttpCommentHandler struct {
 	comment usecases.CommentUsecase
 }
 
-func NewHttpCommentHandler(commentUsecase usecases.CommentUsecase) *HtppCommentHandler {
-	return &HtppCommentHandler{commentUsecase}
+func NewHttpCommentHandler(commentUsecase usecases.CommentUsecase) *HttpCommentHandler {
+	return &HttpCommentHandler{commentUsecase}
 }
 
-func (handler *HtppCommentHandler) CreateCommentThread(c *fiber.Ctx) error {
+func (handler *HttpCommentHandler) CreateCommentThread(c *fiber.Ctx) error {
 
 	token := c.Get("token")
 	if token == "" {
@@ -51,7 +51,7 @@ func (handler *HtppCommentHandler) CreateCommentThread(c *fiber.Ctx) error {
 
 }
 
-func (handler *HtppCommentHandler) GetCommentsThread(c *fiber.Ctx) error {
+func (handler *HttpCommentHandler) GetCommentsThread(c *fiber.Ctx) error {
 	id := c.Params("thread_id")
 
 	thread_id, err := strconv.Atoi(id)
@@ -78,7 +78,7 @@ func (handler *HtppCommentHandler) GetCommentsThread(c *fiber.Ctx) error {
 
 }
 
-func (handler *HtppCommentHandler) CreateCommentReviewSkicnare(c *fiber.Ctx) error {
+func (handler *HttpCommentHandler) CreateCommentReviewSkicnare(c *fiber.Ctx) error {
 
 	token := c.Get("token")
 	if token == "" {
@@ -111,7 +111,7 @@ func (handler *HtppCommentHandler) CreateCommentReviewSkicnare(c *fiber.Ctx) err
 
 }
 
-func (handler *HtppCommentHandler) HandleGetCommentReviewSkincare(c *fiber.Ctx) error {
+func (handler *HttpCommentHandler) HandleGetCommentReviewSkincare(c *fiber.Ctx) error {
 
 	id := c.Params("review_id")
 
