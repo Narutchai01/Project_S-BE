@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"os"
@@ -107,20 +108,20 @@ func (service *userService) UpdateUser(user entities.User, token string, file *m
 
 	oldValue, err := service.repo.GetUser(uint(id))
 	if err != nil {
-		return entities.User{}, err
+		return entities.User{}, errors.New("user not found")
 	}
 
 	if user.Email != "" {
 		_, err := service.repo.GetUserByEmail(user.Email)
 		if err == nil {
-			return user, fmt.Errorf("email already exists")
+			return user, errors.New("email already exists")
 		}
 	}
 
 	if user.Password != "" {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return user, fmt.Errorf("failed to hashed password: %w", err)
+			return user, errors.New("failed to hashed password")
 		}
 		user.Password = string(hashedPassword)
 	}
@@ -139,13 +140,13 @@ func (service *userService) UpdateUser(user entities.User, token string, file *m
 		imageUrl, err := utils.UploadImage(fileName, "/user")
 
 		if err != nil {
-			return entities.User{}, fmt.Errorf("failed to upload image: %w", err)
+			return entities.User{}, errors.New("failed to upload image")
 		}
 
 		err = os.Remove("./uploads/" + fileName)
 
 		if err != nil {
-			return entities.User{}, fmt.Errorf("failed to remove image: %w", err)
+			return entities.User{}, errors.New("failed to remove image")
 		}
 		user.Image = imageUrl
 	}
