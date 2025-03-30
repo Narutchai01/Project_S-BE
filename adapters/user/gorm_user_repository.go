@@ -1,6 +1,8 @@
 package adapters
 
 import (
+	"fmt"
+
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
 	"gorm.io/gorm"
@@ -79,4 +81,14 @@ func (repo *GormUserRepository) DeleteFollower(id uint) (entities.Follower, erro
 	}
 
 	return follower, nil
+}
+
+func (repo *GormUserRepository) CountFollow(user_id uint, colum string) (int64, error) {
+	var count int64
+	query := fmt.Sprintf("%s = ?", colum)
+	err := repo.db.Model(&entities.Follower{}).Where(query, user_id).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

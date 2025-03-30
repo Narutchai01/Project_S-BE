@@ -10,8 +10,11 @@ func PublicUser(data entities.User) *User {
 		FullName:      data.FullName,
 		Email:         data.Email,
 		Birthday:      data.Birthday,
+		Follower:      data.Follower,
+		Following:     data.Following,
 		SensitiveSkin: data.SensitiveSkin,
 		Image:         data.Image,
+		Follow:        data.Follow,
 	}
 
 	return &user

@@ -14,6 +14,9 @@ type User struct {
 	SensitiveSkin *bool      `json:"sensitive_skin" gorm:"default:null"`
 	Password      string     `json:"password"`
 	Image         string     `json:"image" swaggerignore:"true"`
+	Follower      int64      `json:"follower" gorm:"-"`
+	Following     int64      `json:"following" gorm:"-"`
+	Follow        bool       `json:"follow" gorm:"-"`
 }
 
 type Follower struct {

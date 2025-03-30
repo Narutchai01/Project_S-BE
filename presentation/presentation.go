@@ -52,6 +52,9 @@ type User struct {
 	Birthday      *time.Time `json:"birthday"`
 	SensitiveSkin *bool      `json:"sensitive_skin"`
 	Image         string     `json:"image"`
+	Follower      int64      `json:"follower"`
+	Following     int64      `json:"following"`
+	Follow        bool       `json:"follow"`
 }
 
 type Follower struct {

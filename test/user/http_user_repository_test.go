@@ -33,6 +33,11 @@ type MockUserService struct {
 	mock.Mock
 }
 
+// GetUserByID implements usecases.UserUsecases.
+func (m *MockUserService) GetUserByID(id uint, token string) (entities.User, error) {
+	panic("unimplemented")
+}
+
 // Follower implements usecases.UserUsecases.
 func (m *MockUserService) Follower(follow_id uint, token string) (entities.Follower, error) {
 	args := m.Called(follow_id, token)
