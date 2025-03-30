@@ -199,3 +199,19 @@ func (handler *HttpUserHandler) Follower(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToFollowerResponse(result))
 }
+
+func (handler *HttpUserHandler) GetUserByID(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	token := c.Get("token")
+
+	result, err := handler.userUcase.GetUserByID(uint(id), token)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
+}

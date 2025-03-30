@@ -158,6 +158,13 @@ func (service *communityService) GetCommunity(id uint, type_community string, to
 
 	community.Likes = uint64(service.favoriteRepo.CountFavorite(community.ID, "community_id"))
 
+	_, err = service.userRepo.FindFollower(community.User.ID, user.ID)
+	if err != nil {
+		user.Follow = false
+	} else {
+		user.Follow = true
+	}
+
 	return community, nil
 }
 

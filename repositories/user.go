@@ -11,4 +11,5 @@ type UserRepository interface {
 	Follower(follow_id uint, user_id uint) (entities.Follower, error)
 	FindFollower(follow_id uint, user_id uint) (entities.Follower, error)
 	DeleteFollower(id uint) (entities.Follower, error)
+	CountFollow(user_id uint, column string) (int64, error)
 }

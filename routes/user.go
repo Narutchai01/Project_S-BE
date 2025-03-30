@@ -21,4 +21,5 @@ func UserRoutes(app fiber.Router, db *gorm.DB) {
 	app.Get("/me", middlewares.AuthorizationRequired(), userHandler.GetUser)
 	app.Post("/follower/:follow_id", middlewares.AuthorizationRequired(), userHandler.Follower)
 	app.Put("/", middlewares.AuthorizationRequired(), userHandler.UpdateUser)
+	app.Get("/:id", middlewares.AuthorizationRequired(), userHandler.GetUserByID)
 }

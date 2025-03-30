@@ -22,6 +22,7 @@ type UserUsecases interface {
 	GetUser(token string) (entities.User, error)
 	UpdateUser(user entities.User, token string, file *multipart.FileHeader, c *fiber.Ctx) (entities.User, error)
 	Follower(follow_id uint, token string) (entities.Follower, error)
+	GetUserByID(id uint, token string) (entities.User, error)
 }
 
 type userService struct {
@@ -189,4 +190,44 @@ func (service *userService) Follower(follow_id uint, token string) (entities.Fol
 	}
 
 	return service.repo.Follower(follower.ID, user.ID)
+}
+
+func (service *userService) GetUserByID(id uint, token string) (entities.User, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.User{}, err
+	}
+
+	me, err := service.repo.GetUser(user_id)
+	if err != nil {
+		return entities.User{}, err
+	}
+
+	user, err := service.repo.GetUser(id)
+	if err != nil {
+		return entities.User{}, err
+	}
+
+	_, err = service.repo.FindFollower(user.ID, me.ID)
+	if err != nil {
+		user.Follow = false
+	} else {
+		user.Follow = true
+	}
+
+	followerCount, err := service.repo.CountFollow(user.ID, "follower_id")
+	if err != nil {
+		followerCount = 0
+	}
+
+	followingCount, err := service.repo.CountFollow(user.ID, "user_id")
+	if err != nil {
+		followingCount = 0
+	}
+
+	user.Follower = int64(followerCount)
+	user.Following = int64(followingCount)
+
+	return user, nil
 }
