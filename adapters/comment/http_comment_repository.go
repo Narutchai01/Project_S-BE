@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type HtppCommentHandler struct {
+type HttpCommentHandler struct {
 	comment usecases.CommentUsecase
 }
 
