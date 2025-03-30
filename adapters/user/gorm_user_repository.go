@@ -83,9 +83,9 @@ func (repo *GormUserRepository) DeleteFollower(id uint) (entities.Follower, erro
 	return follower, nil
 }
 
-func (repo *GormUserRepository) CountFollow(user_id uint, colum string) (int64, error) {
+func (repo *GormUserRepository) CountFollow(user_id uint, column string) (int64, error) {
 	var count int64
-	query := fmt.Sprintf("%s = ?", colum)
+	query := fmt.Sprintf("%s = ?", column)
 	err := repo.db.Model(&entities.Follower{}).Where(query, user_id).Count(&count).Error
 	if err != nil {
 		return 0, err

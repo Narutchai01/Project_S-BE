@@ -226,7 +226,7 @@ func (service *userService) GetUserByID(id uint, token string) (entities.User, e
 		followingCount = 0
 	}
 
-	user.Follower = int64(folloerCount)
+	user.Follower = int64(followerCount)
 	user.Following = int64(followingCount)
 
 	return user, nil
