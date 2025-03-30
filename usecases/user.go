@@ -216,9 +216,9 @@ func (service *userService) GetUserByID(id uint, token string) (entities.User, e
 		user.Follow = true
 	}
 
-	folloerCount, err := service.repo.CountFollow(user.ID, "follower_id")
+	followerCount, err := service.repo.CountFollow(user.ID, "follower_id")
 	if err != nil {
-		folloerCount = 0
+		followerCount = 0
 	}
 
 	followingCount, err := service.repo.CountFollow(user.ID, "user_id")
