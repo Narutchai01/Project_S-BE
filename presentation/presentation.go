@@ -54,6 +54,14 @@ type User struct {
 	Image         string     `json:"image"`
 }
 
+type Follower struct {
+	ID         uint64 `json:"id"`
+	FollowerID uint   `json:"follower_id"`
+	Follower   User   `json:"follower"`
+	UserID     uint   `json:"user_id"`
+	User       User   `json:"user"`
+}
+
 type Facial struct {
 	ID       uint   `json:"id"`
 	Name     string `json:"name"`
@@ -116,6 +124,18 @@ type BookmarkReviewSkincare struct {
 	ReviewSkincareID uint `json:"review_skincare_id" `
 	UserID           uint `json:"user_id" `
 	Status           bool `json:"status" `
+}
+
+type BookmarkCommunity struct {
+	ID          uint   `json:"id"`
+	CommunityID uint   `json:"community_id"`
+	UserID      uint   `json:"user_id"`
+	User        User   `json:"user"`
+	Image       string `json:"image"`
+	Title       string `json:"title"`
+	Content     string `json:"content"`
+	Type        int    `json:"type"`
+	Favorite    bool   `json:"favorite"`
 }
 
 type CommentThread struct {

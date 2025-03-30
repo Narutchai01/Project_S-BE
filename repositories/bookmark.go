@@ -6,4 +6,5 @@ type BookmarkRepository interface {
 	FindBookmark(community_id uint, user_id uint) (bool, entities.Bookmark, error)
 	Bookmark(community_id uint, user_id uint) (entities.Bookmark, error)
 	DeleteBookmark(community_id uint, user_id uint) (entities.Bookmark, error)
+	GetCommunitiesBookmark(user_id int) ([]entities.Bookmark, error)
 }

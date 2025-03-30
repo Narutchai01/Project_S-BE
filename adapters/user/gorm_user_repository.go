@@ -42,3 +42,41 @@ func (repo *GormUserRepository) UpdateUser(user entities.User) (entities.User, e
 	err := repo.db.Save(&user).Error
 	return user, err
 }
+
+func (repo *GormUserRepository) Follower(follow_id uint, user_id uint) (entities.Follower, error) {
+	follower := entities.Follower{FollowerID: follow_id, UserID: user_id}
+	err := repo.db.Create(&follower).Error
+	if err != nil {
+		return follower, err
+	}
+
+	// Reload the follower with associated entities
+	err = repo.db.Preload("User").Preload("Follower").Where("follower_id = ? AND user_id = ?", follow_id, user_id).First(&follower).Error
+	return follower, err
+}
+
+func (repo *GormUserRepository) FindFollower(follow_id uint, user_id uint) (entities.Follower, error) {
+	var follower entities.Follower
+	err := repo.db.Preload("User").Preload("Follower").Where("follower_id = ? AND user_id = ?", follow_id, user_id).First(&follower).Error
+	if err != nil {
+		return follower, err
+	}
+	return follower, nil
+}
+
+func (repo *GormUserRepository) DeleteFollower(id uint) (entities.Follower, error) {
+	var follower entities.Follower
+	// First fetch the follower with preloaded associations
+	err := repo.db.Preload("User").Preload("Follower").Where("id = ?", id).First(&follower).Error
+	if err != nil {
+		return follower, err
+	}
+
+	// Then delete the follower
+	err = repo.db.Where("id = ?", id).Delete(&entities.Follower{}).Error
+	if err != nil {
+		return follower, err
+	}
+
+	return follower, nil
+}

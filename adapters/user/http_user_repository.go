@@ -1,8 +1,6 @@
 package adapters
 
 import (
-	"time"
-
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/usecases"
@@ -170,25 +168,8 @@ func (handler *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 func (handler *HttpUserHandler) UpdateUser(c *fiber.Ctx) error {
 	var user entities.User
 
-	user.FullName = c.FormValue("full_name")
-	user.Email = c.FormValue("email")
-	user.Password = c.FormValue("password")
-	birthday := c.FormValue("birthday")
-	if birthday != "" {
-		parsedBirthday, err := time.Parse(time.RFC3339, birthday)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
-		}
-		user.Birthday = &parsedBirthday
-	} else {
-		user.Birthday = nil
-	}
-	sensitiveSkin := c.FormValue("sensitive_skin")
-	if sensitiveSkin != "" {
-		sensitiveSkinBool := sensitiveSkin == "true"
-		user.SensitiveSkin = &sensitiveSkinBool
-	} else {
-		user.SensitiveSkin = nil
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
 	token := c.Get("token")
@@ -196,10 +177,25 @@ func (handler *HttpUserHandler) UpdateUser(c *fiber.Ctx) error {
 	file, _ := c.FormFile("file")
 
 	result, err := handler.userUcase.UpdateUser(user, token, file, c)
+
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(presentation.UserResponse(result))
-	// return c.Status(fiber.StatusOK).JSON(user)
+	return c.Status(fiber.StatusOK).JSON(result)
+}
+
+func (handler *HttpUserHandler) Follower(c *fiber.Ctx) error {
+	token := c.Get("token")
+	folllow_id, err := c.ParamsInt("follow_id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	result, err := handler.userUcase.Follower(uint(folllow_id), token)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToFollowerResponse(result))
 }

@@ -11,15 +11,17 @@ import (
 
 type BookmarkUseCase interface {
 	BookmarkCommunity(community_id uint, token string, type_community string) (entities.Bookmark, error)
+	GetCommunitiesBookmark(user_id uint, token string) ([]entities.Bookmark, error)
 }
 type bookmarkService struct {
 	repo          repositories.BookmarkRepository
 	userRepo      repositories.UserRepository
 	communityRepo repositories.CommunityRepository
+	favoriteRepo  repositories.FavoriteRepository
 }
 
-func NewBookmarkUseCase(repo repositories.BookmarkRepository, userRepo repositories.UserRepository, communityRepo repositories.CommunityRepository) BookmarkUseCase {
-	return &bookmarkService{repo, userRepo, communityRepo}
+func NewBookmarkUseCase(repo repositories.BookmarkRepository, userRepo repositories.UserRepository, communityRepo repositories.CommunityRepository, favoriteRepo repositories.FavoriteRepository) BookmarkUseCase {
+	return &bookmarkService{repo, userRepo, communityRepo, favoriteRepo}
 }
 
 func (service *bookmarkService) BookmarkCommunity(community_id uint, token string, type_community string) (entities.Bookmark, error) {
@@ -62,4 +64,35 @@ func (service *bookmarkService) BookmarkCommunity(community_id uint, token strin
 	}
 
 	return bookmark, nil
+}
+
+func (service *bookmarkService) GetCommunitiesBookmark(user_id uint, token string) ([]entities.Bookmark, error) {
+
+	usered_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return []entities.Bookmark{}, err
+	}
+
+	user_bookmark, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return []entities.Bookmark{}, err
+	}
+
+	user, err := service.userRepo.GetUser(usered_id)
+	if err != nil {
+		return []entities.Bookmark{}, err
+	}
+
+	bookmarks, err := service.repo.GetCommunitiesBookmark(int(user_bookmark.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	for i, bookmark := range bookmarks {
+		community := bookmark.Community
+		isFavorted, _, _ := service.favoriteRepo.FindFavorite(community.ID, "community_id", user.ID)
+		bookmarks[i].Community.Favorite = isFavorted
+	}
+
+	return bookmarks, nil
 }

@@ -11,6 +11,21 @@ func PublicBookmarkThread(bookmark entities.Bookmark) BookmarkThread {
 	}
 }
 
+func PublicCommunitiesBookmark(bookmarks entities.Bookmark) BookmarkCommunity {
+	communityBokkmark := BookmarkCommunity{
+		ID:          bookmarks.ID,
+		CommunityID: bookmarks.CommunityID,
+		UserID:      bookmarks.Community.User.ID,
+		User:        *PublicUser(bookmarks.Community.User),
+		Image:       bookmarks.Community.Images[0].Image,
+		Title:       bookmarks.Community.Title,
+		Content:     bookmarks.Community.Caption,
+		Type:        int(bookmarks.Community.TypeID),
+		Favorite:    bookmarks.Community.Favorite,
+	}
+	return communityBokkmark
+}
+
 func PublicBookmarkReviewSkincare(bookmark entities.Bookmark) BookmarkReviewSkincare {
 	return BookmarkReviewSkincare{
 		ID:               bookmark.ID,
@@ -32,6 +47,27 @@ func ToBookmarkReviewSkincareResponse(data entities.Bookmark) *Responses {
 	return &Responses{
 		Status: true,
 		Data:   PublicBookmarkReviewSkincare(data),
+		Error:  nil,
+	}
+}
+
+func ToCommunityBookmarkResponse(data []entities.Bookmark) *Responses {
+	bookmarks := []BookmarkCommunity{}
+
+	if len(data) == 0 {
+		return &Responses{
+			Status: true,
+			Data:   []BookmarkCommunity{},
+			Error:  nil,
+		}
+	}
+
+	for _, bookmark := range data {
+		bookmarks = append(bookmarks, PublicCommunitiesBookmark(bookmark))
+	}
+	return &Responses{
+		Status: true,
+		Data:   bookmarks,
 		Error:  nil,
 	}
 }
