@@ -93,7 +93,7 @@ func (handler *HttpBookmarkHandler) BookMarkReviewSkincare(c *fiber.Ctx) error {
 func (handler *HttpBookmarkHandler) GetCommunitiesBookmark(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("user_id")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid patterns")))
 	}
 
 	token := c.Get("token")

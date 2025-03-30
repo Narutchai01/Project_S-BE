@@ -52,7 +52,16 @@ func ToBookmarkReviewSkincareResponse(data entities.Bookmark) *Responses {
 }
 
 func ToCommunityBookmarkResponse(data []entities.Bookmark) *Responses {
-	var bookmarks []BookmarkCommunity
+	bookmarks := []BookmarkCommunity{}
+
+	if len(data) == 0 {
+		return &Responses{
+			Status: true,
+			Data:   []BookmarkCommunity{},
+			Error:  nil,
+		}
+	}
+
 	for _, bookmark := range data {
 		bookmarks = append(bookmarks, PublicCommunitiesBookmark(bookmark))
 	}
