@@ -108,7 +108,7 @@ func (service *resultService) CreateResult(file multipart.FileHeader, token stri
 	for _, skincare := range data.SkincareID {
 		skincareResult := entities.SkincareResult{
 			SkincareID: skincare,
-			ResultID:   resutl.ID,
+			ResultID:   result.ID,
 		}
 
 		_, err := service.repo.CreateSkincareResult(skincareResult)
@@ -118,17 +118,17 @@ func (service *resultService) CreateResult(file multipart.FileHeader, token stri
 
 	}
 
-	resutl, err = service.repo.GetReuslt(resutl.ID)
+	result, err = service.repo.GetResult(result.ID)
 	if err != nil {
 		return entities.Result{}, err
 	}
 
-	return resutl, nil
+	return result, nil
 
 }
 
 func (service *resultService) GetResult(id uint) (entities.Result, error) {
-	result, err := service.repo.GetReuslt(id)
+	result, err := service.repo.GetResult(id)
 	if err != nil {
 		return entities.Result{}, err
 	}

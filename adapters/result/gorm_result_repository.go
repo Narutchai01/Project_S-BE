@@ -32,7 +32,7 @@ func (repo *GormResultRepository) CreateSkincareResult(skincareResult entities.S
 	return skincareResult, nil
 }
 
-func (repo *GormResultRepository) GetReuslt(id uint) (entities.Result, error) {
+func (repo *GormResultRepository) GetResult(id uint) (entities.Result, error) {
 	var result entities.Result
 	err := repo.db.Preload("User").Preload("Skincare.Skincare").Preload("Skin").Where("id = ?", id).First(&result).Error
 	if err != nil {
