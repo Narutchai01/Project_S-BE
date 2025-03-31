@@ -19,6 +19,11 @@ type MockCommunityUsecase struct {
 	mock.Mock
 }
 
+// GetCommunitiesByUserID implements usecases.CommunityUseCase.
+func (m *MockCommunityUsecase) GetCommunitiesByUserID(user_id uint, type_community string, token string) ([]entities.Community, error) {
+	panic("unimplemented")
+}
+
 func (m *MockCommunityUsecase) CreateCommunityThread(community entities.Community, token string, files []*multipart.FileHeader, c *fiber.Ctx, communityType string) (entities.Community, error) {
 	args := m.Called(community, token, files, c, communityType)
 	return args.Get(0).(entities.Community), args.Error(1)

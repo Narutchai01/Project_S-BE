@@ -17,6 +17,7 @@ type CommunityUseCase interface {
 	CreateCommunityThread(community entities.Community, token string, files []*multipart.FileHeader, c *fiber.Ctx, type_community string) (entities.Community, error)
 	GetCommunity(id uint, type_community string, token string) (entities.Community, error)
 	GetCommunities(type_community string, token string) ([]entities.Community, error)
+	GetCommunitiesByUserID(user_id uint, type_community string, token string) ([]entities.Community, error)
 }
 
 type communityService struct {
@@ -203,4 +204,47 @@ func (service *communityService) GetCommunities(type_community string, token str
 
 	return communities, nil
 
+}
+
+func (service *communityService) GetCommunitiesByUserID(target_user_id uint, type_community string, token string) ([]entities.Community, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return []entities.Community{}, err
+	}
+
+	user_target, err := service.userRepo.GetUser(target_user_id)
+	if err != nil {
+		return []entities.Community{}, err
+	}
+
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return []entities.Community{}, err
+	}
+
+	community_type, err := service.communityRepo.GetCommunityType(strings.ToLower(type_community))
+	if err != nil {
+		return []entities.Community{}, err
+	}
+
+	communities, err := service.communityRepo.GetCommunitiesByUserID(user_target.ID, uint(community_type.ID))
+	if err != nil {
+		return []entities.Community{}, err
+	}
+
+	for i, community := range communities {
+		communities[i].Owner = (user.ID == community.User.ID)
+
+		isFavorted, _, err := service.favoriteRepo.FindFavorite(uint(community.ID), "community_id", user.ID)
+		if err != nil {
+			return []entities.Community{}, err
+		}
+
+		communities[i].Favorite = isFavorted
+
+		communities[i].Likes = uint64(service.favoriteRepo.CountFavorite(community.ID, "community_id"))
+	}
+
+	return communities, nil
 }

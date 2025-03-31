@@ -50,3 +50,9 @@ func (repo *GormCommunityRepository) CreateSkincareCommunity(community_id uint, 
 
 	return repo.db.Create(&community_skincare).Error
 }
+
+func (repo *GormCommunityRepository) GetCommunitiesByUserID(user_id uint, type_id uint) ([]entities.Community, error) {
+	var communities []entities.Community
+	err := repo.db.Preload("Images").Preload("Skincares").Preload("Skincares.Skincare").Preload("User").Where("user_id = ? AND type_id = ?", user_id, type_id).Find(&communities).Error
+	return communities, err
+}
