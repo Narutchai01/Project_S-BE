@@ -2,6 +2,7 @@ package routes
 
 import (
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/result"
+	adaptersUser "github.com/Narutchai01/Project_S-BE/adapters/user"
 	"github.com/Narutchai01/Project_S-BE/middlewares"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
@@ -10,7 +11,8 @@ import (
 
 func ResultRoutes(app fiber.Router, db *gorm.DB) {
 	resultRepo := adapters.NewGormResultRepository(db)
-	resultService := usecases.NewResultsUsecase(resultRepo)
+	userRepo := adaptersUser.NewGormUserRepository(db)
+	resultService := usecases.NewResultsUsecase(resultRepo, userRepo)
 	resultHandler := adapters.NewHttpResultHandler(resultService)
 
 	resultGroup := app.Group("/results")

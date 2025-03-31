@@ -3,6 +3,7 @@ package usecases
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -17,20 +18,19 @@ import (
 
 type ResultsUsecase interface {
 	CreateResult(file multipart.FileHeader, token string, c *fiber.Ctx) (entities.Result, error)
-	GetResults(token string) ([]entities.Result, error)
 	GetResult(id uint) (entities.Result, error)
+	GetResults(token string) ([]entities.Result, error)
 	GetResultLatest(token string) (entities.Result, error)
-	GetResultByIDs(ids []uint) ([]entities.Result, error)
-	// UpdateResult(result entities.Result, id uint) (entities.Result, error)
-	// DeleteResult(id uint) error
+	GetResultByIDs(ids []uint, token string) ([]entities.Result, error)
 }
 
 type resultService struct {
-	repo repositories.ResultsRepository
+	repo     repositories.ResultsRepository
+	userRepo repositories.UserRepository
 }
 
-func NewResultsUsecase(repo repositories.ResultsRepository) ResultsUsecase {
-	return &resultService{repo}
+func NewResultsUsecase(repo repositories.ResultsRepository, userRepo repositories.UserRepository) ResultsUsecase {
+	return &resultService{repo, userRepo}
 }
 
 func CallAPI(url string, image string, id uint) (entities.Result, error) {
@@ -100,42 +100,107 @@ func (service *resultService) CreateResult(file multipart.FileHeader, token stri
 		return entities.Result{}, err
 	}
 
-	return service.repo.CreateResult(data)
-}
-
-func (service *resultService) GetResults(token string) ([]entities.Result, error) {
-	id, err := utils.ExtractToken(token)
-	if err != nil {
-		return nil, err
-	}
-	return service.repo.GetResults(id)
-}
-
-func (service *resultService) GetResultLatest(token string) (entities.Result, error) {
-	id, err := utils.ExtractToken(token)
+	resutl, err := service.repo.CreateResult(data)
 	if err != nil {
 		return entities.Result{}, err
 	}
 
-	return service.repo.GetResultLatest(id)
+	for _, skincare := range data.SkincareID {
+		skincareResult := entities.SkincareResult{
+			SkincareID: skincare,
+			ResultID:   resutl.ID,
+		}
+
+		_, err := service.repo.CreateSkincareResult(skincareResult)
+		if err != nil {
+			return entities.Result{}, err
+		}
+
+	}
+
+	resutl, err = service.repo.GetReuslt(resutl.ID)
+	if err != nil {
+		return entities.Result{}, err
+	}
+
+	return resutl, nil
+
 }
 
 func (service *resultService) GetResult(id uint) (entities.Result, error) {
-	return service.repo.GetResult(id)
+	result, err := service.repo.GetReuslt(id)
+	if err != nil {
+		return entities.Result{}, err
+	}
+
+	return result, nil
 }
 
-func (service *resultService) GetResultByIDs(ids []uint) ([]entities.Result, error) {
-
-	var results []entities.Result
-
-	results, err := service.repo.GetResultByIDs(ids)
+func (service *resultService) GetResults(token string) ([]entities.Result, error) {
+	user_id, err := utils.ExtractToken(token)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(results) < len(ids) {
-		return nil, fmt.Errorf("results not found")
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := service.repo.GetResults(user.ID)
+	if err != nil {
+		return nil, err
 	}
 
 	return results, nil
+}
+
+func (service *resultService) GetResultLatest(token string) (entities.Result, error) {
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.Result{}, err
+	}
+
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return entities.Result{}, err
+	}
+
+	result, err := service.repo.GetResults(user.ID)
+	if err != nil {
+		return entities.Result{}, err
+	}
+	return result[len(result)-1], nil
+}
+func (service *resultService) GetResultByIDs(ids []uint, token string) ([]entities.Result, error) {
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return []entities.Result{}, err
+	}
+
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return []entities.Result{}, err
+	}
+
+	results, err := service.repo.GetResults(user.ID)
+	if err != nil {
+		return []entities.Result{}, err
+	}
+
+	filteredResults := make([]entities.Result, 0)
+	for _, result := range results {
+		for _, id := range ids {
+			if result.ID == id {
+				filteredResults = append(filteredResults, result)
+				break
+			}
+		}
+	}
+
+	if len(filteredResults) < len(ids) {
+		return []entities.Result{}, errors.New("results not found")
+	}
+
+	return filteredResults, nil
 }

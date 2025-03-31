@@ -4,30 +4,13 @@ import (
 	"github.com/Narutchai01/Project_S-BE/entities"
 )
 
-func MapSkinCare(data []entities.Skincare) []Skincare {
-	skincare := []Skincare{}
-	for _, skin := range data {
-		skincare = append(skincare, Skincare{
-			ID:          skin.ID,
-			Name:        skin.Name,
-			Description: skin.Description,
-			Image:       skin.Image,
-		})
-	}
-	return skincare
-}
+func PublicResultResponse(data entities.Result) Result {
 
-func MapSkin(data entities.Skin) Skin {
-	skin := Skin{
-		ID:       data.ID,
-		Name:     data.Name,
-		Image:    data.Image,
-		CreateBY: data.CreateBY,
+	skincares := []Skincare{}
+	for _, skincare := range data.Skincare {
+		skincares = append(skincares, PubliceSkincare(skincare.Skincare))
 	}
-	return skin
-}
 
-func ToResultResponse(data entities.Result) *Responses {
 	result := Result{
 		ID:         data.ID,
 		UserID:     data.UserID,
@@ -36,10 +19,15 @@ func ToResultResponse(data entities.Result) *Responses {
 		AcneTpye:   data.AcneType,
 		FacialType: data.FacialType,
 		SkinID:     data.SkinID,
-		Skin:       MapSkin(data.Skin),
-		Skincare:   MapSkinCare(data.Skincare),
+		Skin:       PublicSkinResponse(data.Skin),
+		Skincare:   skincares,
 		CreateAt:   &data.CreatedAt,
 	}
+	return result
+}
+
+func ToResultResponse(data entities.Result) *Responses {
+	result := PublicResultResponse(data)
 	return &Responses{
 		Status: true,
 		Data:   result,
@@ -50,18 +38,7 @@ func ToResultResponse(data entities.Result) *Responses {
 func ToResultsResponse(data []entities.Result) *Responses {
 	results := []Result{}
 	for _, result := range data {
-		results = append(results, Result{
-			ID:         result.ID,
-			UserID:     result.ID,
-			Image:      result.Image,
-			SkincareID: result.SkincareID,
-			AcneTpye:   result.AcneType,
-			FacialType: result.FacialType,
-			SkinID:     result.SkinID,
-			Skin:       MapSkin(result.Skin),
-			Skincare:   MapSkinCare(result.Skincare),
-			CreateAt:   &result.CreatedAt,
-		})
+		results = append(results, PublicResultResponse(result))
 	}
 
 	return &Responses{
