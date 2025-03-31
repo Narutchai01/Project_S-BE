@@ -52,13 +52,11 @@ func ConnectDB() (*gorm.DB, error) {
 }
 
 func Seeds(db *gorm.DB) {
-
 	// initialize the database vactor
 	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS vector").Error; err != nil {
 		log.Printf("Error creating vector extension: %v", err)
 		// Decide whether to panic or continue
 	}
-
 	type_community := []entities.CommunityType{
 		{Type: "thread"},
 		{Type: "review"},
@@ -87,5 +85,30 @@ func Seeds(db *gorm.DB) {
 				db.Create(&faceProblemType)
 			}
 		}
+	}
+}
+
+func ManageOTP(db *gorm.DB) {
+	// Start a goroutine that runs every 5 minutes
+	go func() {
+		ticker := time.NewTicker(1 * time.Minute)
+		for range ticker.C {
+			expireTime := time.Now().Add(-1 * time.Minute)
+			result := db.Where("created_at < ?", expireTime).Delete(&entities.Recovery{})
+			if result.Error != nil {
+				log.Printf("Error deleting expired OTP records: %v", result.Error)
+			} else if result.RowsAffected > 0 {
+				log.Printf("Deleted %d expired OTP records", result.RowsAffected)
+			}
+		}
+	}()
+
+	// Also run once immediately on startup
+	expireTime := time.Now().Add(-5 * time.Minute)
+	result := db.Where("created_at < ?", expireTime).Delete(&entities.Recovery{})
+	if result.Error != nil {
+		log.Printf("Error deleting expired OTP records: %v", result.Error)
+	} else if result.RowsAffected > 0 {
+		log.Printf("Deleted %d expired OTP records", result.RowsAffected)
 	}
 }
