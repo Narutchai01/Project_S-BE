@@ -100,7 +100,7 @@ func (service *resultService) CreateResult(file multipart.FileHeader, token stri
 		return entities.Result{}, err
 	}
 
-	resutl, err := service.repo.CreateResult(data)
+	result, err := service.repo.CreateResult(data)
 	if err != nil {
 		return entities.Result{}, err
 	}
