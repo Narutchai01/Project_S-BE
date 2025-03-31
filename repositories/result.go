@@ -7,6 +7,6 @@ import (
 type ResultsRepository interface {
 	CreateResult(entities.Result) (entities.Result, error)
 	CreateSkincareResult(entities.SkincareResult) (entities.SkincareResult, error)
-	GetReuslt(id uint) (entities.Result, error)
+	GetResult(id uint) (entities.Result, error)
 	GetResults(user_id uint) ([]entities.Result, error)
 }
