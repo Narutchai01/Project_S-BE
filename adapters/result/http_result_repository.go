@@ -48,18 +48,18 @@ func (handler *HttpResultHandler) CreateResult(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(presentation.ToResultResponse(result))
 }
 
-// GetResults godoc
-//
-//	@Summary		Get results
-//	@Description	Get results
-//	@Tags			results
-//	@Accept			json
-//	@Produce		json
-//	@Param			token	header		string	true	"Token"
-//	@Success		200		{object}	presentation.Responses
-//	@Failure		400		{object}	presentation.Responses
-//	@Failure		500		{object}	presentation.Responses
-//	@Router			/results/ [get]
+// // GetResults godoc
+// //
+// //	@Summary		Get results
+// //	@Description	Get results
+// //	@Tags			results
+// //	@Accept			json
+// //	@Produce		json
+// //	@Param			token	header		string	true	"Token"
+// //	@Success		200		{object}	presentation.Responses
+// //	@Failure		400		{object}	presentation.Responses
+// //	@Failure		500		{object}	presentation.Responses
+// //	@Router			/results/ [get]
 func (handler *HttpResultHandler) GetResults(c *fiber.Ctx) error {
 
 	token := c.Get("token")
@@ -77,24 +77,20 @@ func (handler *HttpResultHandler) GetResults(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToResultsResponse(results))
 }
 
-// GetResultLatest godoc
-//
-//	@Summary		Get the latest result
-//	@Description	Get the latest result
-//	@Tags			results
-//	@Accept			json
-//	@Produce		json
-//	@Param			token	header		string	true	"Token"
-//	@Success		200		{object}	presentation.Responses
-//	@Failure		400		{object}	presentation.Responses
-//	@Failure		500		{object}	presentation.Responses
-//	@Router			/results/latest [get]
+// // GetResultLatest godoc
+// //
+// //	@Summary		Get the latest result
+// //	@Description	Get the latest result
+// //	@Tags			results
+// //	@Accept			json
+// //	@Produce		json
+// //	@Param			token	header		string	true	"Token"
+// //	@Success		200		{object}	presentation.Responses
+// //	@Failure		400		{object}	presentation.Responses
+// //	@Failure		500		{object}	presentation.Responses
+// //	@Router			/results/latest [get]
 func (handler *HttpResultHandler) GetResultLatest(c *fiber.Ctx) error {
 	token := c.Get("token")
-
-	if token == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
-	}
 
 	result, err := handler.resultUsecase.GetResultLatest(token)
 
@@ -105,18 +101,18 @@ func (handler *HttpResultHandler) GetResultLatest(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
 }
 
-// GetResult godoc
-//
-//	@Summary		Get a result
-//	@Description	Get a result
-//	@Tags			results
-//	@Accept			json
-//	@Produce		json
-//	@Param			id	path		string	true	"Result ID"
-//	@Success		200	{object}	presentation.Responses
-//	@Failure		400	{object}	presentation.Responses
-//	@Failure		500	{object}	presentation.Responses
-//	@Router			/results/{id} [get]
+// // GetResult godoc
+// //
+// //	@Summary		Get a result
+// //	@Description	Get a result
+// //	@Tags			results
+// //	@Accept			json
+// //	@Produce		json
+// //	@Param			id	path		string	true	"Result ID"
+// //	@Success		200	{object}	presentation.Responses
+// //	@Failure		400	{object}	presentation.Responses
+// //	@Failure		500	{object}	presentation.Responses
+// //	@Router			/results/{id} [get]
 func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -135,19 +131,19 @@ func (handler *HttpResultHandler) GetResult(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(presentation.ToResultResponse(result))
 }
 
-// GetResultByIDs godoc
-//
-//	@Summary		Get results by IDs
-//	@Description	Get results by IDs
-//	@Tags			results
-//	@Accept			json
-//	@Produce		json
-//	@Param			token	header		string	true	"Token"
-//	@Param			ids		body		object{IDs=[]uint}	true	"IDs"
-//	@Success		200		{object}	presentation.Responses
-//	@Failure		400		{object}	presentation.Responses
-//	@Failure		500		{object}	presentation.Responses
-//	@Router			/results/compare [post]
+// // GetResultByIDs godoc
+// //
+// //	@Summary		Get results by IDs
+// //	@Description	Get results by IDs
+// //	@Tags			results
+// //	@Accept			json
+// //	@Produce		json
+// //	@Param			token	header		string	true	"Token"
+// //	@Param			ids		body		object{IDs=[]uint}	true	"IDs"
+// //	@Success		200		{object}	presentation.Responses
+// //	@Failure		400		{object}	presentation.Responses
+// //	@Failure		500		{object}	presentation.Responses
+// //	@Router			/results/compare [post]
 func (handler *HttpResultHandler) GetResultByIDs(c *fiber.Ctx) error {
 	var ids struct{ IDs []uint }
 
@@ -159,7 +155,9 @@ func (handler *HttpResultHandler) GetResultByIDs(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
 	}
 
-	results, err := handler.resultUsecase.GetResultByIDs(ids.IDs)
+	token := c.Get("token")
+
+	results, err := handler.resultUsecase.GetResultByIDs(ids.IDs, token)
 	if err != nil {
 		if err.Error() == "results not found" {
 			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))

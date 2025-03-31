@@ -6,10 +6,7 @@ import (
 
 type ResultsRepository interface {
 	CreateResult(entities.Result) (entities.Result, error)
-	GetResults(id uint) ([]entities.Result, error)
+	CreateSkincareResult(entities.SkincareResult) (entities.SkincareResult, error)
 	GetResult(id uint) (entities.Result, error)
-	GetResultLatest(id uint) (entities.Result, error)
-	GetResultByIDs(ids []uint) ([]entities.Result, error)
-	// UpdateResult(result entities.Result, id uint) (entities.Result, error)
-	// DeleteResult(uint) error
+	GetResults(user_id uint) ([]entities.Result, error)
 }

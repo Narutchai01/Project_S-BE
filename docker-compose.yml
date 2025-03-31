@@ -26,7 +26,8 @@ services:
 
 
   postgres:
-    image: postgres:alpine
+    image: pgvector/pgvector:pg15
+    restart: on-failure
     container_name: project-s-db
     ports:
       - "5432:5432"
