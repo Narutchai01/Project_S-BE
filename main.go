@@ -33,6 +33,8 @@ func main() {
 
 	db.Seeds(dbc)
 
+	go db.ManageOTP(dbc)
+
 	if err != nil {
 		log.Fatalf("Could not connect to the database")
 	}
