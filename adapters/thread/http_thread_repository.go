@@ -132,3 +132,24 @@ func (repo *HttpThreadRepository) GetThreads(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadsResponse(result))
 }
+
+func (repo *HttpThreadRepository) GetThreadsByUserID(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
+	}
+
+	result, err := repo.communityUseccase.GetCommunitiesByUserID(uint(id), "Thread", token)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadsResponse(result))
+}
