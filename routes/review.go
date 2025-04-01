@@ -25,5 +25,6 @@ func ReviewRoutes(app fiber.Router, db *gorm.DB) {
 	reviewGroup.Get("/", reviewHandler.GetReviewSkincares)
 	reviewGroup.Get("/user/:id", reviewHandler.GetReviewSkincareByUserID)
 	reviewGroup.Get("/:id", reviewHandler.GetReviewSkincare)
+	reviewGroup.Delete("/:id", reviewHandler.DeleteReviewSkincare)
 
 }

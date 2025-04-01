@@ -24,5 +24,6 @@ func ThreadRouters(app fiber.Router, db *gorm.DB) {
 	threadGroup.Get("/", threadHandler.GetThreads)
 	threadGroup.Get("/user/:id", threadHandler.GetThreadsByUserID)
 	threadGroup.Get("/:id", threadHandler.GetThread)
+	threadGroup.Delete("/:id", threadHandler.DeleteThread)
 
 }

@@ -56,3 +56,19 @@ func (repo *GormCommunityRepository) GetCommunitiesByUserID(user_id uint, type_i
 	err := repo.db.Preload("Images").Preload("Skincares").Preload("Skincares.Skincare").Preload("User").Where("user_id = ? AND type_id = ?", user_id, type_id).Find(&communities).Error
 	return communities, err
 }
+
+func (repo *GormCommunityRepository) DeleteCommunity(community_id uint) error {
+	err := repo.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("community_id = ?", community_id).Delete(&entities.SkincareCommunity{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("community_id = ?", community_id).Delete(&entities.CommunityImage{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&entities.Community{}, community_id).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}

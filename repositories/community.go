@@ -10,4 +10,5 @@ type CommunityRepository interface {
 	GetCommunities(typeID uint64) ([]entities.Community, error)
 	CreateSkincareCommunity(community_id uint, skincare_id uint) error
 	GetCommunitiesByUserID(user_id uint, type_id uint) ([]entities.Community, error)
+	DeleteCommunity(community_id uint) error
 }

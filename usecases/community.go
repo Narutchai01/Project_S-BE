@@ -18,6 +18,7 @@ type CommunityUseCase interface {
 	GetCommunity(id uint, type_community string, token string) (entities.Community, error)
 	GetCommunities(type_community string, token string) ([]entities.Community, error)
 	GetCommunitiesByUserID(user_id uint, type_community string, token string) ([]entities.Community, error)
+	DeleteCommunity(id uint, token string, type_community string) error
 }
 
 type communityService struct {
@@ -247,4 +248,38 @@ func (service *communityService) GetCommunitiesByUserID(target_user_id uint, typ
 	}
 
 	return communities, nil
+}
+
+func (service *communityService) DeleteCommunity(id uint, token string, type_community string) error {
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return err
+	}
+
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return err
+	}
+
+	community_type, err := service.communityRepo.GetCommunityType(strings.ToLower(type_community))
+	if err != nil {
+		return err
+	}
+
+	community, err := service.communityRepo.GetCommunity(id, uint64(community_type.ID))
+	if err != nil {
+		return errors.New("community not found")
+	}
+
+	if community.UserID != uint64(user.ID) {
+		return errors.New("you are not the owner of this community")
+	}
+
+	err = service.communityRepo.DeleteCommunity(community.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

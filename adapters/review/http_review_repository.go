@@ -120,3 +120,24 @@ func (repo *HtttpReviewRepository) GetReviewSkincareByUserID(c *fiber.Ctx) error
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToReviewsResponse(results))
 }
+
+func (repo *HtttpReviewRepository) DeleteReviewSkincare(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid ID")))
+	}
+
+	token := c.Get("token")
+
+	if token == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
+	}
+
+	err = repo.communityUseccase.DeleteCommunity(uint(id), token, "Review")
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
+}
