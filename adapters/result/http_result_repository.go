@@ -95,6 +95,9 @@ func (handler *HttpResultHandler) GetResultLatest(c *fiber.Ctx) error {
 	result, err := handler.resultUsecase.GetResultLatest(token)
 
 	if err != nil {
+		if err.Error() == "result not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
