@@ -48,7 +48,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: yourusername/project-s-be
+          images: ${{secrets.DOCKERHUB_USERNAME}}/ucare-be
           tags: |
             type=ref,event=branch
             type=sha,format=short
