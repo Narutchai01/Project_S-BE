@@ -170,8 +170,14 @@ func (service *resultService) GetResultLatest(token string) (entities.Result, er
 	if err != nil {
 		return entities.Result{}, err
 	}
+
+	if len(result) < 1 {
+		return entities.Result{}, errors.New("result not found")
+	}
+
 	return result[len(result)-1], nil
 }
+
 func (service *resultService) GetResultByIDs(ids []uint, token string) ([]entities.Result, error) {
 	user_id, err := utils.ExtractToken(token)
 	if err != nil {
