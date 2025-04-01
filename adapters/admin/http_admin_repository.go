@@ -15,6 +15,14 @@ func NewHttpAdminHandler(adminUcase usecases.AdminUsecases) *HttpAdminHandler {
 	return &HttpAdminHandler{adminUcase}
 }
 
+// create func for validate admin
+func validateAdmin(admin entities.Admin) error {
+	if admin.Email == "" || admin.Password == "" || admin.FullName == "" {
+		return fiber.ErrBadRequest
+	}
+	return nil
+}
+
 // CreateAdmin godoc
 //
 //	@Summary		Create an admin
@@ -38,6 +46,10 @@ func (handler *HttpAdminHandler) CreateAdmin(c *fiber.Ctx) error {
 	file, err := c.FormFile("file")
 
 	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+	}
+
+	if err := validateAdmin(admin); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
@@ -129,7 +141,13 @@ func (handler *HttpAdminHandler) UpdateAdmin(c *fiber.Ctx) error {
 	result, err := handler.adminUcase.UpdateAdmin(adminToken, admin, file, c)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "email already exists" {
+			return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		} else if err.Error() == "admin not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.ToAdminResponse(result))
@@ -157,7 +175,11 @@ func (handler *HttpAdminHandler) DeleteAdmin(c *fiber.Ctx) error {
 	_, err = handler.adminUcase.DeleteAdmin(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "admin not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))

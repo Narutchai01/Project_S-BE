@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
@@ -10,11 +11,11 @@ import (
 )
 
 type HttpFacialHandler struct {
-	facialUsecase usecases.FacialUsecases
+	faceProblemsUsecase usecases.FaceProblemUseCase
 }
 
-func NewHttpFacialHandler(facialUcase usecases.FacialUsecases) *HttpFacialHandler {
-	return &HttpFacialHandler{facialUcase}
+func NewHttpFacialHandler(faceProblemsUsecase usecases.FaceProblemUseCase) *HttpFacialHandler {
+	return &HttpFacialHandler{faceProblemsUsecase}
 }
 
 // CreateFacial godoc
@@ -29,7 +30,7 @@ func NewHttpFacialHandler(facialUcase usecases.FacialUsecases) *HttpFacialHandle
 //	@Param			token	header		string			true	"Token"
 //	@Router			/admin/facial [post]
 func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
-	var facial entities.Facial
+	var facial entities.FaceProblem
 
 	if err := c.BodyParser(&facial); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
@@ -43,7 +44,11 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 
 	create_by_token := c.Get("token")
 
-	result, err := handler.facialUsecase.CreateFacial(facial, *file, c, create_by_token)
+	if facial.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("name is required")))
+	}
+
+	result, err := handler.faceProblemsUsecase.CreateProblem(facial, *file, c, create_by_token, "facial")
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
@@ -61,7 +66,7 @@ func (handler *HttpFacialHandler) CreateFacial(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Router			/facial [get]
 func (handler *HttpFacialHandler) GetFacials(c *fiber.Ctx) error {
-	facial, err := handler.facialUsecase.GetFacials()
+	facial, err := handler.faceProblemsUsecase.GetProblems("facial")
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
@@ -80,13 +85,12 @@ func (handler *HttpFacialHandler) GetFacials(c *fiber.Ctx) error {
 //	@Param			id	path	int	true	"Facial ID"
 //	@Router			/facial/{id} [get]
 func (handler *HttpFacialHandler) GetFacial(c *fiber.Ctx) error {
-	id := c.Params("id")
-	intID, err := strconv.Atoi(id)
+	id, err := c.ParamsInt("id")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
 	}
 
-	facial, err := handler.facialUsecase.GetFacial(intID)
+	facial, err := handler.faceProblemsUsecase.GetProblem(uint64(id))
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
@@ -113,7 +117,7 @@ func (handler *HttpFacialHandler) UpdateFacial(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	var facial entities.Facial
+	var facial entities.FaceProblem
 
 	if err := c.BodyParser(&facial); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
@@ -121,8 +125,12 @@ func (handler *HttpFacialHandler) UpdateFacial(c *fiber.Ctx) error {
 
 	file, _ := c.FormFile("file")
 
-	result, err := handler.facialUsecase.UpdateFacial(intID, facial, file, c)
+	result, err := handler.faceProblemsUsecase.UpdateFaceProblems(intID, facial, file, c)
 	if err != nil {
+		if err.Error() == "facial not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		}
+
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
@@ -139,17 +147,19 @@ func (handler *HttpFacialHandler) UpdateFacial(c *fiber.Ctx) error {
 //	@Param			id	path	int	true	"Facial ID"
 //	@Router			/admin/facial/{id} [delete]
 func (handler *HttpFacialHandler) DeleteFacial(c *fiber.Ctx) error {
-	id := c.Params("id")
-	intID, err := strconv.Atoi(id)
+	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	err = handler.facialUsecase.DeleteFacial(intID)
+	err = handler.faceProblemsUsecase.DeleteFaceProblem(id)
 
 	if err != nil {
+		if err.Error() == "facial not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(intID))
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))
 }

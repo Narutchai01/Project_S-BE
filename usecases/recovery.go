@@ -1,87 +1,90 @@
 package usecases
 
 import (
+	"errors"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
 	"github.com/Narutchai01/Project_S-BE/repositories"
 	"github.com/Narutchai01/Project_S-BE/utils"
-	"github.com/gofiber/fiber/v2"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type RecoveryUsecases interface {
-	CreateRecovery(recovery entities.Recovery, email string, c *fiber.Ctx) (entities.Recovery, error)
-	DeleteRecoveryById(id int) (entities.Recovery, error)
-	GetRecoveries() ([]entities.Recovery, error)
-	GetRecoveryById(id int) (entities.Recovery, error)
-	GetRecoveryByUserId(user_id int) (entities.Recovery, error)
-	OtpValidation(id int, otp string) (bool, error)
-	UpdateRecoveryOtpById(recovery entities.Recovery, email string) (entities.Recovery, error)
+	CreateRecovery(email string) (entities.Recovery, error)
+	ValidateRecovery(otp string, user_id uint) (entities.Recovery, error)
+	ResetPassword(newPassword string, user_id uint) (entities.User, error)
 }
 type recoveryService struct {
-	repo repositories.RecoveryRepository
+	repo     repositories.RecoveryRepository
+	userRepo repositories.UserRepository
 }
 
-func NewRecoveryUseCase(repo repositories.RecoveryRepository) RecoveryUsecases {
-	return &recoveryService{repo}
+func NewRecoveryUseCase(repo repositories.RecoveryRepository, userRepo repositories.UserRepository) RecoveryUsecases {
+	return &recoveryService{repo, userRepo}
 }
 
-func (service *recoveryService) CreateRecovery(recovery entities.Recovery, email string, c *fiber.Ctx) (entities.Recovery, error) {
-	generateOTP, err := utils.GenerateOTP()
+func GenerateOTP(length int) string {
+	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
+	otp := ""
+	for i := 0; i < length; i++ {
+		otp += fmt.Sprintf("%d", rand.Intn(10)) // Generate a random digit (0-9)
+	}
+	return otp
+}
+
+func (service *recoveryService) CreateRecovery(email string) (entities.Recovery, error) {
+
+	user, err := service.userRepo.GetUserByEmail(email)
 	if err != nil {
-		return recovery, c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return entities.Recovery{}, errors.New("user not found")
 	}
 
-	if err := utils.SendEmailVerification(email, generateOTP); err != nil {
-		return recovery, fmt.Errorf("failed to send email: %w", err)
+	otp := GenerateOTP(6)
+
+	recovery := entities.Recovery{
+		OTP:    otp,
+		UserID: uint(user.ID),
 	}
 
-	recovery.OTP = generateOTP
+	if err := utils.SendEmailVerification(email, otp); err != nil {
+		return entities.Recovery{}, errors.New("failed to send email")
+	}
 
 	return service.repo.CreateRecovery(recovery)
+
 }
 
-func (service *recoveryService) DeleteRecoveryById(id int) (entities.Recovery, error) {
-	return service.repo.DeleteRecoveryById(id)
-}
+func (service *recoveryService) ValidateRecovery(otp string, user_id uint) (entities.Recovery, error) {
 
-func (service *recoveryService) GetRecoveries() ([]entities.Recovery, error) {
-	return service.repo.GetRecoveries()
-}
-
-func (service *recoveryService) GetRecoveryById(id int) (entities.Recovery, error) {
-	return service.repo.GetRecoveryById(id)
-}
-
-func (service *recoveryService) GetRecoveryByUserId(user_id int) (entities.Recovery, error) {
-	return service.repo.GetRecoveryByUserId(user_id)
-}
-
-func (service *recoveryService) OtpValidation(id int, otp string) (bool, error) {
-	recovery, err := service.repo.GetRecoveryById(id)
+	recovery, err := service.repo.FindRecoveryByOTP(otp, user_id)
 	if err != nil {
-		return false, fmt.Errorf("recovery not found: %w", err)
+		return entities.Recovery{}, errors.New("invalid OTP")
 	}
 
-	if recovery.OTP != otp {
-		return false, fmt.Errorf("invalid OTP")
-	}
-
-	return true, nil
-}
-
-func (service *recoveryService) UpdateRecoveryOtpById(recovery entities.Recovery, email string) (entities.Recovery, error) {
-	generateOTP, err := utils.GenerateOTP()
+	err = service.repo.DeleteRecoveryById(recovery.ID)
 	if err != nil {
-		return entities.Recovery{}, err
+		return entities.Recovery{}, errors.New("failed to delete recovery record")
 	}
 
-	if err := utils.SendEmailVerification(email, generateOTP); err != nil {
-		return recovery, fmt.Errorf("failed to send email: %w", err)
-	}
-
-	return service.repo.UpdateRecoveryOtpById(int(recovery.ID), generateOTP)
+	return recovery, nil
 }
 
+func (service *recoveryService) ResetPassword(newPassword string, user_id uint) (entities.User, error) {
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return entities.User{}, errors.New("user not found")
+	}
+
+	hashedNewPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return entities.User{}, errors.New("failed to hash password")
+	}
+
+	user.Password = string(hashedNewPassword)
+
+	return service.userRepo.UpdateUser(user)
+
+}

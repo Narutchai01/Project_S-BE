@@ -2,20 +2,18 @@ package presentation
 
 import "github.com/Narutchai01/Project_S-BE/entities"
 
-type Skin struct {
-	ID       uint   `json:"id"`
-	Name     string `json:"name"`
-	Image    string `json:"image"`
-	CreateBY uint   `json:"create_by"`
-}
-
-func ToSkinResponse(data entities.Skin) *Responses {
+func PublicSkinResponse(data entities.FaceProblem) Skin {
 	skin := Skin{
 		ID:       data.ID,
 		Name:     data.Name,
 		Image:    data.Image,
-		CreateBY: data.CreateBY,
+		CreateBY: uint(data.CreatedBy),
 	}
+	return skin
+}
+
+func ToSkinResponse(data entities.FaceProblem) *Responses {
+	skin := PublicSkinResponse(data)
 	return &Responses{
 		Status: true,
 		Data:   skin,
@@ -23,16 +21,11 @@ func ToSkinResponse(data entities.Skin) *Responses {
 	}
 }
 
-func ToSkinsResponse(data []entities.Skin) *Responses {
+func ToSkinsResponse(data []entities.FaceProblem) *Responses {
 	skins := []Skin{}
 
 	for _, skin := range data {
-		skins = append(skins, Skin{
-			ID:       skin.ID,
-			Name:     skin.Name,
-			Image:    skin.Image,
-			CreateBY: skin.CreateBY,
-		})
+		skins = append(skins, PublicSkinResponse(skin))
 	}
 	return &Responses{
 		Status: true,

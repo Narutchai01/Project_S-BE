@@ -29,12 +29,16 @@ func main() {
 
 	app.Get("/swagger/*", swagger.HandlerDefault) // default
 
-	db, err := db.ConnectDB()
+	dbc, err := db.ConnectDB()
+
+	db.Seeds(dbc)
+
+	go db.ManageOTP(dbc)
 
 	if err != nil {
 		log.Fatalf("Could not connect to the database")
 	}
-	routes.Router(app, db)
+	routes.Router(app, dbc)
 
 	port := config.GetEnv("PORT")
 

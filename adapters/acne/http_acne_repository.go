@@ -10,11 +10,11 @@ import (
 )
 
 type HttpAcneHandler struct {
-	acneUsecase usecases.AcneUseCase
+	faceProblemsUsecase usecases.FaceProblemUseCase
 }
 
-func NewHttpAcneHandler(acneUcase usecases.AcneUseCase) *HttpAcneHandler {
-	return &HttpAcneHandler{acneUcase}
+func NewHttpAcneHandler(faceProblemsUsecase usecases.FaceProblemUseCase) *HttpAcneHandler {
+	return &HttpAcneHandler{faceProblemsUsecase}
 }
 
 // CreateAcne godoc
@@ -32,7 +32,7 @@ func NewHttpAcneHandler(acneUcase usecases.AcneUseCase) *HttpAcneHandler {
 //	@Failure		404		{object}	presentation.Responses
 //	@Router			/admin/acne/ [post]
 func (handler *HttpAcneHandler) CreateAcne(c *fiber.Ctx) error {
-	var acne entities.Acne
+	var acne entities.FaceProblem
 
 	if err := c.BodyParser(&acne); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
@@ -46,7 +46,11 @@ func (handler *HttpAcneHandler) CreateAcne(c *fiber.Ctx) error {
 
 	create_by_token := c.Get("token")
 
-	result, err := handler.acneUsecase.CreateAcne(acne, *file, c, create_by_token)
+	if acne.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
+	result, err := handler.faceProblemsUsecase.CreateProblem(acne, *file, c, create_by_token, "acne")
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
@@ -68,7 +72,7 @@ func (handler *HttpAcneHandler) CreateAcne(c *fiber.Ctx) error {
 //
 //	@Router			/acne [get]
 func (handler *HttpAcneHandler) GetAcnes(c *fiber.Ctx) error {
-	result, err := handler.acneUsecase.GetAcnes()
+	result, err := handler.faceProblemsUsecase.GetProblems("acne")
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
@@ -90,13 +94,12 @@ func (handler *HttpAcneHandler) GetAcnes(c *fiber.Ctx) error {
 //	@Failure		404	{object}	presentation.Responses
 //	@Router			/acne/{id} [get]
 func (handler *HttpAcneHandler) GetAcne(c *fiber.Ctx) error {
-	id := c.Params("id")
-	intID, err := strconv.Atoi(id)
+	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	result, err := handler.acneUsecase.GetAcne(intID)
+	result, err := handler.faceProblemsUsecase.GetProblem(uint64(id))
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
@@ -126,7 +129,7 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	var acne entities.Acne
+	var acne entities.FaceProblem
 
 	if err := c.BodyParser(&acne); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
@@ -137,8 +140,11 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 		file = nil
 	}
 
-	result, err := handler.acneUsecase.UpdateAcne(intID, acne, file, c)
+	result, err := handler.faceProblemsUsecase.UpdateFaceProblems(intID, acne, file, c)
 	if err != nil {
+		if err.Error() == "acne not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
@@ -158,17 +164,20 @@ func (handler *HttpAcneHandler) UpdateAcne(c *fiber.Ctx) error {
 //	@Failure		404	{object}	presentation.Responses
 //	@Router			/admin/acne/{id} [delete]
 func (handler *HttpAcneHandler) DeleteAcne(c *fiber.Ctx) error {
-	id := c.Params("id")
-	intID, err := strconv.Atoi(id)
+	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(err))
 	}
 
-	err = handler.acneUsecase.DeleteAcne(intID)
+	err = handler.faceProblemsUsecase.DeleteFaceProblem(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		if err.Error() == "acne not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(err))
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(intID))
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))
 }

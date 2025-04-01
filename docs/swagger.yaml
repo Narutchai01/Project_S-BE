@@ -1,5 +1,14 @@
 basePath: /api
 definitions:
+  entities.Admin:
+    properties:
+      email:
+        type: string
+      fullname:
+        type: string
+      password:
+        type: string
+    type: object
   entities.User:
     properties:
       birthday:
@@ -676,6 +685,110 @@ paths:
       summary: Update a skincare
       tags:
       - skincare
+  /bookmark/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Bookmark a thread
+      parameters:
+      - description: Thread ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Bookmark a thread
+      tags:
+      - bookmark
+  /comment:
+    post:
+      consumes:
+      - application/json
+      description: Create a comment
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Comment
+        in: body
+        name: comment
+        required: true
+        schema:
+          properties:
+            text:
+              type: string
+            thread_id:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create a comment
+      tags:
+      - comment
+  /comment/{thread_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a comment
+      parameters:
+      - description: Thread ID
+        in: path
+        name: thread_id
+        required: true
+        type: integer
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get a comment
+      tags:
+      - comment
   /facial:
     get:
       consumes:
@@ -704,6 +817,166 @@ paths:
       summary: Get facial by ID
       tags:
       - facial
+  /results/:
+    get:
+      consumes:
+      - application/json
+      description: Get results
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get results
+      tags:
+      - results
+    post:
+      consumes:
+      - application/json
+      description: Create a result
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create a result
+      tags:
+      - results
+  /results/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a result
+      parameters:
+      - description: Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get a result
+      tags:
+      - results
+  /results/compare:
+    post:
+      consumes:
+      - application/json
+      description: Get results by IDs
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: IDs
+        in: body
+        name: ids
+        required: true
+        schema:
+          properties:
+            IDs:
+              items:
+                type: integer
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get results by IDs
+      tags:
+      - results
+  /results/latest:
+    get:
+      consumes:
+      - application/json
+      description: Get the latest result
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get the latest result
+      tags:
+      - results
   /skin:
     get:
       consumes:
@@ -808,6 +1081,183 @@ paths:
       summary: Get a skincare
       tags:
       - skincare
+  /thread/:
+    get:
+      consumes:
+      - application/json
+      description: Get threads
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get threads
+      tags:
+      - threads
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a thread
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Title
+        in: formData
+        name: title
+        type: string
+      - description: Caption
+        in: formData
+        name: caption
+        type: string
+      - description: File
+        in: formData
+        name: files
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Create a thread
+      tags:
+      - threads
+  /thread/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a thread
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get a thread
+      tags:
+      - threads
+  /user/:
+    put:
+      consumes:
+      - application/json
+      description: Update user
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entities.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Update user
+      tags:
+      - user
+  /user/goolge-signin:
+    post:
+      consumes:
+      - application/json
+      description: Google sign in
+      parameters:
+      - description: Admin Object
+        in: body
+        name: admin
+        required: true
+        schema:
+          properties:
+            email:
+              type: string
+            fullname:
+              type: string
+            image:
+              type: string
+            sensitive_skin:
+              type: boolean
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Google sign in
+      tags:
+      - user
   /user/login:
     post:
       consumes:
@@ -841,6 +1291,35 @@ paths:
           schema:
             $ref: '#/definitions/presentation.Responses'
       summary: Log in
+      tags:
+      - user
+  /user/me:
+    get:
+      consumes:
+      - application/json
+      description: Get user by id
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/presentation.Responses'
+      summary: Get user by id
       tags:
       - user
   /user/register:

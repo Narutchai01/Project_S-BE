@@ -2,13 +2,18 @@ package presentation
 
 import "github.com/Narutchai01/Project_S-BE/entities"
 
-func ToAcneResponse(data entities.Acne) *Responses {
+func PublicAcneResponse(data entities.FaceProblem) Acne {
 	acne := Acne{
 		ID:       data.ID,
 		Name:     data.Name,
 		Image:    data.Image,
-		CreateBY: data.CreateBY,
+		CreateBY: uint(data.CreatedBy),
 	}
+	return acne
+}
+
+func ToAcneResponse(data entities.FaceProblem) *Responses {
+	acne := PublicAcneResponse(data)
 	return &Responses{
 		Status: true,
 		Data:   acne,
@@ -16,16 +21,11 @@ func ToAcneResponse(data entities.Acne) *Responses {
 	}
 }
 
-func ToAcnesResponse(data []entities.Acne) *Responses {
+func ToAcnesResponse(data []entities.FaceProblem) *Responses {
 	acnes := []Acne{}
 
 	for _, acne := range data {
-		acnes = append(acnes, Acne{
-			ID:       acne.ID,
-			Name:     acne.Name,
-			Image:    acne.Image,
-			CreateBY: acne.CreateBY,
-		})
+		acnes = append(acnes, PublicAcneResponse(acne))
 	}
 	return &Responses{
 		Status: true,

@@ -8,4 +8,5 @@ type SkincareRepository interface {
 	GetSkincareById(id int) (entities.Skincare, error)
 	UpdateSkincareById(id int, skincare entities.Skincare) (entities.Skincare, error)
 	DeleteSkincareById(id int) (entities.Skincare, error)
+	GetSkincareByIds(ids []int) ([]entities.Skincare, error)
 }

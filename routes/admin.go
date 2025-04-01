@@ -2,6 +2,7 @@ package routes
 
 import (
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/admin"
+	"github.com/Narutchai01/Project_S-BE/middlewares"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -16,8 +17,10 @@ func AdminRoutes(app fiber.Router, db *gorm.DB) {
 	app.Get("/manage/", adminHandler.GetAdmins)
 	app.Post("/manage/", adminHandler.CreateAdmin)
 	app.Get("/manage/:id", adminHandler.GetAdmin)
-	app.Put("/manage/", adminHandler.UpdateAdmin)
 	app.Delete("/manage/:id", adminHandler.DeleteAdmin)
 	app.Post("/login/", adminHandler.LogIn)
-	app.Get("/profile/", adminHandler.GetAdminByToken)
+
+
+	app.Put("/manage/", adminHandler.UpdateAdmin).Use(middlewares.AuthorizationRequired())
+	app.Get("/profile/", adminHandler.GetAdminByToken).Use(middlewares.AuthorizationRequired())
 }

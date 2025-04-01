@@ -7,7 +7,7 @@ import (
 func RecoveryResponse(data entities.Recovery) *Responses {
 	recovery := Recovery{
 		ID:     data.ID,
-		UserId: data.UserId,
+		UserId: int(data.UserID),
 		OTP:    data.OTP,
 	}
 
@@ -24,7 +24,7 @@ func RecoveriesResponse(data []entities.Recovery) *Responses {
 	for _, recovery := range data {
 		recoveries = append(recoveries, Recovery{
 			ID:     recovery.ID,
-			UserId: recovery.UserId,
+			UserId: int(recovery.UserID),
 			OTP:    recovery.OTP,
 		})
 	}

@@ -6,6 +6,7 @@ import (
 
 type Recovery struct {
 	gorm.Model
-	OTP string `json:"otp"`
-	UserId    int `json:"user_id"`
+	OTP    string `json:"otp"`
+	UserID uint   `json:"user_id"`
+	User   User   `json:"user" gorm:"foreignKey:UserID"`
 }
