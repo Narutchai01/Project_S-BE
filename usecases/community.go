@@ -167,6 +167,10 @@ func (service *communityService) GetCommunity(id uint, type_community string, to
 		user.Follow = true
 	}
 
+	isBookmarked, _, _ := service.bookmarkRepo.FindBookmark(community.ID, user.ID)
+
+	community.Bookmark = isBookmarked
+
 	return community, nil
 }
 
