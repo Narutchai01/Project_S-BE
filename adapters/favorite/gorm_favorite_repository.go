@@ -239,8 +239,8 @@ func (r *GormFavoriteRepository) DeleteFavorite(id uint) (entities.Favorite, err
 
 func (r *GormFavoriteRepository) CountFavorite(id uint, column string) int64 {
 	var count int64
-	query := fmt.Sprintf("%s = ? ", column)
-	if err := r.db.Model(&entities.Favorite{}).Where(fmt.Sprintf(query, id), id).Count(&count).Error; err != nil {
+	query := fmt.Sprintf("%s = ?", column)
+	if err := r.db.Model(&entities.Favorite{}).Where(query, id).Count(&count).Error; err != nil {
 		return 0
 	}
 
