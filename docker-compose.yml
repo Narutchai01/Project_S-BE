@@ -20,7 +20,7 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - API_MODEL=http://project-s-model:8000
       - SENDING_EMAIL=${SENDING_EMAIL}
-      - SENDING_PASSWORD=${SENDING_PASSWORD}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
     ports:
       - "${PORT}:${PORT}"
 
