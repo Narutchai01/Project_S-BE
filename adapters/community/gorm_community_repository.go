@@ -72,3 +72,24 @@ func (repo *GormCommunityRepository) DeleteCommunity(community_id uint) error {
 	})
 	return err
 }
+
+func (repo *GormCommunityRepository) UpdateCommunity(community_id uint, community *entities.Community) error {
+	if err := repo.db.Model(&entities.Community{}).Where("id = ?", community_id).Updates(&community).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *GormCommunityRepository) DeleteCommunityImage(image_id uint, community_id uint) error {
+	if err := repo.db.Where("community_id = ? AND id = ?", community_id, image_id).Delete(&entities.CommunityImage{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *GormCommunityRepository) DeleteSkincareCommunity(community_id uint, skincare_id uint) error {
+	if err := repo.db.Where("community_id = ? AND skincare_id = ?", community_id, skincare_id).Delete(&entities.SkincareCommunity{}).Error; err != nil {
+		return err
+	}
+	return nil
+}

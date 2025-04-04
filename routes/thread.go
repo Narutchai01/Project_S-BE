@@ -6,6 +6,7 @@ import (
 	adaptersFav "github.com/Narutchai01/Project_S-BE/adapters/favorite"
 	adapters "github.com/Narutchai01/Project_S-BE/adapters/thread"
 	adaptersUser "github.com/Narutchai01/Project_S-BE/adapters/user"
+	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -25,5 +26,9 @@ func ThreadRouters(app fiber.Router, db *gorm.DB) {
 	threadGroup.Get("/user/:id", threadHandler.GetThreadsByUserID)
 	threadGroup.Get("/:id", threadHandler.GetThread)
 	threadGroup.Delete("/:id", threadHandler.DeleteThread)
+	threadGroup.Put("/", func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(fiber.ErrNotFound))
+	})
+	threadGroup.Put("/:id", threadHandler.UpdateThread)
 
 }

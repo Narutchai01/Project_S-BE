@@ -40,7 +40,21 @@ func ToThreadResponse(data entities.Community) *Responses {
 
 func ToThreadsResponse(data []entities.Community) *Responses {
 	var threads []Thread
+
+	if len(data) == 0 {
+		return &Responses{
+			Status: true,
+			Data:   []Thread{},
+			Error:  nil,
+		}
+	}
+
 	for _, thread := range data {
+
+		if len(thread.Images) == 0 {
+			continue
+		}
+
 		threads = append(threads, PublicThread(thread))
 	}
 

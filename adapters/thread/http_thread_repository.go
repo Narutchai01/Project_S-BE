@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"encoding/json"
 	"errors"
 	"mime/multipart"
 
@@ -162,15 +163,46 @@ func (repo *HttpThreadRepository) DeleteThread(c *fiber.Ctx) error {
 
 	token := c.Get("token")
 
-	if token == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(presentation.ErrorResponse(fiber.ErrUnauthorized))
-	}
-
 	err = repo.communityUseccase.DeleteCommunity(uint(id), token, "Thread")
-
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(id))
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(int(id)))
+}
+
+func (repo *HttpThreadRepository) UpdateThread(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(fiber.ErrBadRequest))
+	}
+
+	token := c.Get("token")
+
+	var updateThread entities.UpdateCommunity
+
+	updateThread.Title = c.FormValue("title")
+	updateThread.Caption = c.FormValue("caption")
+
+	if err := json.Unmarshal([]byte(c.FormValue("delete_images")), &updateThread.DeleteImages); err != nil {
+		updateThread.DeleteImages = []uint{}
+	}
+
+	form, _ := c.MultipartForm()
+
+	files := make([]*multipart.FileHeader, 0)
+	for _, fh := range form.File {
+		files = append(files, fh...)
+	}
+
+	result, err := repo.communityUseccase.UpdateCommunity(uint(id), updateThread, token, "Thread", files, c)
+
+	if err != nil {
+		if err.Error() == "community not found" || err.Error() == "user not found" {
+			return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(errors.New("thread not found")))
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToThreadResponse(result))
 }
