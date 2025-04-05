@@ -43,14 +43,14 @@ func (repo *GormBookmarkRepository) Bookmark(community_id uint, user_id uint) (e
 
 }
 
-func (repo *GormBookmarkRepository) DeleteBookmark(community_id uint, user_id uint) (entities.Bookmark, error) {
+func (repo *GormBookmarkRepository) DeleteBookmark(community_id uint, user_id uint) error {
 	var bookmark entities.Bookmark
 
 	if err := repo.db.Where("community_id = ? and user_id = ?", community_id, user_id).Delete(&bookmark).Error; err != nil {
-		return entities.Bookmark{}, err
+		return err
 	}
 
-	return bookmark, nil
+	return nil
 }
 
 func (repo *GormBookmarkRepository) GetCommunitiesBookmark(user_id int) ([]entities.Bookmark, error) {

@@ -23,10 +23,10 @@ func PublicThread(thread entities.Community) Thread {
 		Favorite:      thread.Favorite,
 		FavoriteCount: int64(thread.Likes),
 		User:          *PublicUser(thread.User),
-
-		Caption:  thread.Caption,
-		Images:   PublicThreadImage(thread.Images),
-		CreateAt: thread.CreatedAt,
+		Bookmark:      thread.Bookmark,
+		Caption:       thread.Caption,
+		Images:        PublicThreadImage(thread.Images),
+		CreateAt:      thread.CreatedAt,
 	}
 }
 
