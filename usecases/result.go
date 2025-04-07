@@ -105,17 +105,18 @@ func (service *resultService) CreateResult(file multipart.FileHeader, token stri
 		return entities.Result{}, err
 	}
 
-	for _, skincare := range data.SkincareID {
-		skincareResult := entities.SkincareResult{
-			SkincareID: skincare,
-			ResultID:   result.ID,
-		}
+	if len(data.SkincareID) > 0 {
+		for _, skincare := range data.SkincareID {
+			skincareResult := entities.SkincareResult{
+				SkincareID: skincare,
+				ResultID:   result.ID,
+			}
 
-		_, err := service.repo.CreateSkincareResult(skincareResult)
-		if err != nil {
-			return entities.Result{}, err
+			_, err := service.repo.CreateSkincareResult(skincareResult)
+			if err != nil {
+				return entities.Result{}, err
+			}
 		}
-
 	}
 
 	result, err = service.repo.GetResult(result.ID)

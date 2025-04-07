@@ -93,3 +93,12 @@ func (repo *GormCommunityRepository) DeleteSkincareCommunity(community_id uint, 
 	}
 	return nil
 }
+
+func (repo *GormCommunityRepository) FindSkincareCommunity(community_id uint, skincare_id uint) error {
+	var community_skincare entities.SkincareCommunity
+	err := repo.db.Where("community_id = ? AND skincare_id = ?", community_id, skincare_id).First(&community_skincare).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

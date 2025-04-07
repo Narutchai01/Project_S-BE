@@ -317,21 +317,26 @@ func (service *communityService) UpdateCommunity(community_id uint, update_commu
 	community.Title = utils.CheckEmptyValueBeforeUpdate(update_community.Title, community.Title)
 	community.Caption = utils.CheckEmptyValueBeforeUpdate(update_community.Caption, community.Caption)
 
-	if len(update_community.SkincareID) > 0 {
-		for _, skincare_id := range update_community.SkincareID {
-			err = service.communityRepo.CreateSkincareCommunity(community.ID, uint(skincare_id))
-			if err != nil {
-				return entities.Community{}, err
-			}
-		}
-	}
-
 	if len(update_community.DeleteSkincares) > 0 {
 		for _, skincare_id := range update_community.DeleteSkincares {
 			err = service.communityRepo.DeleteSkincareCommunity(community.ID, uint(skincare_id))
 			if err != nil {
-				return entities.Community{}, err
+				continue
 			}
+		}
+	}
+
+	if len(update_community.SkincareID) > 0 {
+		for _, skincare_id := range update_community.SkincareID {
+			if err := service.communityRepo.FindSkincareCommunity(community.ID, uint(skincare_id)); err != nil {
+				err = service.communityRepo.CreateSkincareCommunity(community.ID, uint(skincare_id))
+				if err != nil {
+					return entities.Community{}, err
+				}
+			} else {
+				continue
+			}
+
 		}
 	}
 
@@ -339,7 +344,7 @@ func (service *communityService) UpdateCommunity(community_id uint, update_commu
 		for _, image_id := range update_community.DeleteImages {
 			err = service.communityRepo.DeleteCommunityImage(uint(image_id), community.ID)
 			if err != nil {
-				return entities.Community{}, err
+				continue
 			}
 		}
 	}

@@ -14,4 +14,5 @@ type CommunityRepository interface {
 	UpdateCommunity(community_id uint, community *entities.Community) error
 	DeleteCommunityImage(image_id uint, community_id uint) error
 	DeleteSkincareCommunity(community_id uint, skincare_id uint) error
+	FindSkincareCommunity(community_id uint, skincare_id uint) error
 }
