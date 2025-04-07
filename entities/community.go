@@ -36,3 +36,11 @@ type SkincareCommunity struct {
 	Skincare    Skincare `json:"skincare" gorm:"foreignKey:SkincareID"`
 	CommunityID uint64   `json:"community_id"`
 }
+
+type UpdateCommunity struct {
+	Title           string `json:"title"`
+	Caption         string `json:"caption"`
+	DeleteImages    []uint `json:"delete_images"`
+	DeleteSkincares []uint `json:"delete_skincares"`
+	SkincareID      []int  `json:"skincare_id"`
+}

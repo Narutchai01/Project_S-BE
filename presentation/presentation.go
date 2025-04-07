@@ -112,6 +112,7 @@ type ReviewSkincare struct {
 	Owner         bool       `json:"owner"`
 	Content       string     `json:"content"`
 	Image         string     `json:"image"`
+	ImageID       uint       `json:"image_id"`
 	User          User       `json:"user"`
 	Skincare      []Skincare `json:"skincares"`
 	CreateAt      time.Time  `json:"create_at"`

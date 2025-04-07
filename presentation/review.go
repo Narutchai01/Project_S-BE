@@ -11,6 +11,14 @@ func PublicReviewSkincare(data entities.Community) ReviewSkincare {
 		skincares = append(skincares, skincare.Skincare)
 	}
 
+	// Initialize with default empty string
+	var image string
+	var imageID uint
+	if len(data.Images) > 0 {
+		image = data.Images[0].Image
+		imageID = data.Images[0].ID
+	}
+
 	return ReviewSkincare{
 		ID:            data.ID,
 		Title:         data.Title,
@@ -19,7 +27,8 @@ func PublicReviewSkincare(data entities.Community) ReviewSkincare {
 		FavoriteCount: int64(data.Likes),
 		Bookmark:      data.Bookmark,
 		Owner:         data.Owner,
-		Image:         data.Images[0].Image,
+		Image:         image,
+		ImageID:       imageID,
 		User:          *PublicUser(data.User),
 		Skincare:      MapPubliceSkincare(skincares),
 		CreateAt:      data.CreatedAt,
@@ -27,6 +36,14 @@ func PublicReviewSkincare(data entities.Community) ReviewSkincare {
 }
 
 func ToReviewResponse(data entities.Community) *Responses {
+	if data.ID == 0 {
+		return &Responses{
+			Status: false,
+			Data:   nil,
+			Error:  []string{"Review not found"},
+		}
+	}
+
 	return &Responses{
 		Status: true,
 		Data:   PublicReviewSkincare(data),
@@ -37,7 +54,22 @@ func ToReviewResponse(data entities.Community) *Responses {
 func ToReviewsResponse(data []entities.Community) *Responses {
 	var responses []ReviewSkincare
 
+	if len(data) == 0 {
+		return &Responses{
+			Status: true,
+			Data:   []ReviewSkincare{},
+			Error:  nil,
+		}
+	}
+
 	for _, review := range data {
+		if review.ID == 0 {
+			continue
+		}
+
+		if len(review.Images) == 0 || len(review.Skincares) == 0 {
+			continue
+		}
 		responses = append(responses, PublicReviewSkincare(review))
 	}
 	return &Responses{
@@ -45,5 +77,4 @@ func ToReviewsResponse(data []entities.Community) *Responses {
 		Data:   responses,
 		Error:  nil,
 	}
-
 }

@@ -63,6 +63,11 @@ func ToCommunityBookmarkResponse(data []entities.Bookmark) *Responses {
 	}
 
 	for _, bookmark := range data {
+
+		if len(bookmark.Community.Images) == 0 {
+			continue
+		}
+
 		bookmarks = append(bookmarks, PublicCommunitiesBookmark(bookmark))
 	}
 	return &Responses{

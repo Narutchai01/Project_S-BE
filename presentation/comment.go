@@ -50,10 +50,10 @@ func PublicCommentReviewSkincare(data entities.Comment) CommentReviewSkicare {
 		ID:               data.ID,
 		ReviewSkincareID: data.CommunityID,
 		User:             *PublicUser(data.User),
-		// Favorite:         data.Favorite,
-		// FavoriteCount:    data.FavoriteCount,
-		Content:  data.Content,
-		CreateAt: data.CreatedAt,
+		Favorite:         data.Favorite,
+		FavoriteCount:    data.FavoriteCount,
+		Content:          data.Content,
+		CreateAt:         data.CreatedAt,
 	}
 	return commment
 }

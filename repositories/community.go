@@ -11,4 +11,8 @@ type CommunityRepository interface {
 	CreateSkincareCommunity(community_id uint, skincare_id uint) error
 	GetCommunitiesByUserID(user_id uint, type_id uint) ([]entities.Community, error)
 	DeleteCommunity(community_id uint) error
+	UpdateCommunity(community_id uint, community *entities.Community) error
+	DeleteCommunityImage(image_id uint, community_id uint) error
+	DeleteSkincareCommunity(community_id uint, skincare_id uint) error
+	FindSkincareCommunity(community_id uint, skincare_id uint) error
 }

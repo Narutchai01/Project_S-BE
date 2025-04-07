@@ -19,6 +19,11 @@ type MockCommunityUsecase struct {
 	mock.Mock
 }
 
+// UpdateCommunity implements usecases.CommunityUseCase.
+func (m *MockCommunityUsecase) UpdateCommunity(community_id uint, update_community entities.UpdateCommunity, token string, type_community string, files []*multipart.FileHeader, c *fiber.Ctx) (entities.Community, error) {
+	panic("unimplemented")
+}
+
 // DeleteCommunity implements usecases.CommunityUseCase.
 func (m *MockCommunityUsecase) DeleteCommunity(id uint, token string, type_community string) error {
 	panic("unimplemented")

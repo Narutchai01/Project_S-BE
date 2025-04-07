@@ -52,11 +52,12 @@ func (service *bookmarkService) BookmarkCommunity(community_id uint, token strin
 			if err != nil {
 				return entities.Bookmark{}, err
 			}
+			bookmark.Status = true
 		} else {
 			return entities.Bookmark{}, err
 		}
 	} else if isBookmarked {
-		bookmark, err = service.repo.DeleteBookmark(community.ID, user.ID)
+		err = service.repo.DeleteBookmark(community.ID, user.ID)
 		if err != nil {
 			return entities.Bookmark{}, err
 		}

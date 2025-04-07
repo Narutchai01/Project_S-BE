@@ -3,6 +3,7 @@ package adapters
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"mime/multipart"
 
 	"github.com/Narutchai01/Project_S-BE/entities"
@@ -139,5 +140,53 @@ func (repo *HtttpReviewRepository) DeleteReviewSkincare(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
 	}
 
-	return c.SendStatus(fiber.StatusNoContent)
+	return c.Status(fiber.StatusOK).JSON(presentation.DeleteResponse(int(id)))
+}
+
+func (repo *HtttpReviewRepository) UpdateReviewSkincare(c *fiber.Ctx) error {
+
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid ID")))
+	}
+
+	var update_review entities.UpdateCommunity
+
+	update_review.Title = c.FormValue("title")
+	update_review.Caption = c.FormValue("content")
+	if err := json.Unmarshal([]byte(c.FormValue("delete_images")), &update_review.DeleteImages); err != nil {
+		update_review.DeleteImages = []uint{}
+	}
+
+	token := c.Get("token")
+
+	if err := json.Unmarshal([]byte(c.FormValue("delete_skincares")), &update_review.DeleteSkincares); err != nil {
+		update_review.DeleteSkincares = []uint{}
+	}
+
+	if err := json.Unmarshal([]byte(c.FormValue("skincare_id")), &update_review.SkincareID); err != nil {
+		update_review.SkincareID = []int{}
+
+	}
+
+	file, err := c.FormFile("file")
+
+	if file != nil && len(update_review.DeleteImages) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(presentation.ErrorResponse(errors.New("invalid file")))
+
+	}
+
+	var files []*multipart.FileHeader
+	if err == nil && file != nil {
+		files = append(files, file)
+	}
+
+	result, err := repo.communityUseccase.UpdateCommunity(uint(id), update_review, token, "Review", files, c)
+	if err != nil {
+		fmt.Println("Error in UpdateReviewSkincare:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(presentation.ErrorResponse(err))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(presentation.ToReviewResponse(result))
+
 }

@@ -7,6 +7,7 @@ import (
 	adaptersReview "github.com/Narutchai01/Project_S-BE/adapters/review"
 	adaptersUser "github.com/Narutchai01/Project_S-BE/adapters/user"
 	"github.com/Narutchai01/Project_S-BE/middlewares"
+	"github.com/Narutchai01/Project_S-BE/presentation"
 	"github.com/Narutchai01/Project_S-BE/usecases"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -26,5 +27,9 @@ func ReviewRoutes(app fiber.Router, db *gorm.DB) {
 	reviewGroup.Get("/user/:id", reviewHandler.GetReviewSkincareByUserID)
 	reviewGroup.Get("/:id", reviewHandler.GetReviewSkincare)
 	reviewGroup.Delete("/:id", reviewHandler.DeleteReviewSkincare)
+	reviewGroup.Put("/", func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusNotFound).JSON(presentation.ErrorResponse(fiber.ErrNotFound))
+	})
+	reviewGroup.Put("/:id", reviewHandler.UpdateReviewSkincare)
 
 }

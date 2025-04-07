@@ -98,7 +98,33 @@ func (service *userService) GetUser(token string) (entities.User, error) {
 	if err != nil {
 		return entities.User{}, err
 	}
-	return service.repo.GetUser(uint(id))
+	user, err := service.repo.GetUser(uint(id))
+
+	if err != nil {
+		return entities.User{}, errors.New("user not found")
+	}
+
+	_, err = service.repo.FindFollower(user.ID, user.ID)
+	if err != nil {
+		user.Follow = false
+	} else {
+		user.Follow = true
+	}
+
+	followerCount, err := service.repo.CountFollow(user.ID, "follower_id")
+	if err != nil {
+		followerCount = 0
+	}
+
+	followingCount, err := service.repo.CountFollow(user.ID, "user_id")
+	if err != nil {
+		followingCount = 0
+	}
+
+	user.Follower = int64(followerCount)
+	user.Following = int64(followingCount)
+
+	return user, nil
 }
 
 func (service *userService) UpdateUser(user entities.User, token string, file *multipart.FileHeader, c *fiber.Ctx) (entities.User, error) {

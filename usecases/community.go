@@ -19,6 +19,7 @@ type CommunityUseCase interface {
 	GetCommunities(type_community string, token string) ([]entities.Community, error)
 	GetCommunitiesByUserID(user_id uint, type_community string, token string) ([]entities.Community, error)
 	DeleteCommunity(id uint, token string, type_community string) error
+	UpdateCommunity(community_id uint, update_community entities.UpdateCommunity, token string, type_community string, files []*multipart.FileHeader, c *fiber.Ctx) (entities.Community, error)
 }
 
 type communityService struct {
@@ -167,6 +168,10 @@ func (service *communityService) GetCommunity(id uint, type_community string, to
 		user.Follow = true
 	}
 
+	isBookmarked, _, _ := service.bookmarkRepo.FindBookmark(community.ID, user.ID)
+
+	community.Bookmark = isBookmarked
+
 	return community, nil
 }
 
@@ -208,7 +213,6 @@ func (service *communityService) GetCommunities(type_community string, token str
 }
 
 func (service *communityService) GetCommunitiesByUserID(target_user_id uint, type_community string, token string) ([]entities.Community, error) {
-
 	user_id, err := utils.ExtractToken(token)
 	if err != nil {
 		return []entities.Community{}, err
@@ -281,5 +285,125 @@ func (service *communityService) DeleteCommunity(id uint, token string, type_com
 	}
 
 	return nil
+
+}
+
+func (service *communityService) UpdateCommunity(community_id uint, update_community entities.UpdateCommunity, token string, type_community string, files []*multipart.FileHeader, c *fiber.Ctx) (entities.Community, error) {
+
+	user_id, err := utils.ExtractToken(token)
+	if err != nil {
+		return entities.Community{}, err
+	}
+
+	user, err := service.userRepo.GetUser(user_id)
+	if err != nil {
+		return entities.Community{}, err
+	}
+
+	community_type, err := service.communityRepo.GetCommunityType(strings.ToLower(type_community))
+	if err != nil {
+		return entities.Community{}, err
+	}
+
+	community, err := service.communityRepo.GetCommunity(community_id, uint64(community_type.ID))
+	if err != nil {
+		return entities.Community{}, errors.New("community not found")
+	}
+
+	if community.UserID != uint64(user.ID) {
+		return entities.Community{}, errors.New("you are not the owner of this community")
+	}
+
+	community.Title = utils.CheckEmptyValueBeforeUpdate(update_community.Title, community.Title)
+	community.Caption = utils.CheckEmptyValueBeforeUpdate(update_community.Caption, community.Caption)
+
+	if len(update_community.DeleteSkincares) > 0 {
+		for _, skincare_id := range update_community.DeleteSkincares {
+			err = service.communityRepo.DeleteSkincareCommunity(community.ID, uint(skincare_id))
+			if err != nil {
+				continue
+			}
+		}
+	}
+
+	if len(update_community.SkincareID) > 0 {
+		for _, skincare_id := range update_community.SkincareID {
+			if err := service.communityRepo.FindSkincareCommunity(community.ID, uint(skincare_id)); err != nil {
+				err = service.communityRepo.CreateSkincareCommunity(community.ID, uint(skincare_id))
+				if err != nil {
+					return entities.Community{}, err
+				}
+			} else {
+				continue
+			}
+
+		}
+	}
+
+	if len(update_community.DeleteImages) > 0 {
+		for _, image_id := range update_community.DeleteImages {
+			err = service.communityRepo.DeleteCommunityImage(uint(image_id), community.ID)
+			if err != nil {
+				continue
+			}
+		}
+	}
+
+	if len(files) > 0 {
+		var ImageURLs []string
+
+		for _, file := range files {
+			fileName := uuid.New().String() + ".jpg"
+
+			if err := utils.CheckDirectoryExist(); err != nil {
+				return entities.Community{}, err
+			}
+
+			if err := c.SaveFile(file, "./uploads/"+fileName); err != nil {
+				return entities.Community{}, err
+			}
+
+			imageUrl, err := utils.UploadImage(fileName, "/thread")
+
+			if err != nil {
+				return entities.Community{}, err
+			}
+
+			err = os.Remove("./uploads/" + fileName)
+
+			if err != nil {
+				return entities.Community{}, err
+			}
+
+			ImageURLs = append(ImageURLs, imageUrl)
+		}
+
+		if len(ImageURLs) != len(files) {
+			return entities.Community{}, err
+		}
+
+		for _, imageUrl := range ImageURLs {
+			image := entities.CommunityImage{
+				CommunityID: uint64(community.ID),
+				Image:       imageUrl,
+			}
+			_, err = service.communityRepo.CreateCommunityImage(image)
+			if err != nil {
+				return entities.Community{}, err
+			}
+		}
+
+	}
+
+	if err := service.communityRepo.UpdateCommunity(community.ID, &community); err != nil {
+		return entities.Community{}, err
+	}
+
+	community, err = service.communityRepo.GetCommunity(community.ID, community.TypeID)
+	if err != nil {
+		return entities.Community{}, err
+	}
+
+	return community, nil
 
 }
