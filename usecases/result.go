@@ -75,9 +75,7 @@ func (service *resultService) CreateResult(file multipart.FileHeader, token stri
 		return entities.Result{}, err
 	}
 
-	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
-		return entities.Result{}, err
-	}
+	_ = c.SaveFile(&file, "./uploads/"+fileName)
 
 	imageUrl, err := utils.UploadImage(fileName, "/results")
 	if err != nil {
