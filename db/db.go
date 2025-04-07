@@ -91,9 +91,9 @@ func Seeds(db *gorm.DB) {
 func ManageOTP(db *gorm.DB) {
 	// Start a goroutine that runs every 5 minutes
 	go func() {
-		ticker := time.NewTicker(1 * time.Minute)
+		ticker := time.NewTicker(5 * time.Minute)
 		for range ticker.C {
-			expireTime := time.Now().Add(-1 * time.Minute)
+			expireTime := time.Now().Add(-5 * time.Minute)
 			result := db.Where("created_at < ?", expireTime).Delete(&entities.Recovery{})
 			if result.Error != nil {
 				log.Printf("Error deleting expired OTP records: %v", result.Error)
