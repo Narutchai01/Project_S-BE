@@ -84,9 +84,7 @@ func (service *resultService) CreateResult(file multipart.FileHeader, token stri
 		return entities.Result{}, err
 	}
 
-	if err := os.Remove("./uploads/" + fileName); err != nil {
-		return entities.Result{}, err
-	}
+	_ = os.Remove("./uploads/" + fileName)
 
 	createBy, err := utils.ExtractToken(token)
 	if err != nil {
@@ -99,6 +97,8 @@ func (service *resultService) CreateResult(file multipart.FileHeader, token stri
 	if err != nil {
 		return entities.Result{}, err
 	}
+
+	data.Image = imageUrl
 
 	result, err := service.repo.CreateResult(data)
 	if err != nil {
