@@ -50,11 +50,12 @@ func CallAPI(url string, image string, id uint) (entities.Result, error) {
 	resq, err := client.Post(url, "application/json", bytes.NewBuffer(jsonBody))
 
 	if err != nil {
-		if resq.StatusCode != http.StatusOK {
-			return entities.Result{}, fmt.Errorf("API request failed with status: %s", resq.Status)
-		}
+		return entities.Result{}, err
+	}
 
+	if resq.StatusCode != http.StatusOK {
 		defer resq.Body.Close()
+		return entities.Result{}, fmt.Errorf("API request failed with status: %s", resq.Status)
 	}
 
 	defer resq.Body.Close()
@@ -75,9 +76,7 @@ func (service *resultService) CreateResult(file multipart.FileHeader, token stri
 		return entities.Result{}, err
 	}
 
-	if err := c.SaveFile(&file, "./uploads/"+fileName); err != nil {
-		return entities.Result{}, err
-	}
+	_ = c.SaveFile(&file, "./uploads/"+fileName)
 
 	imageUrl, err := utils.UploadImage(fileName, "/results")
 	if err != nil {
