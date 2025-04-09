@@ -34,8 +34,9 @@ func NewResultsUsecase(repo repositories.ResultsRepository, userRepo repositorie
 }
 
 func CallAPI(url string, image string, id uint) (entities.Result, error) {
-
-	client := http.Client{}
+	client := http.Client{
+		Timeout: 0,
+	}
 
 	body := map[string]interface{}{
 		"image": image,
@@ -48,7 +49,6 @@ func CallAPI(url string, image string, id uint) (entities.Result, error) {
 	}
 
 	resq, err := client.Post(url, "application/json", bytes.NewBuffer(jsonBody))
-
 	if err != nil {
 		return entities.Result{}, err
 	}
